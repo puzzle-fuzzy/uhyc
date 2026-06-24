@@ -214,38 +214,82 @@ body {
   transform: translateX(20px);
 }
 
-/* ---- Custom select (native select, styled + chevron) ---- */
-.gen-select {
+/* ---- Custom dropdown (no native select) ---- */
+.gen-dropdown {
   position: relative;
 }
-.gen-select select {
+.gen-dropdown__btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
   width: 100%;
   border: var(--border);
   border-radius: 8px;
   background: var(--paper);
-  padding: 12px 36px 12px 14px;
+  padding: 12px 14px;
   font-family: var(--font);
   font-size: 15px;
   font-weight: 600;
   color: var(--ink);
-  appearance: none;
-  -webkit-appearance: none;
   cursor: pointer;
   outline: none;
+  transition: box-shadow 0.12s ease, transform 0.12s ease;
 }
-.gen-select select:focus {
+.gen-dropdown__btn:hover,
+.gen-dropdown__btn--open {
   box-shadow: var(--shadow-sm);
   transform: translate(-1px, -1px);
 }
-.gen-select__chevron {
-  position: absolute;
-  right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
+.gen-dropdown__chevron {
   width: 18px;
   height: 18px;
+  flex: 0 0 auto;
   color: var(--ink);
-  pointer-events: none;
+  transition: transform 0.15s ease;
+}
+.gen-dropdown__chevron--up {
+  transform: rotate(180deg);
+}
+.gen-dropdown__list {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  z-index: 20;
+  list-style: none;
+  margin: 0;
+  padding: 4px;
+  background: var(--paper);
+  border: var(--border);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  max-height: 240px;
+  overflow-y: auto;
+}
+.gen-dropdown__option {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: none;
+  background: transparent;
+  padding: 9px 12px;
+  border-radius: 6px;
+  font-family: var(--font);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+  cursor: pointer;
+}
+.gen-dropdown__option:hover {
+  background: var(--purple-soft);
+}
+.gen-dropdown__option--active {
+  background: var(--ink);
+  color: var(--paper);
+}
+.gen-dropdown__option--active:hover {
+  background: var(--ink);
 }
 
 /* ---- Custom range slider ---- */
@@ -280,39 +324,31 @@ body {
   border-radius: 999px;
   pointer-events: none;
 }
+/* Visible thumb, vertically centered on the track */
+.gen-range__thumb {
+  position: absolute;
+  top: 50%;
+  width: 20px;
+  height: 20px;
+  transform: translate(-50%, -50%);
+  background: var(--ink);
+  border: 2px solid var(--paper);
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px var(--ink);
+  pointer-events: none;
+}
+/* Native range input: fully transparent, just drives interaction (covers track) */
 .gen-range__track input[type='range'] {
   position: absolute;
-  inset: -8px 0;
+  top: 50%;
+  left: 0;
   width: 100%;
-  height: calc(100% + 16px);
+  height: 20px;
   margin: 0;
+  transform: translateY(-50%);
   background: transparent;
   cursor: pointer;
-}
-.gen-range__track input[type='range']::-webkit-slider-runnable-track {
-  background: transparent;
-  border: none;
-}
-.gen-range__track input[type='range']::-webkit-slider-thumb {
-  appearance: none;
-  -webkit-appearance: none;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background: var(--ink);
-  border: 2px solid var(--paper);
-  box-shadow: 0 0 0 2px var(--ink);
-  margin-top: -6px;
-  cursor: pointer;
-}
-.gen-range__track input[type='range']::-moz-range-thumb {
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background: var(--ink);
-  border: 2px solid var(--paper);
-  box-shadow: 0 0 0 2px var(--ink);
-  cursor: pointer;
+  opacity: 0;
 }
 
 /* ---- Image upload area ---- */

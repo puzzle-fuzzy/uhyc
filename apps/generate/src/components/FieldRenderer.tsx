@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { FieldMeta } from '../types'
 
 interface FieldRendererProps {
@@ -96,32 +96,22 @@ export function FieldRenderer({ field, value, error, onChange }: FieldRendererPr
       )
 
     case 'select':
-      // Custom dropdown (native select styled, with chevron)
+      // Fully custom dropdown (no native select)
       return (
         <label className="uhyc-field">
           {label}
-          <div className="gen-select">
-            <select
-              value={(value as string) ?? ''}
-              onChange={(e) => onChange(e.target.value)}
-            >
-              {(field.options ?? []).map((o) => (
-                <option key={String(o.value)} value={String(o.value)}>
-                  {o.label}
-                </option>
-              ))}
-            </select>
-            <svg className="gen-select__chevron" viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </div>
+          <CustomSelect
+            value={(value as string) ?? ''}
+            options={field.options ?? []}
+            onChange={onChange}
+          />
           {desc}
           {error && <p className="gen-field__error">{error}</p>}
         </label>
       )
 
     case 'range': {
-      // Custom slider (neo-brutalist): visible track + fill + native thumb
+      // Custom slider (neo-brutalist): visible track + fill + JS-positioned thumb
       const min = field.min ?? 0
       const max = field.max ?? 100
       const v = (value as number) ?? min
@@ -132,12 +122,12 @@ export function FieldRenderer({ field, value, error, onChange }: FieldRendererPr
           <div className="gen-range">
             <div className="gen-range__track">
               <div className="gen-range__fill" style={{ width: `${pct}%` }} />
+              <div className="gen-range__thumb" style={{ left: `${pct}%` }} />
               <input
                 type="range"
                 min={min}
                 max={max}
                 value={v}
-                style={{ accentColor: 'var(--ink)' }}
                 onChange={(e) => onChange(Number(e.target.value))}
               />
             </div>
@@ -230,5 +220,91 @@ function MediaUpload({
         </button>
       )}
     </label>
+  )
+}
+
+/**
+ * Fully custom dropdown (no native <select>). Button trigger + popover list,
+ * styled to match the neo-brutalist aesthetic. Closes on outside click / Esc.
+ */
+function CustomSelect({
+  value,
+  options,
+  onChange,
+}: {
+  value: string
+  options: { label: string; value: unknown }[]
+  onChange: (value: unknown) => void
+}) {
+  const [open, setOpen] = useState(false)
+  const rootRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!open) return
+    function onDoc(e: MouseEvent) {
+      if (rootRef.current && !rootRef.current.contains(e.target as Node)) {
+        setOpen(false)
+      }
+    }
+    function onEsc(e: KeyboardEvent) {
+      if (e.key === 'Escape') setOpen(false)
+    }
+    document.addEventListener('mousedown', onDoc)
+    document.addEventListener('keydown', onEsc)
+    return () => {
+      document.removeEventListener('mousedown', onDoc)
+      document.removeEventListener('keydown', onEsc)
+    }
+  }, [open])
+
+  const selected = options.find((o) => String(o.value) === value)
+
+  return (
+    <div className="gen-dropdown" ref={rootRef}>
+      <button
+        type="button"
+        className={`gen-dropdown__btn ${open ? 'gen-dropdown__btn--open' : ''}`}
+        onClick={() => setOpen((o) => !o)}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+      >
+        <span>{selected?.label ?? '请选择'}</span>
+        <svg
+          className={`gen-dropdown__chevron ${open ? 'gen-dropdown__chevron--up' : ''}`}
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+        >
+          <path
+            d="M6 9l6 6 6-6"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </button>
+      {open && (
+        <ul className="gen-dropdown__list" role="listbox">
+          {options.map((o) => {
+            const active = String(o.value) === value
+            return (
+              <li key={String(o.value)} role="option" aria-selected={active}>
+                <button
+                  type="button"
+                  className={`gen-dropdown__option ${active ? 'gen-dropdown__option--active' : ''}`}
+                  onClick={() => {
+                    onChange(o.value)
+                    setOpen(false)
+                  }}
+                >
+                  {o.label}
+                </button>
+              </li>
+            )
+          })}
+        </ul>
+      )}
+    </div>
   )
 }
