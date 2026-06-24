@@ -6,7 +6,14 @@ import { api, ALICE, deleteUser } from '../helpers'
 // ---------------------------------------------------------------------------
 
 interface CatalogBody {
-  video: Record<string, { model: string; fields: { key: string; required?: boolean }[] }[]>
+  video: Record<
+    string,
+    {
+      model: string
+      refSyntax?: string
+      fields: { key: string; required?: boolean }[]
+    }[]
+  >
   image: Record<string, unknown[]>
   music: Record<string, unknown[]>
 }
@@ -46,5 +53,21 @@ describe('GET /generate/catalog', () => {
     const prompt = wan.fields.find((f) => f.key === 'prompt')
     expect(prompt).toBeDefined()
     expect(prompt!.required).toBe(true)
+  })
+
+  it('surfaces refSyntax for r2v and video-edit models', async () => {
+    const res = await api.generate.catalog.get()
+    const cat = res.data as CatalogBody
+    const wanR2v = cat.video['reference-to-video'].find(
+      (m) => m.model === 'wan2.7-r2v',
+    )
+    expect(wanR2v).toBeDefined()
+    expect(wanR2v!.refSyntax).toBe('cn-prefixed')
+
+    const hhR2v = cat.video['reference-to-video'].find(
+      (m) => m.model === 'happyhorse-1.1-r2v',
+    )
+    expect(hhR2v).toBeDefined()
+    expect(hhR2v!.refSyntax).toBe('bracket-en')
   })
 })
