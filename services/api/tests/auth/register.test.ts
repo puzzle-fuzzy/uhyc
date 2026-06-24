@@ -6,6 +6,10 @@ import { api, ALICE, deleteUser } from '../helpers'
 // ---------------------------------------------------------------------------
 
 describe('POST /auth/register', () => {
+  beforeAll(async () => {
+    await deleteUser(ALICE.username)
+  })
+
   it('registers a new user and returns the public user shape', async () => {
     const { data, status, response } = await api.auth.register.post(ALICE)
 
