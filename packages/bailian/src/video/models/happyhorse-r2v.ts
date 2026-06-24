@@ -1,19 +1,16 @@
-import type { ModelDefinition } from '../types'
-import type { VideoSubCategory } from '../types'
+import type { ModelDefinition, VideoSubCategory } from '../types'
 
 // ---------------------------------------------------------------------------
-// HappyHorse 文生视频
-//
-// 对应文档: docs/bailian/HappyHorse-文生视频.md
-// API 端点: POST /api/v1/services/aigc/video-generation/video-synthesis
+// HappyHorse 参考生视频
+// 文档: docs/bailian/HappyHorse-参考生视频.md
 // ---------------------------------------------------------------------------
 
-export const happyhorseT2v: ModelDefinition<VideoSubCategory> = {
-  model: 'happyhorse-1.1-t2v',
-  supportedModels: ['happyhorse-1.1-t2v', 'happyhorse-1.0-t2v'],
-  displayName: 'HappyHorse 文生视频',
+export const happyhorseR2v: ModelDefinition<VideoSubCategory> = {
+  model: 'happyhorse-1.1-r2v',
+  supportedModels: ['happyhorse-1.1-r2v', 'happyhorse-1.0-r2v'],
+  displayName: 'HappyHorse 参考生视频',
   category: 'video',
-  subCategory: 'text-to-video',
+  subCategory: 'reference-to-video',
   endpoint: '/services/aigc/video-generation/video-synthesis',
   async: true,
 
@@ -26,7 +23,16 @@ export const happyhorseT2v: ModelDefinition<VideoSubCategory> = {
       required: true,
       maxLength: 5000,
       description:
-        '描述期望生成的视频内容。支持任何语言，不超过5000个非中文字符或2500个中文字符',
+        '描述期望生成的视频内容。用 [Image 1]、[Image 2] 指代 media 数组中的参考图像。不超过5000字符',
+    },
+    {
+      key: 'media',
+      label: '参考图像',
+      type: 'media',
+      group: 'input',
+      required: true,
+      description:
+        '参考图像列表，1~9张。格式：JPEG/JPG/PNG/WEBP，短边≥400px，≤20MB。数组顺序对应 prompt 中 [Image n] 的索引',
     },
     {
       key: 'resolution',
@@ -82,8 +88,7 @@ export const happyhorseT2v: ModelDefinition<VideoSubCategory> = {
       group: 'parameters',
       min: 0,
       max: 2147483647,
-      description:
-        '固定种子可提升结果可复现性。留空则系统自动生成随机种子',
+      description: '固定种子可提升结果可复现性',
     },
   ],
 }

@@ -1,39 +1,27 @@
-import type { ModelDefinition } from '../types'
-import type { VideoSubCategory } from '../types'
+import type { ModelDefinition, VideoSubCategory } from '../types'
 
 // ---------------------------------------------------------------------------
-// 万相 2.7 文生视频
-//
-// 对应文档: docs/bailian/万相2.7-文生视频.md
-// API 端点: POST /api/v1/services/aigc/video-generation/video-synthesis
-//
-// 与 HappyHorse 关键差异:
-//   - 支持 negative_prompt（反向提示词）
-//   - 支持 audio_url（自定义音频）
-//   - 支持 prompt_extend（Prompt 智能改写）
-//   - ratio 选项更少（5 种 vs 9 种）
-//   - duration 范围 [2,15] vs [3,15]
-//   - watermark 默认 false，"AI生成" vs "Happy Horse"
+// 万相2.7 视频编辑
+// 文档: docs/bailian/万相2.7-视频编辑.md
 // ---------------------------------------------------------------------------
 
-export const wan27T2v: ModelDefinition<VideoSubCategory> = {
-  model: 'wan2.7-t2v',
-  supportedModels: ['wan2.7-t2v'],
-  displayName: '万相 2.7 文生视频',
+export const wan27VideoEdit: ModelDefinition<VideoSubCategory> = {
+  model: 'wan2.7-videoedit',
+  supportedModels: ['wan2.7-videoedit'],
+  displayName: '万相2.7 视频编辑',
   category: 'video',
-  subCategory: 'text-to-video',
+  subCategory: 'video-editing',
   endpoint: '/services/aigc/video-generation/video-synthesis',
   async: true,
 
   fields: [
     {
       key: 'prompt',
-      label: '文本提示词',
+      label: '编辑指令',
       type: 'text',
       group: 'input',
-      required: true,
       maxLength: 5000,
-      description: '描述期望生成的视频内容。支持中英文，不超过5000个字符',
+      description: '描述对视频的编辑意图。不超过5000个字符',
     },
     {
       key: 'negative_prompt',
@@ -41,15 +29,16 @@ export const wan27T2v: ModelDefinition<VideoSubCategory> = {
       type: 'text',
       group: 'input',
       maxLength: 500,
-      description: '描述不希望在视频画面中看到的内容，用于排除特定元素',
+      description: '描述不希望在视频画面中出现的内容',
     },
     {
-      key: 'audio_url',
-      label: '音频文件 URL',
-      type: 'text',
+      key: 'media',
+      label: '视频与参考图像',
+      type: 'media',
       group: 'input',
+      required: true,
       description:
-        '自定义音频文件链接。支持 wav/mp3，时长 2～30s，不超过 15MB。不提供则自动生成背景音乐',
+        '必传1个视频（mp4/mov，2-10s，240-4096px，≤100MB）+ 可选0~4张参考图像（JPEG/PNG/BMP/WEBP，240-8000px，≤20MB）',
     },
     {
       key: 'resolution',
@@ -67,8 +56,9 @@ export const wan27T2v: ModelDefinition<VideoSubCategory> = {
       label: '宽高比',
       type: 'select',
       group: 'parameters',
-      defaultValue: '16:9',
+      description: '不传则自动跟随输入视频宽高比',
       options: [
+        { label: '跟随输入视频', value: '' },
         { label: '16:9', value: '16:9' },
         { label: '9:16', value: '9:16' },
         { label: '1:1', value: '1:1' },
@@ -81,10 +71,21 @@ export const wan27T2v: ModelDefinition<VideoSubCategory> = {
       label: '视频时长',
       type: 'range',
       group: 'parameters',
-      defaultValue: 5,
-      min: 2,
-      max: 15,
-      description: '单位：秒，取值范围 [2, 15]',
+      defaultValue: 0,
+      min: 0,
+      max: 10,
+      description: '0=跟随输入视频时长。设置 [2,10] 则从0秒截取至指定长度',
+    },
+    {
+      key: 'audio_setting',
+      label: '声音设置',
+      type: 'select',
+      group: 'parameters',
+      defaultValue: 'auto',
+      options: [
+        { label: '自动（由模型智能判断）', value: 'auto' },
+        { label: '保留输入视频原声', value: 'origin' },
+      ],
     },
     {
       key: 'prompt_extend',
@@ -92,8 +93,7 @@ export const wan27T2v: ModelDefinition<VideoSubCategory> = {
       type: 'boolean',
       group: 'parameters',
       defaultValue: true,
-      description:
-        '开启后使用大模型对输入 prompt 进行智能改写，提升短 prompt 生成效果，但会增加耗时',
+      description: '开启后大模型优化 prompt',
     },
     {
       key: 'watermark',
@@ -110,8 +110,6 @@ export const wan27T2v: ModelDefinition<VideoSubCategory> = {
       group: 'parameters',
       min: 0,
       max: 2147483647,
-      description:
-        '固定种子可提升结果可复现性。留空则系统自动生成随机种子',
     },
   ],
 }

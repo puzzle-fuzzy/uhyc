@@ -3,7 +3,7 @@
 // ---------------------------------------------------------------------------
 
 /** 表单控件类型 */
-export type FieldType = 'text' | 'number' | 'boolean' | 'select' | 'range'
+export type FieldType = 'text' | 'number' | 'boolean' | 'select' | 'range' | 'media' | 'multi-text'
 
 /** 请求体中该字段所属的分组 */
 export type FieldGroup = 'input' | 'parameters'
@@ -71,6 +71,8 @@ export interface ModelDefinition<SubCategory extends string = string> {
   fields: FieldMeta[]
   /** 创建任务的 API 路径（相对 baseUrl），如 "/services/aigc/video-generation/video-synthesis" */
   endpoint: string
+  /** 是否异步 API（创建任务 → 轮询结果）。false 表示同步返回结果 */
+  async: boolean
 }
 
 // ---------------------------------------------------------------------------

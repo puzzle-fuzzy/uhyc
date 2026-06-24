@@ -1,24 +1,30 @@
 // ---------------------------------------------------------------------------
-// 视频生成领域 — 模型注册表 & 导出
+// 视频生成领域 — 模型注册表
 // ---------------------------------------------------------------------------
 
 import { happyhorseT2v } from './models/happyhorse-t2v'
+import { happyhorseI2v } from './models/happyhorse-i2v'
+import { happyhorseR2v } from './models/happyhorse-r2v'
+import { happyhorseVideoEdit } from './models/happyhorse-video-edit'
 import { wan27T2v } from './models/wan2.7-t2v'
+import { wan27I2v } from './models/wan2.7-i2v'
+import { wan27R2v } from './models/wan2.7-r2v'
+import { wan27VideoEdit } from './models/wan2.7-video-edit'
 import type { VideoModelRegistry } from './types'
 
 /**
  * 视频生成领域模型注册表。
  *
  * 前端消费方式：
- * 1. 遍历 `videoModels` 的 key（subCategory）渲染子 Tab
+ * 1. 遍历 videoModels 的 key（subCategory）渲染子 Tab
  * 2. 选中子 Tab 后列出对应数组中的模型
- * 3. 选择模型后遍历 `model.fields` 渲染参数表单
+ * 3. 选择模型后遍历 model.fields 渲染参数表单
  */
 export const videoModels: VideoModelRegistry = {
-  'text-to-video': [happyhorseT2v, wan27T2v],
-  'image-to-video': [],
-  'reference-to-video': [],
-  'video-editing': [],
+  'text-to-video':       [happyhorseT2v, wan27T2v],
+  'image-to-video':      [happyhorseI2v, wan27I2v],
+  'reference-to-video':  [happyhorseR2v, wan27R2v],
+  'video-editing':       [happyhorseVideoEdit, wan27VideoEdit],
 }
 
 /** 所有视频领域模型的扁平列表 */
@@ -26,7 +32,13 @@ export const allVideoModels = Object.values(videoModels).flat()
 
 // ---- 模型定义 ----
 export { happyhorseT2v } from './models/happyhorse-t2v'
+export { happyhorseI2v } from './models/happyhorse-i2v'
+export { happyhorseR2v } from './models/happyhorse-r2v'
+export { happyhorseVideoEdit } from './models/happyhorse-video-edit'
 export { wan27T2v } from './models/wan2.7-t2v'
+export { wan27I2v } from './models/wan2.7-i2v'
+export { wan27R2v } from './models/wan2.7-r2v'
+export { wan27VideoEdit } from './models/wan2.7-video-edit'
 
 // ---- 类型 ----
 export type {
