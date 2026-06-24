@@ -3,6 +3,7 @@ import { cors } from '@elysia/cors'
 import { openapi } from '@elysia/openapi'
 
 import { authModule } from './modules/auth'
+import { generateModule } from './modules/generate'
 
 const app = new Elysia()
   // `credentials: true` lets browsers send the auth cookie cross-origin.
@@ -26,6 +27,7 @@ const app = new Elysia()
   )
   .get('/', () => 'Hello Elysia')
   .use(authModule)
+  .use(generateModule)
   .listen(3000)
 
 console.log(
