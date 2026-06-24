@@ -1,0 +1,88 @@
+import type { ModelDefinition } from '../types'
+import type { VideoSubCategory } from '../types'
+
+// ---------------------------------------------------------------------------
+// HappyHorse 文生视频
+//
+// 对应文档: docs/bailian/HappyHorse-文生视频.md
+// API 端点: POST /api/v1/services/aigc/video-generation/video-synthesis
+// ---------------------------------------------------------------------------
+
+export const happyhorseT2v: ModelDefinition<VideoSubCategory> = {
+  model: 'happyhorse-1.1-t2v',
+  supportedModels: ['happyhorse-1.1-t2v', 'happyhorse-1.0-t2v'],
+  displayName: 'HappyHorse 文生视频',
+  category: 'video',
+  subCategory: 'text-to-video',
+  endpoint: '/services/aigc/video-generation/video-synthesis',
+
+  fields: [
+    {
+      key: 'prompt',
+      label: '文本提示词',
+      type: 'text',
+      group: 'input',
+      required: true,
+      maxLength: 5000,
+      description:
+        '描述期望生成的视频内容。支持任何语言，不超过5000个非中文字符或2500个中文字符',
+    },
+    {
+      key: 'resolution',
+      label: '分辨率',
+      type: 'select',
+      group: 'parameters',
+      defaultValue: '1080P',
+      options: [
+        { label: '720P', value: '720P' },
+        { label: '1080P', value: '1080P' },
+      ],
+    },
+    {
+      key: 'ratio',
+      label: '宽高比',
+      type: 'select',
+      group: 'parameters',
+      defaultValue: '16:9',
+      options: [
+        { label: '16:9', value: '16:9' },
+        { label: '9:16', value: '9:16' },
+        { label: '1:1', value: '1:1' },
+        { label: '4:3', value: '4:3' },
+        { label: '3:4', value: '3:4' },
+        { label: '4:5', value: '4:5' },
+        { label: '5:4', value: '5:4' },
+        { label: '9:21', value: '9:21' },
+        { label: '21:9', value: '21:9' },
+      ],
+    },
+    {
+      key: 'duration',
+      label: '视频时长',
+      type: 'range',
+      group: 'parameters',
+      defaultValue: 5,
+      min: 3,
+      max: 15,
+      description: '单位：秒，取值范围 [3, 15]',
+    },
+    {
+      key: 'watermark',
+      label: '添加水印',
+      type: 'boolean',
+      group: 'parameters',
+      defaultValue: true,
+      description: '水印位于视频右下角，文案为 "Happy Horse"',
+    },
+    {
+      key: 'seed',
+      label: '随机种子',
+      type: 'number',
+      group: 'parameters',
+      min: 0,
+      max: 2147483647,
+      description:
+        '固定种子可提升结果可复现性。留空则系统自动生成随机种子',
+    },
+  ],
+}
