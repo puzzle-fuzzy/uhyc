@@ -8,6 +8,13 @@
       "when": 1782311012843,
       "tag": "0000_normal_albert_cleary",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1782317673863,
+      "tag": "0001_smooth_iron_fist",
+      "breakpoints": true
     }
   ]
 }
