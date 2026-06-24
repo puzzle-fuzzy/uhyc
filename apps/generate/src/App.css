@@ -576,3 +576,189 @@ body {
     max-height: 70vh;
   }
 }
+
+/* ---- ReferenceAssets (多素材区) ---- */
+.gen-refassets__actions {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.gen-refassets__add {
+  border: 2px solid var(--ink);
+  border-radius: 8px;
+  background: var(--paper);
+  color: var(--ink);
+  padding: 8px 14px;
+  font-family: var(--font);
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+}
+.gen-refassets__add:hover {
+  background: var(--purple-soft);
+}
+.gen-refassets__empty {
+  color: var(--muted);
+  font-size: 14px;
+  margin: 0;
+}
+.gen-refassets__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(88px, 1fr));
+  gap: 10px;
+}
+.gen-refassets__item {
+  position: relative;
+  border: 2px solid var(--ink);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--paper);
+  box-shadow: var(--shadow-sm);
+}
+.gen-refassets__label {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  z-index: 1;
+  background: var(--ink);
+  color: var(--paper);
+  font-size: 11px;
+  font-weight: 800;
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+.gen-refassets__thumb {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+}
+.gen-refassets__thumb--video {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--cyan);
+  font-weight: 800;
+  font-size: 13px;
+}
+.gen-refassets__remove {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  z-index: 1;
+  border: 2px solid var(--ink);
+  border-radius: 50%;
+  background: var(--red-soft);
+  color: var(--danger);
+  width: 20px;
+  height: 20px;
+  line-height: 1;
+  font-weight: 800;
+  cursor: pointer;
+  padding: 0;
+}
+
+/* ---- PromptEditor (contentEditable) ---- */
+.gen-prompteditor {
+  position: relative;
+}
+.gen-prompteditor__input {
+  min-height: 100px;
+  border: var(--border);
+  border-radius: 8px;
+  background: var(--paper);
+  padding: 12px 14px;
+  font-family: var(--font);
+  font-size: 15px;
+  line-height: 1.7;
+  outline: none;
+  resize: vertical;
+}
+.gen-prompteditor__input:empty::before {
+  content: attr(data-placeholder);
+  color: #9aa3af;
+}
+.gen-prompteditor__input:focus {
+  box-shadow: var(--shadow-sm);
+  transform: translate(-1px, -1px);
+}
+.gen-prompteditor__hint {
+  font-size: 12px;
+  color: var(--muted);
+  margin: 4px 0 0;
+}
+
+/* chip（内联引用） */
+.gen-chip {
+  display: inline-flex;
+  align-items: center;
+  background: var(--purple);
+  color: var(--ink);
+  border: 2px solid var(--ink);
+  border-radius: 6px;
+  padding: 0 6px;
+  margin: 0 2px;
+  font-weight: 800;
+  font-size: 13px;
+  user-select: none;
+  vertical-align: baseline;
+}
+.gen-chip--video {
+  background: var(--cyan);
+}
+
+/* @ 浮层 */
+.gen-promptpicker {
+  position: absolute;
+  z-index: 30;
+  min-width: 180px;
+  max-width: 260px;
+  background: var(--paper);
+  border: var(--border);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  padding: 4px;
+  max-height: 240px;
+  overflow-y: auto;
+}
+.gen-promptpicker__empty {
+  margin: 0;
+  padding: 10px;
+  color: var(--muted);
+  font-size: 13px;
+}
+.gen-promptpicker__item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  border: none;
+  background: transparent;
+  padding: 6px 8px;
+  border-radius: 6px;
+  font-family: var(--font);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+  cursor: pointer;
+  text-align: left;
+}
+.gen-promptpicker__item:hover {
+  background: var(--purple-soft);
+}
+.gen-promptpicker__thumb {
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  object-fit: cover;
+  border: 2px solid var(--ink);
+}
+.gen-promptpicker__thumb--video {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--cyan);
+  font-size: 10px;
+  font-weight: 800;
+}

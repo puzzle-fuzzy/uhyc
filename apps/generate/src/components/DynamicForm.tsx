@@ -1,5 +1,7 @@
-import type { FieldMeta, ModelDefinition } from '../types'
+import type { FieldMeta, ModelDefinition, PromptToken, MediaItem } from '../types'
 import { FieldRenderer } from './FieldRenderer'
+import { ReferenceAssets } from './ReferenceAssets'
+import { PromptEditor } from './PromptEditor'
 
 interface DynamicFormProps {
   model: ModelDefinition | null
@@ -8,22 +10,17 @@ interface DynamicFormProps {
   onChange: (key: string, value: unknown) => void
 }
 
-/**
- * Fields that should share one row when they appear adjacently in parameters.
- * Keeps compact controls (resolution+ratio, watermark+seed) on a single line.
- */
 const ROW_PAIRS: [string, string][] = [
   ['resolution', 'ratio'],
   ['watermark', 'seed'],
 ]
 
 function isPair(a: FieldMeta, b: FieldMeta): boolean {
-  return ROW_PAIRS.some(([x, y]) =>
-    (a.key === x && b.key === y) || (a.key === y && b.key === x),
+  return ROW_PAIRS.some(
+    ([x, y]) => (a.key === x && b.key === y) || (a.key === y && b.key === x),
   )
 }
 
-/** Group an ordered field list into rows (singletons or adjacent pairs). */
 function groupIntoRows(fields: FieldMeta[]): FieldMeta[][] {
   const rows: FieldMeta[][] = []
   let i = 0
@@ -43,7 +40,20 @@ function groupIntoRows(fields: FieldMeta[]): FieldMeta[][] {
 
 export function DynamicForm({ model, params, errors, onChange }: DynamicFormProps) {
   if (!model) return null
-  const inputs = model.fields.filter((f) => f.group === 'input')
+
+  const refSyntax = model.refSyntax
+  const promptField = model.fields.find(
+    (f) => f.key === 'prompt' && f.group === 'input',
+  )
+  const mediaField = model.fields.find((f) => f.type === 'media' && f.group === 'input')
+  const isRefModel = Boolean(refSyntax && promptField && mediaField)
+
+  // refSyntax 模型：prompt + media 合并为复合区，不单独渲染这两个字段
+  const inputs = model.fields.filter(
+    (f) =>
+      f.group === 'input' &&
+      !(isRefModel && (f.key === 'prompt' || f.type === 'media')),
+  )
   const parameters = model.fields.filter((f) => f.group === 'parameters')
   const paramRows = groupIntoRows(parameters)
 
@@ -68,11 +78,20 @@ export function DynamicForm({ model, params, errors, onChange }: DynamicFormProp
 
   return (
     <div className="gen-form">
-      {inputs.length > 0 && (
-        <div className="gen-form__group">
-          {inputs.map(renderField)}
-        </div>
-      )}
+      <div className="gen-form__group">
+        {inputs.map(renderField)}
+
+        {isRefModel && promptField && mediaField && (
+          <ReferenceComposite
+            promptField={promptField}
+            mediaField={mediaField}
+            refSyntax={refSyntax!}
+            params={params}
+            onChange={onChange}
+          />
+        )}
+      </div>
+
       {parameters.length > 0 && (
         <div className="gen-form__group">
           <p className="gen-form__group-title">参数</p>
@@ -80,5 +99,58 @@ export function DynamicForm({ model, params, errors, onChange }: DynamicFormProp
         </div>
       )}
     </div>
+  )
+}
+
+/** refSyntax 模型的 prompt + media 复合区 */
+function ReferenceComposite({
+  promptField,
+  mediaField,
+  refSyntax,
+  params,
+  onChange,
+}: {
+  promptField: FieldMeta
+  mediaField: FieldMeta
+  refSyntax: NonNullable<ModelDefinition['refSyntax']>
+  params: Record<string, unknown>
+  onChange: (key: string, value: unknown) => void
+}) {
+  const items = (params[mediaField.key] as MediaItem[] | undefined) ?? []
+  const tokens = (params[promptField.key] as PromptToken[] | undefined) ?? []
+
+  return (
+    <>
+      <label className="uhyc-field">
+        <span className="uhyc-field__label">{mediaField.label}</span>
+        <ReferenceAssets
+          items={items}
+          refSyntax={refSyntax}
+          allowVideo={refSyntax === 'cn-prefixed'}
+          onChange={(next) => onChange(mediaField.key, next)}
+        />
+        {mediaField.description && (
+          <p className="gen-field__desc">{mediaField.description}</p>
+        )}
+      </label>
+
+      <label className="uhyc-field">
+        <span className="uhyc-field__label">
+          {promptField.label}
+          {promptField.required ? ' *' : ''}
+        </span>
+        <PromptEditor
+          items={items}
+          refSyntax={refSyntax}
+          tokens={tokens}
+          placeholder={promptField.label}
+          maxLength={promptField.maxLength}
+          onChange={(next) => onChange(promptField.key, next)}
+        />
+        {promptField.description && (
+          <p className="gen-field__desc">{promptField.description}</p>
+        )}
+      </label>
+    </>
   )
 }

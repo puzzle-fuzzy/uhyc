@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'bun:test'
 import { computeLabels, serializePrompt, type PromptToken } from './promptSerializer'
-import type { MediaItem, RefSyntax } from '../types'
+import type { MediaItem } from '../types'
 
 function img(id: string): MediaItem {
   return { id, type: 'reference_image', url: 'u', label: '' }

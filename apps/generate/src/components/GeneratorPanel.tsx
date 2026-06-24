@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
-import type { Catalog, ModelDefinition } from '../types'
+import type { Catalog, ModelDefinition, MediaItem, PromptToken } from '../types'
+import { serializePrompt } from '../lib/promptSerializer'
 import { CategorySelect } from './CategorySelect'
 import { SubCategoryTabs } from './SubCategoryTabs'
 import { ModelSelect } from './ModelSelect'
@@ -76,12 +77,37 @@ export function GeneratorPanel({
   async function handleSubmit() {
     if (!model) return
     setErrors({})
+
+    // refSyntax 模型：params.prompt 是 PromptToken[]，需序列化成字符串 + media[]
+    let submitParams = { ...params }
+    const promptField = model.fields.find((f) => f.key === 'prompt')
+    const mediaField = model.fields.find((f) => f.type === 'media')
+    if (model.refSyntax && promptField && mediaField) {
+      const tokens = (params[promptField.key] as PromptToken[] | undefined) ?? []
+      const items = (params[mediaField.key] as MediaItem[]) ?? []
+      const { prompt, media } = serializePrompt(tokens, items, model.refSyntax)
+      // 前端预校验：至少引用一个素材
+      if (media.length === 0) {
+        setErrors({
+          [promptField.key]: '请在提示词中至少引用一个参考素材（打 @）',
+        })
+        return
+      }
+      // media[] 仅保留 bailian 需要的 {type, url}，丢弃前端用的 id/label/thumbnail
+      const bailianMedia = media.map((m) => ({ type: m.type, url: m.url }))
+      submitParams = {
+        ...submitParams,
+        [promptField.key]: prompt,
+        [mediaField.key]: bailianMedia,
+      }
+    }
+
     try {
       await onSubmit({
         category,
         subCategory,
         model: model.model,
-        params,
+        params: submitParams,
       })
     } catch {
       // submitError 由父组件管理
