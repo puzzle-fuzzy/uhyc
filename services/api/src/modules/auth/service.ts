@@ -1,11 +1,21 @@
-import bcrypt from 'bcryptjs'
 import { and, eq, or } from 'drizzle-orm'
 import { status } from 'elysia'
 
 import { db, table, type User } from '@uhyc/db'
 import type { SignInBody, SignUpBody, UserResponse } from './model'
 
-const BCRYPT_ROUNDS = 12
+/**
+ * The runtime shape returned by Elysia's `status(code, value)` is
+ * `{ code, response }`. We use this type to discriminate success ({ user })
+ * from error returns in the controller.
+ */
+export type StatusReturn = ReturnType<typeof status>
+export const isStatusReturn = (v: unknown): v is StatusReturn =>
+  typeof v === 'object' &&
+  v !== null &&
+  'code' in v &&
+  'response' in v &&
+  !('user' in v)
 
 /** Strip sensitive columns before returning a user to the client. */
 function toUserResponse(user: User): UserResponse {
@@ -42,7 +52,7 @@ export abstract class AuthService {
       return status(409, { error: 'Username or email already in use' })
     }
 
-    const passwordHash = await bcrypt.hash(input.password, BCRYPT_ROUNDS)
+    const passwordHash = await Bun.password.hash(input.password)
 
     const [created] = await db
       .insert(table.users)
@@ -72,7 +82,7 @@ export abstract class AuthService {
       return status(401, { error: 'Invalid credentials' })
     }
 
-    const ok = await bcrypt.compare(input.password, row.password)
+    const ok = await Bun.password.verify(input.password, row.password)
     if (!ok) {
       return status(401, { error: 'Invalid credentials' })
     }

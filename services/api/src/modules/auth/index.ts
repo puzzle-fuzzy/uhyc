@@ -1,7 +1,7 @@
 import { Elysia, t } from 'elysia'
 
 import { authPlugin, AUTH_COOKIE, AUTH_COOKIE_OPTIONS } from '../../plugins/jwt'
-import { AuthService } from './service'
+import { AuthService, isStatusReturn } from './service'
 import { AuthResponse, ErrorResponse, SignInBody, SignUpBody } from './model'
 
 /**
@@ -22,7 +22,7 @@ export const authModule = new Elysia({ prefix: '/auth' })
       const result = await AuthService.register(body)
 
       // Service returned an error status (e.g. duplicate user).
-      if ('status' in result) return result
+      if (isStatusReturn(result)) return result
 
       const token = await jwt.sign({
         sub: result.user.id,
@@ -43,7 +43,7 @@ export const authModule = new Elysia({ prefix: '/auth' })
     async ({ body, jwt, cookie: { [AUTH_COOKIE]: auth } }) => {
       const result = await AuthService.login(body)
 
-      if ('status' in result) return result
+      if (isStatusReturn(result)) return result
 
       const token = await jwt.sign({
         sub: result.user.id,
@@ -74,7 +74,7 @@ export const authModule = new Elysia({ prefix: '/auth' })
     '/me',
     async ({ currentUser }) => {
       const result = await AuthService.getProfile(currentUser.id)
-      if ('status' in result) return result
+      if (isStatusReturn(result)) return result
       return result
     },
     {
