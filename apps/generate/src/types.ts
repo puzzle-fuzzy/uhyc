@@ -30,6 +30,7 @@ export interface ModelDefinition {
   subCategory: string
   endpoint: string
   fields: FieldMeta[]
+  refSyntax?: RefSyntax
 }
 
 export type Catalog = Record<string, Record<string, ModelDefinition[]>>
@@ -67,3 +68,23 @@ export interface TaskResponse {
   createdAt: string
   updatedAt: string
 }
+
+/** prompt 中参考素材的引用语法风格（镜像 bailian） */
+export type RefSyntax = 'bracket-en' | 'cn-prefixed'
+
+/** 一个参考素材（参考素材区的产物，也是 media[] 的元素） */
+export interface MediaItem {
+  /** 前端临时 id */
+  id: string
+  /** bailian 类型 */
+  type: 'reference_image' | 'reference_video' | 'first_frame'
+  /** 上传后的 URL（现阶段本地 blob，OSS 后接） */
+  url: string
+  /** 显示编号，如 "图1" / "视频1" / "[Image 1]"（按 refSyntax 生成） */
+  label: string
+  /** 本地预览缩略图 URL（视频用占位） */
+  thumbnail?: string
+}
+
+// prompt 编辑期的 token 结构（提交时序列化为字符串）。来自 lib/promptSerializer。
+export type { PromptToken } from './lib/promptSerializer'
