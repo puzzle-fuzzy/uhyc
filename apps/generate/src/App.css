@@ -139,18 +139,230 @@ body {
   resize: vertical;
   font-family: var(--font);
 }
+
+/* ---- Custom subcategory tabs (single horizontal scrollable row) ---- */
+.gen-subtabs {
+  display: flex;
+  gap: 8px;
+  padding: 16px 0 4px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.gen-subtabs::-webkit-scrollbar {
+  display: none;
+}
+.gen-subtab {
+  flex: 0 0 auto;
+  appearance: none;
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  background: var(--paper);
+  color: var(--ink);
+  padding: 6px 14px;
+  font-family: var(--font);
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.12s ease, transform 0.12s ease;
+}
+.gen-subtab:hover {
+  background: var(--purple-soft);
+}
+.gen-subtab--active {
+  background: var(--ink);
+  color: var(--paper);
+}
+.gen-subtab--active:hover {
+  background: var(--ink);
+}
+
+/* ---- Parameter row (two fields side by side) ---- */
+.gen-form__row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+/* ---- Custom toggle switch ---- */
+.gen-toggle {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  flex: 0 0 auto;
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  background: var(--paper);
+  cursor: pointer;
+  padding: 0;
+  transition: background 0.15s ease;
+}
+.gen-toggle__thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--ink);
+  transition: transform 0.15s ease;
+}
+.gen-toggle--on {
+  background: var(--purple);
+}
+.gen-toggle--on .gen-toggle__thumb {
+  transform: translateX(20px);
+}
+
+/* ---- Custom select (native select, styled + chevron) ---- */
+.gen-select {
+  position: relative;
+}
+.gen-select select {
+  width: 100%;
+  border: var(--border);
+  border-radius: 8px;
+  background: var(--paper);
+  padding: 12px 36px 12px 14px;
+  font-family: var(--font);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink);
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+  outline: none;
+}
+.gen-select select:focus {
+  box-shadow: var(--shadow-sm);
+  transform: translate(-1px, -1px);
+}
+.gen-select__chevron {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 18px;
+  height: 18px;
+  color: var(--ink);
+  pointer-events: none;
+}
+
+/* ---- Custom range slider ---- */
 .gen-range {
   display: flex;
   align-items: center;
   gap: 12px;
 }
-.gen-range input {
-  flex: 1;
-}
 .gen-range__value {
   font-weight: 800;
-  min-width: 2ch;
+  min-width: 3ch;
   text-align: right;
+  background: var(--purple-soft);
+  border: 2px solid var(--ink);
+  border-radius: 6px;
+  padding: 2px 8px;
+}
+.gen-range__track {
+  position: relative;
+  flex: 1;
+  height: 8px;
+  background: var(--paper);
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+}
+.gen-range__fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background: var(--purple);
+  border-radius: 999px;
+  pointer-events: none;
+}
+.gen-range__track input[type='range'] {
+  position: absolute;
+  inset: -8px 0;
+  width: 100%;
+  height: calc(100% + 16px);
+  margin: 0;
+  background: transparent;
+  cursor: pointer;
+}
+.gen-range__track input[type='range']::-webkit-slider-runnable-track {
+  background: transparent;
+  border: none;
+}
+.gen-range__track input[type='range']::-webkit-slider-thumb {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--ink);
+  border: 2px solid var(--paper);
+  box-shadow: 0 0 0 2px var(--ink);
+  margin-top: -6px;
+  cursor: pointer;
+}
+.gen-range__track input[type='range']::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--ink);
+  border: 2px solid var(--paper);
+  box-shadow: 0 0 0 2px var(--ink);
+  cursor: pointer;
+}
+
+/* ---- Image upload area ---- */
+.gen-upload {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 140px;
+  border: 2px dashed var(--ink);
+  border-radius: 10px;
+  background: var(--paper);
+  cursor: pointer;
+  transition: background 0.12s ease, box-shadow 0.12s ease;
+}
+.gen-upload:hover {
+  background: var(--purple-soft);
+}
+.gen-upload__input {
+  display: none;
+}
+.gen-upload__preview {
+  max-width: 100%;
+  max-height: 200px;
+  border-radius: 8px;
+}
+.gen-upload__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 600;
+}
+.gen-upload__empty svg {
+  width: 28px;
+  height: 28px;
+  color: var(--ink);
+}
+.gen-upload__clear {
+  margin-top: 8px;
+  border: 2px solid var(--ink);
+  border-radius: 6px;
+  background: var(--red-soft);
+  color: var(--danger);
+  padding: 4px 12px;
+  font-family: var(--font);
+  font-weight: 700;
+  font-size: 12px;
+  cursor: pointer;
 }
 .gen-empty-inline {
   color: var(--muted);

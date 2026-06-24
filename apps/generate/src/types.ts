@@ -1,5 +1,11 @@
 /** 镜像后端 generate/model.ts 与 @uhyc/bailian 的字段元数据。 */
-export type FieldType = 'text' | 'number' | 'boolean' | 'select' | 'range'
+export type FieldType =
+  | 'text'
+  | 'number'
+  | 'boolean'
+  | 'select'
+  | 'range'
+  | 'media'
 export type FieldGroup = 'input' | 'parameters'
 
 export interface FieldMeta {

@@ -18,12 +18,13 @@ const LABELS: Record<string, string> = {
 export function SubCategoryTabs({ options, value, onChange }: SubCategoryTabsProps) {
   if (options.length === 0) return null
   return (
-    <div className="uhyc-tabs">
+    <div className="gen-subtabs" role="tablist">
       {options.map((s) => (
         <button
           key={s}
           type="button"
-          className={`uhyc-tab ${s === value ? 'uhyc-tab--active' : ''}`}
+          role="tab"
+          className={`gen-subtab ${s === value ? 'gen-subtab--active' : ''}`}
           onClick={() => onChange(s)}
         >
           {LABELS[s] ?? s}
