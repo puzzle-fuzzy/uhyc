@@ -1,0 +1,180 @@
+/* Auth-app-specific layout. Generic primitives (.uhyc-card, .uhyc-btn, …)
+   come from @uhyc/shared/styles/ui.css. */
+
+body {
+  /* Dot-grid canvas across the whole auth page. */
+  background-color: var(--bg);
+  background-image: radial-gradient(var(--ink) 1px, transparent 1.4px);
+  background-size: 22px 22px;
+  background-position: -11px -11px;
+}
+
+#root {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  align-items: stretch;
+}
+
+/* ---------- Brand panel (left) ---------- */
+.brand {
+  position: relative;
+  padding: 56px 64px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 28px;
+  overflow: hidden;
+}
+
+.brand__logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  width: fit-content;
+  position: relative;
+  z-index: 1;
+}
+
+.brand__logo svg {
+  width: 40px;
+  height: 40px;
+}
+
+.brand__logo span {
+  font-weight: 800;
+  font-size: 20px;
+  letter-spacing: -0.02em;
+}
+
+.brand__title {
+  font-weight: 900;
+  font-size: clamp(48px, 6vw, 84px);
+  line-height: 0.92;
+  letter-spacing: -0.04em;
+  margin: 0;
+  position: relative;
+  z-index: 1;
+}
+
+.brand__title em {
+  font-style: normal;
+  background: var(--purple);
+  padding: 0 10px;
+  border-radius: 8px;
+  border: var(--border);
+  box-shadow: var(--shadow-sm);
+  display: inline-block;
+  transform: rotate(-2deg);
+}
+
+.brand__sub {
+  font-size: 18px;
+  line-height: 1.5;
+  color: var(--muted-strong);
+  max-width: 420px;
+  margin: 0;
+  position: relative;
+  z-index: 1;
+}
+
+/* Floating decorative concept-map nodes */
+.nodes {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.node {
+  position: absolute;
+  border: var(--border);
+  border-radius: 12px;
+  box-shadow: var(--shadow-sm);
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.node--1 {
+  top: 14%;
+  right: 12%;
+  background: var(--pink);
+  transform: rotate(4deg);
+}
+.node--2 {
+  bottom: 18%;
+  right: 22%;
+  background: var(--cyan);
+  transform: rotate(-3deg);
+}
+.node--3 {
+  bottom: 10%;
+  left: 40%;
+  background: var(--purple-soft);
+  transform: rotate(2deg);
+}
+
+/* ---------- Form panel (right) ---------- */
+.form-panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+}
+
+.form-card {
+  width: 100%;
+  max-width: 420px;
+}
+
+/* ---------- Welcome view ---------- */
+.welcome {
+  text-align: center;
+}
+
+.welcome__avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  border: var(--border);
+  box-shadow: var(--shadow-sm);
+  margin: 4px auto 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--purple-soft);
+  font-weight: 900;
+  font-size: 28px;
+}
+
+.welcome__name {
+  font-weight: 900;
+  font-size: 22px;
+  margin: 0 0 4px;
+}
+
+.welcome__email {
+  color: var(--muted);
+  font-size: 14px;
+  margin: 0 0 10px;
+}
+
+.welcome__actions {
+  margin-top: 24px;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 860px) {
+  #root {
+    grid-template-columns: 1fr;
+  }
+  .brand {
+    display: none;
+  }
+  .form-panel {
+    padding: 24px 16px;
+    min-height: 100vh;
+  }
+}

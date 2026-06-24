@@ -1,0 +1,36 @@
+/* ============================================================
+   uhyc design tokens — Heuristica-inspired neo-brutalist system.
+   Shared across all apps via @uhyc/shared/styles/tokens.css.
+   Extracted from heuristi.ca:
+   - 2px black borders, hard offset shadows, rounded corners
+   - soft pastel block accents, Inter font
+   ============================================================ */
+
+:root {
+  /* Substrate */
+  --bg: #f4f3ec;
+  --ink: #0a0a0a;
+  --paper: #ffffff;
+  --muted: #6b7280; /* slate-500 */
+  --muted-strong: #334155; /* slate-700 */
+
+  /* Pastel block accents (from heuristi.ca CSS) */
+  --pink: #ffaef3;
+  --pink-soft: #ffdee0;
+  --purple: #cba0ff;
+  --purple-soft: #ebdbff;
+  --cyan: #93ecff;
+  --red-soft: #ffe6e7;
+  --danger: #ff5a5f;
+
+  /* Brutalist mechanics */
+  --border: 2px solid var(--ink);
+  --border-thick: 3px solid var(--ink);
+  --radius: 10px;
+  --shadow: 4px 4px 0 var(--ink);
+  --shadow-sm: 2px 2px 0 var(--ink);
+  --shadow-lg: 6px 6px 0 var(--ink);
+  --shadow-hover: 6px 6px 0 var(--ink);
+
+  --font: 'Inter', system-ui, 'Segoe UI', Roboto, sans-serif;
+}

@@ -1,0 +1,237 @@
+/* ============================================================
+   uhyc UI primitives — reusable neo-brutalist classes.
+   Import after tokens.css. Framework-agnostic (plain classnames).
+   ============================================================ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: var(--font);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color-scheme: light;
+}
+
+/* Dot-grid canvas background, echoing Heuristica's discover page. */
+.uhyc-dotgrid {
+  background-color: var(--bg);
+  background-image: radial-gradient(var(--ink) 1px, transparent 1.4px);
+  background-size: 22px 22px;
+  background-position: -11px -11px;
+}
+
+/* ---------- Card ---------- */
+.uhyc-card {
+  background: var(--paper);
+  border: var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+}
+
+.uhyc-card__body {
+  padding: 28px;
+}
+
+.uhyc-card__heading {
+  font-weight: 900;
+  font-size: 24px;
+  letter-spacing: -0.02em;
+  margin: 0 0 4px;
+}
+
+.uhyc-card__hint {
+  font-size: 14px;
+  color: var(--muted);
+  margin: 0 0 22px;
+}
+
+/* ---------- Tabs ---------- */
+.uhyc-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border-bottom: var(--border);
+}
+
+.uhyc-tab {
+  appearance: none;
+  border: none;
+  background: transparent;
+  padding: 16px 12px;
+  font-family: var(--font);
+  font-weight: 800;
+  font-size: 15px;
+  letter-spacing: 0.02em;
+  color: var(--muted);
+  cursor: pointer;
+  position: relative;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+
+.uhyc-tab:not(.uhyc-tab--active):hover {
+  background: var(--bg);
+}
+
+.uhyc-tab--active {
+  color: var(--ink);
+  background: var(--purple-soft);
+}
+
+.uhyc-tab--active::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -2px;
+  height: 3px;
+  background: var(--ink);
+}
+
+.uhyc-tab + .uhyc-tab {
+  border-left: var(--border);
+}
+
+/* ---------- Form ---------- */
+.uhyc-field {
+  display: block;
+  margin-bottom: 16px;
+}
+
+.uhyc-field__label {
+  display: block;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 6px;
+}
+
+.uhyc-input {
+  width: 100%;
+  border: var(--border);
+  border-radius: 8px;
+  background: var(--paper);
+  padding: 12px 14px;
+  font-family: var(--font);
+  font-size: 15px;
+  color: var(--ink);
+  outline: none;
+  transition: box-shadow 0.12s ease, transform 0.12s ease;
+}
+
+.uhyc-input::placeholder {
+  color: #9aa3af;
+}
+
+.uhyc-input:focus {
+  box-shadow: var(--shadow-sm);
+  transform: translate(-1px, -1px);
+}
+
+/* ---------- Buttons ---------- */
+.uhyc-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  border: var(--border);
+  border-radius: 8px;
+  background: var(--ink);
+  color: var(--paper);
+  padding: 13px 16px;
+  font-family: var(--font);
+  font-weight: 800;
+  font-size: 15px;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  box-shadow: var(--shadow);
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.uhyc-btn:hover:not(:disabled) {
+  transform: translate(-2px, -2px);
+  box-shadow: var(--shadow-hover);
+}
+
+.uhyc-btn:active:not(:disabled) {
+  transform: translate(1px, 1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.uhyc-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.uhyc-btn--accent {
+  background: var(--purple);
+  color: var(--ink);
+}
+
+.uhyc-btn--ghost {
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: var(--shadow-sm);
+}
+
+.uhyc-btn--ghost:hover:not(:disabled) {
+  box-shadow: var(--shadow);
+}
+
+/* ---------- Alerts ---------- */
+.uhyc-alert {
+  border: var(--border);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 18px;
+}
+
+.uhyc-alert--error {
+  background: var(--red-soft);
+  color: #b91c1c;
+}
+
+.uhyc-alert--success {
+  background: var(--cyan);
+  color: var(--ink);
+}
+
+/* ---------- Misc ---------- */
+.uhyc-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: uhyc-spin 0.6s linear infinite;
+}
+
+@keyframes uhyc-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.uhyc-badge {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  background: var(--cyan);
+  border: var(--border);
+  border-radius: 999px;
+  padding: 4px 12px;
+  box-shadow: var(--shadow-sm);
+}

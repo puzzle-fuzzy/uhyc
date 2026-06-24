@@ -1,121 +1,75 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
+import { useEffect } from 'react'
+import { useAuth, buildLoginUrl } from '@uhyc/shared'
 import './App.css'
 
+const LOGO_SVG = (
+  <svg viewBox="0 0 32 32" fill="none" aria-hidden="true">
+    <rect x="3" y="3" width="11" height="11" rx="2" fill="#cba0ff" stroke="#0a0a0a" strokeWidth="2.5" />
+    <rect x="18" y="3" width="11" height="11" rx="2" fill="#93ecff" stroke="#0a0a0a" strokeWidth="2.5" />
+    <rect x="3" y="18" width="11" height="11" rx="2" fill="#ffaef3" stroke="#0a0a0a" strokeWidth="2.5" />
+    <rect x="18" y="18" width="11" height="11" rx="2" fill="#0a0a0a" />
+  </svg>
+)
+
 function App() {
-  const [count, setCount] = useState(0)
+  const auth = useAuth()
+
+  // Guard: if the session probe resolves to unauthenticated, bounce to the
+  // central login (auth app) with a callback back to this page.
+  useEffect(() => {
+    if (auth.status === 'unauthenticated') {
+      window.location.replace(buildLoginUrl(window.location.href))
+    }
+  }, [auth.status])
+
+  if (auth.status !== 'authenticated' || !auth.user) {
+    return (
+      <main className="center-screen">
+        <span className="uhyc-spinner" />
+      </main>
+    )
+  }
+
+  const { user } = auth
+  const initial = user.username.charAt(0).toUpperCase()
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
+    <main className="app">
+      <header className="topbar">
+        <div className="topbar__brand">
+          {LOGO_SVG}
+          <span>uhyc · generate</span>
         </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
+        <div className="topbar__user">
+          <span className="topbar__avatar">{initial}</span>
+          <span className="uhyc-badge">{user.username}</span>
+          <button
+            type="button"
+            className="uhyc-btn uhyc-btn--ghost topbar__logout"
+            onClick={auth.logout}
+          >
+            Log out
+          </button>
         </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
+      </header>
+
+      <section className="hero">
+        <h1 className="hero__title">
+          Create with <em>AI.</em>
+        </h1>
+        <p className="hero__sub">
+          Signed in as {user.email}. Generation tools land here next.
+        </p>
       </section>
 
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
+      <section className="uhyc-card gen-card">
+        <div className="uhyc-card__body gen-empty">
+          <h3>Coming soon</h3>
+          <p>Video, image, and audio generation powered by Bailian.</p>
+          <div className="gen-placeholder" />
         </div>
       </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
+    </main>
   )
 }
 
