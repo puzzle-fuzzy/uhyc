@@ -51,6 +51,9 @@ export type {
   VideoModelRegistry,
   ValidationError,
   ValidationResult,
+  PricingUnit,
+  PriceTier,
+  ModelPricing,
 } from './types'
 
 // ---- 校验 ----

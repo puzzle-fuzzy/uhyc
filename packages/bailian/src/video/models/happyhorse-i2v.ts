@@ -13,6 +13,15 @@ export const happyhorseI2v: ModelDefinition<VideoSubCategory> = {
   subCategory: 'image-to-video',
   endpoint: '/services/aigc/video-generation/video-synthesis',
   async: true,
+  pricing: {
+    unit: 'per_second',
+    quantityKey: 'duration',
+    region: 'cn-beijing',
+    tiers: [
+      { condition: { resolution: '720P' }, price: 0.9 },
+      { condition: { resolution: '1080P' }, price: 1.2 },
+    ],
+  },
 
   fields: [
     {

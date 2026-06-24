@@ -2,6 +2,35 @@
 // 参数元数据 & 模型定义 — 前端渲染表单 + 校验的核心
 // ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
+// 定价
+// ---------------------------------------------------------------------------
+
+/** 计费单位 */
+export type PricingUnit = 'per_second' | 'per_image'
+
+/** 价格档位：按某参数维度（如分辨率）匹配不同单价 */
+export interface PriceTier {
+  /** 匹配条件，如 { resolution: "720P" }。空对象表示统一价 */
+  condition: Record<string, unknown>
+  /** 单价（元） */
+  price: number
+}
+
+/** 模型定价定义 */
+export interface ModelPricing {
+  /** 计费单位 */
+  unit: PricingUnit
+  /** 价格档位列表。第一个为默认档位 */
+  tiers: PriceTier[]
+  /** 决定总价乘数的参数字段 key（视频→duration，图像→n） */
+  quantityKey: string
+  /** 地域，默认 cn-beijing */
+  region?: string
+}
+
+// ---------------------------------------------------------------------------
+
 /** 表单控件类型 */
 export type FieldType = 'text' | 'number' | 'boolean' | 'select' | 'range' | 'media' | 'multi-text'
 
@@ -73,6 +102,8 @@ export interface ModelDefinition<SubCategory extends string = string> {
   endpoint: string
   /** 是否异步 API（创建任务 → 轮询结果）。false 表示同步返回结果 */
   async: boolean
+  /** 定价信息（北京地域默认价格） */
+  pricing: ModelPricing
 }
 
 // ---------------------------------------------------------------------------

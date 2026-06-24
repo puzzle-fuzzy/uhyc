@@ -21,6 +21,9 @@ export type {
   ModelDefinition,
   ValidationError,
   ValidationResult,
+  PricingUnit,
+  PriceTier,
+  ModelPricing,
 } from './video/types'
 export type { VideoSubCategory } from './video/types'
 export type { ImageSubCategory } from './image'
@@ -51,3 +54,6 @@ export {
 // ---- API 客户端 ----
 export { createTask, queryTask, waitForCompletion } from './shared/client'
 export type { PollOptions } from './shared/client'
+
+// ---- 价格计算 ----
+export { calcPrice, getDefaultUnitPrice } from './shared/pricing'

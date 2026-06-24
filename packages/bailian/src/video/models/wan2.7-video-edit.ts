@@ -13,6 +13,15 @@ export const wan27VideoEdit: ModelDefinition<VideoSubCategory> = {
   subCategory: 'video-editing',
   endpoint: '/services/aigc/video-generation/video-synthesis',
   async: true,
+  pricing: {
+    unit: 'per_second',
+    quantityKey: 'duration',
+    region: 'cn-beijing',
+    tiers: [
+      { condition: { resolution: '720P' }, price: 0.6 },
+      { condition: { resolution: '1080P' }, price: 1.0 },
+    ],
+  },
 
   fields: [
     {

@@ -28,6 +28,14 @@ export const qwenImageEdit: ModelDefinition<ImageSubCategory> = {
   subCategory: 'image-to-image',
   endpoint: '/services/aigc/multimodal-generation/generation',
   async: false,
+  pricing: {
+    unit: 'per_image',
+    quantityKey: 'n',
+    region: 'cn-beijing',
+    tiers: [
+      { condition: {}, price: 0.5 },
+    ],
+  },
 
   fields: [
     {

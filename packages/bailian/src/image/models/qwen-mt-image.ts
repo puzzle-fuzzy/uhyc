@@ -16,6 +16,14 @@ export const qwenImageTranslation: ModelDefinition<ImageSubCategory> = {
   subCategory: 'reference-to-image',
   endpoint: '/services/aigc/image2image/image-synthesis',
   async: true,
+  pricing: {
+    unit: 'per_image',
+    quantityKey: 'n',
+    region: 'cn-beijing',
+    tiers: [
+      { condition: {}, price: 0.003 },
+    ],
+  },
 
   fields: [
     {
