@@ -4,7 +4,14 @@
       "Bash(npx tsc *)",
       "Bash(git init *)",
       "Bash(git remote *)",
-      "Bash(git commit -m 'chore: initial commit *)"
+      "Bash(git commit -m 'chore: initial commit *)",
+      "Bash(git commit -m 'feat: add generate app \\(React + Vite\\) *)",
+      "Bash(git commit -m 'docs: add bailian model types system design spec *)",
+      "Bash(git commit -m 'feat\\(bailian\\): add model types system with video generation models *)",
+      "Bash(git commit -m 'feat\\(bailian\\): add remaining video + image generation models *)",
+      "Bash(git commit -m 'feat\\(bailian\\): add pricing metadata to all models *)",
+      "Bash(PGPASSWORD=uhyc_dev psql -h localhost -U uhyc -d uhyc -c \"DELETE FROM users WHERE username IN \\('alice_test', 'bob_test'\\);\")",
+      "Bash(git commit -m 'chore: update lockfile and settings *)"
     ]
   }
 }
