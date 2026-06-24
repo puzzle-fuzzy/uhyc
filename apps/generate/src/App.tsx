@@ -1,5 +1,10 @@
-import { useEffect } from 'react'
 import { useAuth, buildLoginUrl } from '@uhyc/shared'
+import { useEffect } from 'react'
+import { useCatalog } from './hooks/useCatalog'
+import { useTaskHistory } from './hooks/useTaskHistory'
+import { useGenerate } from './hooks/useGenerate'
+import { GeneratorPanel } from './components/GeneratorPanel'
+import { TaskHistory } from './components/TaskHistory'
 import './App.css'
 
 const LOGO_SVG = (
@@ -13,14 +18,19 @@ const LOGO_SVG = (
 
 function App() {
   const auth = useAuth()
+  const { catalog } = useCatalog()
+  const { tasks, setTasks, refresh } = useTaskHistory()
+  const { submit, submitting, error: submitError } = useGenerate(tasks, setTasks)
 
-  // Guard: if the session probe resolves to unauthenticated, bounce to the
-  // central login (auth app) with a callback back to this page.
   useEffect(() => {
     if (auth.status === 'unauthenticated') {
       window.location.replace(buildLoginUrl(window.location.href))
     }
   }, [auth.status])
+
+  useEffect(() => {
+    if (auth.status === 'authenticated') void refresh()
+  }, [auth.status, refresh])
 
   if (auth.status !== 'authenticated' || !auth.user) {
     return (
@@ -30,11 +40,10 @@ function App() {
     )
   }
 
-  const { user } = auth
-  const initial = user.username.charAt(0).toUpperCase()
+  const initial = auth.user.username.charAt(0).toUpperCase()
 
   return (
-    <main className="app">
+    <main className="gen-app">
       <header className="topbar">
         <div className="topbar__brand">
           {LOGO_SVG}
@@ -42,33 +51,32 @@ function App() {
         </div>
         <div className="topbar__user">
           <span className="topbar__avatar">{initial}</span>
-          <span className="uhyc-badge">{user.username}</span>
+          <span className="uhyc-badge">{auth.user.username}</span>
           <button
             type="button"
             className="uhyc-btn uhyc-btn--ghost topbar__logout"
             onClick={auth.logout}
           >
-            Log out
+            登出
           </button>
         </div>
       </header>
 
-      <section className="hero">
-        <h1 className="hero__title">
-          Create with <em>AI.</em>
-        </h1>
-        <p className="hero__sub">
-          Signed in as {user.email}. Generation tools land here next.
-        </p>
-      </section>
-
-      <section className="uhyc-card gen-card">
-        <div className="uhyc-card__body gen-empty">
-          <h3>Coming soon</h3>
-          <p>Video, image, and audio generation powered by Bailian.</p>
-          <div className="gen-placeholder" />
-        </div>
-      </section>
+      <div className="gen-layout">
+        <section className="gen-layout__left">
+          {catalog && (
+            <GeneratorPanel
+              catalog={catalog}
+              submitting={submitting}
+              submitError={submitError}
+              onSubmit={submit}
+            />
+          )}
+        </section>
+        <section className="gen-layout__right">
+          <TaskHistory tasks={tasks} />
+        </section>
+      </div>
     </main>
   )
 }
