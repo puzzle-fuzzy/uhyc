@@ -24,6 +24,7 @@ export type {
   PricingUnit,
   PriceTier,
   ModelPricing,
+  RefSyntax,
 } from './video/types'
 export type { VideoSubCategory } from './video/types'
 export type { ImageSubCategory } from './image'

@@ -104,6 +104,12 @@ export interface ModelDefinition<SubCategory extends string = string> {
   async: boolean
   /** 定价信息（北京地域默认价格） */
   pricing: ModelPricing
+  /** prompt 中参考素材的引用语法风格，决定 chip 序列化格式。
+   *  存在时表示该模型支持多素材（r2v/video-edit），前端启用 @ 编辑器。
+   *  - 'bracket-en'：chip → `[Image N]`（仅图片）
+   *  - 'cn-prefixed'：chip → `图N` / `视频N`（图/视频分别计数）
+   */
+  refSyntax?: 'bracket-en' | 'cn-prefixed'
 }
 
 // ---------------------------------------------------------------------------
@@ -129,3 +135,6 @@ export interface ValidationResult {
   valid: boolean
   errors: ValidationError[]
 }
+
+/** prompt 中参考素材的引用语法风格 */
+export type RefSyntax = 'bracket-en' | 'cn-prefixed'
