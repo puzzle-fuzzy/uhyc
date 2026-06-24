@@ -22,6 +22,7 @@ export const happyhorseVideoEdit: ModelDefinition<VideoSubCategory> = {
       { condition: { resolution: '1080P' }, price: 1.6 },
     ],
   },
+  refSyntax: 'bracket-en',
 
   fields: [
     {

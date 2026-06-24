@@ -22,6 +22,7 @@ export const happyhorseR2v: ModelDefinition<VideoSubCategory> = {
       { condition: { resolution: '1080P' }, price: 1.2 },
     ],
   },
+  refSyntax: 'bracket-en',
 
   fields: [
     {

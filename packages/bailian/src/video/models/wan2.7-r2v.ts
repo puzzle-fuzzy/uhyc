@@ -22,6 +22,7 @@ export const wan27R2v: ModelDefinition<VideoSubCategory> = {
       { condition: { resolution: '1080P' }, price: 1.0 },
     ],
   },
+  refSyntax: 'cn-prefixed',
 
   fields: [
     {
