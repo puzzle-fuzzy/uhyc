@@ -1,0 +1,29 @@
+{
+  // Use the workspace's TypeScript (installed via Bun workspaces)
+
+  // Keep file explorer clean
+  "files.exclude": {
+    "**/node_modules": true,
+    "**/dist": true,
+    "**/.turbo": true,
+    "**/.bun": true
+  },
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/dist": true,
+    "**/bun.lock": true
+  },
+
+  // Bun is the runtime/package manager for this workspace
+  "bun.runtime": "bun",
+
+  // TailwindCSS file detection (for the apps/auth frontend later)
+  "tailwindCSS.includeLanguages": {
+    "typescript": "html",
+    "typescriptreact": "html"
+  },
+
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": "always"
+  }
+}

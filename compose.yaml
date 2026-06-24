@@ -1,0 +1,28 @@
+# Local development services for the uhyc workspace.
+# Start everything:  docker compose up -d
+# Stop everything:   docker compose down
+# Reset the database: docker compose down -v
+#
+# PostgreSQL connection (matches .env.example and packages/db/drizzle.config.ts):
+#   host=localhost  port=5432  user=uhyc  password=uhyc_dev  db=uhyc
+services:
+  db:
+    image: postgres:17-alpine
+    container_name: uhyc-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: uhyc
+      POSTGRES_PASSWORD: uhyc_dev
+      POSTGRES_DB: uhyc
+    ports:
+      - "5432:5432"
+    volumes:
+      - uhyc_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U uhyc -d uhyc"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  uhyc_pgdata:

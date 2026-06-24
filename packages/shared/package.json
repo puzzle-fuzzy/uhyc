@@ -1,0 +1,14 @@
+{
+  "name": "@uhyc/shared",
+  "version": "0.0.0",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "build": "echo \"TODO: add shared build script\"",
+    "typecheck": "echo \"TODO: add shared typecheck script\""
+  }
+}

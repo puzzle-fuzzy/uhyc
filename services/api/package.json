@@ -1,0 +1,24 @@
+{
+  "name": "@uhyc/backend",
+  "version": "0.1.0",
+  "type": "module",
+  "module": "src/index.js",
+  "scripts": {
+    "test": "bun test",
+    "dev": "bun run --watch src/index.ts",
+    "db:push": "bun --filter '@uhyc/db' push"
+  },
+  "dependencies": {
+    "@elysia/cors": "^1.4.2",
+    "@elysia/eden": "^1.4.10",
+    "@elysia/jwt": "^1.4.2",
+    "@elysia/openapi": "^1.4.15",
+    "@uhyc/db": "workspace:*",
+    "bcryptjs": "^2.4.3",
+    "elysia": "catalog:"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "bun-types": "latest"
+  }
+}

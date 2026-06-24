@@ -1,0 +1,10 @@
+{
+  // Editor extensions recommended for this workspace.
+  // Install via the "Extensions: Show Recommended Extensions" command.
+  "recommendations": [
+    "oven.bun-vscode",
+    "bradlc.vscode-tailwindcss",
+    "esbenp.prettier-vscode",
+    "biomejs.biome"
+  ]
+}
