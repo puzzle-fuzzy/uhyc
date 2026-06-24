@@ -13,6 +13,7 @@
     "@elysia/eden": "^1.4.10",
     "@elysia/jwt": "^1.4.2",
     "@elysia/openapi": "^1.4.15",
+    "@uhyc/bailian": "workspace:*",
     "@uhyc/db": "workspace:*",
     "bcryptjs": "^2.4.3",
     "elysia": "catalog:"

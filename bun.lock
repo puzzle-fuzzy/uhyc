@@ -52,6 +52,10 @@
         "vite": "^8.1.0",
       },
     },
+    "packages/bailian": {
+      "name": "@uhyc/bailian",
+      "version": "0.1.0",
+    },
     "packages/db": {
       "name": "@uhyc/db",
       "version": "0.0.0",
@@ -84,6 +88,7 @@
         "@elysia/eden": "^1.4.10",
         "@elysia/jwt": "^1.4.2",
         "@elysia/openapi": "^1.4.15",
+        "@uhyc/bailian": "workspace:*",
         "@uhyc/db": "workspace:*",
         "bcryptjs": "^2.4.3",
         "elysia": "catalog:",
@@ -319,6 +324,8 @@
     "@types/react-dom": ["@types/react-dom@19.2.3", "https://registry.npmmirror.com/@types/react-dom/-/react-dom-19.2.3.tgz", { "peerDependencies": { "@types/react": "^19.2.0" } }, "sha512-jp2L/eY6fn+KgVVQAOqYItbF0VY/YApe5Mz2F0aykSO8gx31bYCZyvSeYxCHKvzHG5eZjc+zyaS5BrBWya2+kQ=="],
 
     "@uhyc/backend": ["@uhyc/backend@workspace:services/api"],
+
+    "@uhyc/bailian": ["@uhyc/bailian@workspace:packages/bailian"],
 
     "@uhyc/db": ["@uhyc/db@workspace:packages/db"],
 
