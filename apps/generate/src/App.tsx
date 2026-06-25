@@ -1,6 +1,7 @@
 import { useAuth, buildLoginUrl } from '@uhyc/shared'
 import { useEffect, useState } from 'react'
-import type { TaskResponse } from './types'
+import type { TaskResponse, Catalog } from './types'
+import type { PromptToken } from './lib/promptSerializer'
 import { useCatalog } from './hooks/useCatalog'
 import { useTaskHistory } from './hooks/useTaskHistory'
 import { useGenerate } from './hooks/useGenerate'
@@ -18,6 +19,68 @@ const LOGO_SVG = (
     <rect x="18" y="18" width="11" height="11" rx="2" fill="#0a0a0a" />
   </svg>
 )
+
+/** 从 catalog 查找模型的 refSyntax */
+function getRefSyntax(catalog: Catalog | null, category: string, subCategory: string, model: string): string | null {
+  const m = catalog?.[category]?.[subCategory]?.find((x: { model: string; refSyntax?: string }) => x.model === model)
+  return m?.refSyntax ?? null
+}
+
+/**
+ * 将 prompt 字符串解析为 PromptToken[]，恢复 chip 引用。
+ *
+ * bracket-en 格式: "[Image 1] 描述文本" → [{kind:'ref',itemId}, {kind:'text',text:'描述文本'}]
+ * cn-prefixed 格式: "图1 描述文本" → [{kind:'ref',itemId}, {kind:'text',text:'描述文本'}]
+ */
+function parsePromptIntoTokens(
+  prompt: string,
+  mediaItems: Array<{ id: string; label: string }>,
+  refSyntax: string | null,
+): PromptToken[] {
+  if (!refSyntax) return [{ kind: 'text' as const, text: prompt }]
+
+  // 生成 label → id 映射
+  const labelToId = new Map<string, string>()
+  for (const m of mediaItems) {
+    if (m.label) labelToId.set(m.label, m.id)
+    // bracket-en 的 label 是 "[Image 1]"，cn-prefixed 是 "图1"
+  }
+
+  // 构建正则：匹配所有已知 label，优先匹配长的
+  const labels = [...labelToId.keys()].sort((a, b) => b.length - a.length)
+  if (labels.length === 0) return [{ kind: 'text' as const, text: prompt }]
+
+  const pattern = new RegExp(`(${labels.map((l) => l.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})`, 'g')
+  const tokens: PromptToken[] = []
+  let lastIdx = 0
+
+  for (const match of prompt.matchAll(pattern)) {
+    const matchedLabel = match[0]
+    const idx = match.index!
+
+    // 匹配前的文本
+    if (idx > lastIdx) {
+      tokens.push({ kind: 'text', text: prompt.slice(lastIdx, idx) })
+    }
+
+    // chip 引用
+    const itemId = labelToId.get(matchedLabel)
+    if (itemId) {
+      tokens.push({ kind: 'ref', itemId })
+    } else {
+      tokens.push({ kind: 'text', text: matchedLabel })
+    }
+
+    lastIdx = idx + matchedLabel.length
+  }
+
+  // 剩余文本
+  if (lastIdx < prompt.length) {
+    tokens.push({ kind: 'text', text: prompt.slice(lastIdx) })
+  }
+
+  return tokens.length > 0 ? tokens : [{ kind: 'text' as const, text: prompt }]
+}
 
 function App() {
   const auth = useAuth()
@@ -65,21 +128,42 @@ function App() {
     const rawParams = task.params as Record<string, unknown>
     const params: Record<string, unknown> = { ...rawParams }
 
-    // 转换 prompt 字符串 → PromptToken[]（PromptEditor 所需）
-    if (typeof params.prompt === 'string') {
-      params.prompt = [{ kind: 'text' as const, text: params.prompt }]
-    }
-
     // 转换 media 数组 → MediaItem[]（ReferenceAssets 所需）
     const media = params.media
     if (Array.isArray(media) && media.length > 0) {
-      params.media = media.map((m: Record<string, unknown>, idx: number) => ({
-        id: (m.id as string) || `rerun-${Date.now()}-${idx}`,
-        type: (m.type as string) || 'reference_image',
-        url: (m.url as string) || '',
-        label: (m.label as string) || '',
-        thumbnail: (m.thumbnail as string) || (m.url as string) || undefined,
-      }))
+      params.media = media.map((m: Record<string, unknown>, idx: number) => {
+        const type = (m.type as string) || 'reference_image'
+        const url = (m.url as string) || ''
+        // 先分配 id，稍后 computeLabels 会补 label
+        return {
+          id: (m.id as string) || `rerun-${Date.now()}-${idx}`,
+          type,
+          url,
+          label: (m.label as string) || '',
+          thumbnail: (m.thumbnail as string) || url || undefined,
+        }
+      })
+    }
+
+    // 转换 prompt 字符串 → PromptToken[]（含 chip 引用）
+    if (typeof params.prompt === 'string') {
+      const refSyntax = getRefSyntax(catalog, task.category, task.subCategory, task.model)
+      // computeLabels 需要 refSyntax 和 items 来生成 label，但 items 已在上一步创建
+      // 用 refSyntax 生成 label 映射
+      const mediaItems = (params.media as Array<{ id: string; label: string; type: string }>) ?? []
+      // 预计算 labels
+      let imgIdx = 0
+      let vidIdx = 0
+      for (const item of mediaItems) {
+        if (item.type === 'reference_video') {
+          vidIdx += 1
+          item.label = refSyntax === 'cn-prefixed' ? `视频${vidIdx}` : item.label
+        } else {
+          imgIdx += 1
+          item.label = refSyntax === 'cn-prefixed' ? `图${imgIdx}` : `[Image ${imgIdx}]`
+        }
+      }
+      params.prompt = parsePromptIntoTokens(params.prompt, mediaItems, refSyntax)
     }
 
     setFormFill({ category: task.category, subCategory: task.subCategory, model: task.model, params })
