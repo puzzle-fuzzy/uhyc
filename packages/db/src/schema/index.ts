@@ -76,6 +76,7 @@ export const generationTasks = pgTable(
       .defaultNow()
       .notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' })
+    deletedAt: timestamp('deleted_at', { withTimezone: true, mode: 'date' }),
       .defaultNow()
       .notNull(),
   },
@@ -126,6 +127,7 @@ export const creativityTasks = pgTable('creativity_tasks', {
     .defaultNow()
     .notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' })
+    deletedAt: timestamp('deleted_at', { withTimezone: true, mode: 'date' }),
     .defaultNow()
     .notNull(),
 })

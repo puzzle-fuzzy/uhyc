@@ -1,4 +1,4 @@
-import { desc, eq, inArray } from 'drizzle-orm'
+import { and, desc, eq, inArray, isNull } from 'drizzle-orm'
 import { status } from 'elysia'
 
 import {
@@ -287,12 +287,14 @@ export abstract class GenerateService {
           .select()
           .from(table.generationTasks)
           .orderBy(desc(table.generationTasks.createdAt))
+          .where(isNull(table.generationTasks.deletedAt))
           .limit(limit)
       : await db
           .select()
           .from(table.generationTasks)
           .where(eq(table.generationTasks.userId, userId))
           .orderBy(desc(table.generationTasks.createdAt))
+          .where(and(eq(table.generationTasks.userId, userId), isNull(table.generationTasks.deletedAt)))
           .limit(limit)
 
     // 批量加载所有任务的 files，按 taskId 分组
@@ -439,7 +441,8 @@ export abstract class GenerateService {
     }
 
     await db
-      .delete(table.generationTasks)
+      .update(table.generationTasks)
+      .set({ deletedAt: new Date(), updatedAt: new Date() })
       .where(eq(table.generationTasks.id, taskId))
     return { ok: true }
   }

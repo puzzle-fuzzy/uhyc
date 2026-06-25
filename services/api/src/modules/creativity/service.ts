@@ -1,4 +1,4 @@
-import { desc, eq } from 'drizzle-orm'
+import { desc, eq, isNull } from 'drizzle-orm'
 import { status } from 'elysia'
 
 import { db, table, type CreativityTask } from '@uhyc/db'
@@ -329,7 +329,7 @@ export abstract class CreativityService {
     const rows = await db
       .select()
       .from(table.creativityTasks)
-      .where(eq(table.creativityTasks.userId, userId))
+      .where(and(eq(table.creativityTasks.userId, userId), isNull(table.creativityTasks.deletedAt)))
       .orderBy(desc(table.creativityTasks.createdAt))
       .limit(limit)
 
@@ -364,8 +364,10 @@ export abstract class CreativityService {
     if (row.status !== 'FAILED') {
       return status(400, { error: '仅允许删除失败的任务' })
     }
-
-    await db.delete(table.creativityTasks).where(eq(table.creativityTasks.id, taskId))
+    await db
+      .update(table.creativityTasks)
+      .set({ deletedAt: new Date(), updatedAt: new Date() })
+      .where(eq(table.creativityTasks.id, taskId))
     return { ok: true }
   }
 }
