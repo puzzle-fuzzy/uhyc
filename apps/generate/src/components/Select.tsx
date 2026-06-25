@@ -19,6 +19,7 @@ interface SelectProps {
 export function Select({ value, options, onChange, placeholder }: SelectProps) {
   const [open, setOpen] = useState(false)
   const rootRef = useRef<HTMLDivElement>(null)
+  const listRef = useRef<HTMLUListElement>(null)
 
   useEffect(() => {
     if (!open) return
@@ -36,6 +37,17 @@ export function Select({ value, options, onChange, placeholder }: SelectProps) {
       document.removeEventListener('mousedown', onDoc)
       document.removeEventListener('keydown', onEsc)
     }
+  }, [open])
+
+  // 下拉打开时自动滚动到选中项
+  useEffect(() => {
+    if (!open) return
+    requestAnimationFrame(() => {
+      const activeEl = listRef.current?.querySelector('.gen-dropdown__option--active') as HTMLElement | null
+      if (activeEl) {
+        activeEl.scrollIntoView({ block: 'center' })
+      }
+    })
   }, [open])
 
   const selected = options.find((o) => String(o.value) === value)
@@ -66,7 +78,7 @@ export function Select({ value, options, onChange, placeholder }: SelectProps) {
         </svg>
       </button>
       {open && (
-        <ul className="gen-dropdown__list" role="listbox">
+        <ul className="gen-dropdown__list" role="listbox" ref={listRef}>
           {options.map((o) => {
             const active = String(o.value) === value
             return (
