@@ -81,6 +81,7 @@ const AUDIO_FIELD_KF = {
 }
 
 export const viduQ3ProI2vKF: ModelDefinition<VideoSubCategory> = {
+  id: 'vidu-q3-pro-i2v-kf',
   model: 'vidu/viduq3-pro_start-end2video',
   supportedModels: ['vidu/viduq3-pro_start-end2video'],
   displayName: 'Vidu Q3 Pro 图生视频（首尾帧）',
@@ -110,6 +111,7 @@ export const viduQ3ProI2vKF: ModelDefinition<VideoSubCategory> = {
 }
 
 export const viduQ3TurboI2vKF: ModelDefinition<VideoSubCategory> = {
+  id: 'vidu-q3-turbo-i2v-kf',
   model: 'vidu/viduq3-turbo_start-end2video',
   supportedModels: ['vidu/viduq3-turbo_start-end2video'],
   displayName: 'Vidu Q3 Turbo 图生视频（首尾帧）',
@@ -139,6 +141,7 @@ export const viduQ3TurboI2vKF: ModelDefinition<VideoSubCategory> = {
 }
 
 export const viduQ2ProI2vKF: ModelDefinition<VideoSubCategory> = {
+  id: 'vidu-q2-pro-i2v-kf',
   model: 'vidu/viduq2-pro_start-end2video',
   supportedModels: ['vidu/viduq2-pro_start-end2video'],
   displayName: 'Vidu Q2 Pro 图生视频（首尾帧）',
@@ -167,6 +170,7 @@ export const viduQ2ProI2vKF: ModelDefinition<VideoSubCategory> = {
 }
 
 export const viduQ2TurboI2vKF: ModelDefinition<VideoSubCategory> = {
+  id: 'vidu-q2-turbo-i2v-kf',
   model: 'vidu/viduq2-turbo_start-end2video',
   supportedModels: ['vidu/viduq2-turbo_start-end2video'],
   displayName: 'Vidu Q2 Turbo 图生视频（首尾帧）',

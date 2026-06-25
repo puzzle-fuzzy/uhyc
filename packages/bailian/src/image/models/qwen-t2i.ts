@@ -9,6 +9,7 @@ import type { ModelDefinition } from '../../video/types'
 type ImageSubCategory = 'text-to-image' | 'image-to-image' | 'reference-to-image'
 
 export const qwenTextToImage: ModelDefinition<ImageSubCategory> = {
+  id: 'qwen-text-to-image',
   model: 'qwen-image-2.0-pro',
   supportedModels: [
     'qwen-image-2.0-pro',

@@ -60,6 +60,7 @@ const BASE_FIELDS = [
 ]
 
 export const funMusicV1: ModelDefinition<MusicSubCategory> = {
+  id: 'fun-music-v1',
   model: 'fun-music-v1',
   supportedModels: [
     'fun-music-v1',

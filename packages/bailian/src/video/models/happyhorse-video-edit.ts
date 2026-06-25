@@ -6,6 +6,7 @@ import type { ModelDefinition, VideoSubCategory } from '../types'
 // ---------------------------------------------------------------------------
 
 export const happyhorseVideoEdit: ModelDefinition<VideoSubCategory> = {
+  id: 'happyhorse-video-edit',
   model: 'happyhorse-1.0-video-edit',
   supportedModels: ['happyhorse-1.0-video-edit'],
   displayName: 'HappyHorse 视频编辑',

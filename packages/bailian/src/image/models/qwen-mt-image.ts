@@ -9,6 +9,7 @@ import type { ModelDefinition } from '../../video/types'
 type ImageSubCategory = 'text-to-image' | 'image-to-image' | 'reference-to-image'
 
 export const qwenImageTranslation: ModelDefinition<ImageSubCategory> = {
+  id: 'qwen-image-translation',
   model: 'qwen-mt-image',
   supportedModels: ['qwen-mt-image'],
   displayName: '千问 图像翻译',

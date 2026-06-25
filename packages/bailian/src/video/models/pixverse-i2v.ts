@@ -86,6 +86,7 @@ const BASE_FIELDS_PV_I2V = [
 ]
 
 export const pixverseC1I2v: ModelDefinition<VideoSubCategory> = {
+  id: 'pixverse-c1-i2v',
   model: 'pixverse/pixverse-c1-it2v',
   supportedModels: ['pixverse/pixverse-c1-it2v'],
   displayName: 'PixVerse C1 图生视频（首帧）',
@@ -108,6 +109,7 @@ export const pixverseC1I2v: ModelDefinition<VideoSubCategory> = {
 }
 
 export const pixverseV6I2v: ModelDefinition<VideoSubCategory> = {
+  id: 'pixverse-v6-i2v',
   model: 'pixverse/pixverse-v6-it2v',
   supportedModels: ['pixverse/pixverse-v6-it2v'],
   displayName: 'PixVerse V6 图生视频（首帧）',
@@ -144,6 +146,7 @@ export const pixverseV6I2v: ModelDefinition<VideoSubCategory> = {
 }
 
 export const pixverseV56I2v: ModelDefinition<VideoSubCategory> = {
+  id: 'pixverse-v56-i2v',
   model: 'pixverse/pixverse-v5.6-it2v',
   supportedModels: ['pixverse/pixverse-v5.6-it2v'],
   displayName: 'PixVerse V5.6 图生视频（首帧）',

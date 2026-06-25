@@ -23,6 +23,7 @@ export interface FieldMeta {
 }
 
 export interface ModelDefinition {
+  id: string
   model: string
   supportedModels: string[]
   displayName: string

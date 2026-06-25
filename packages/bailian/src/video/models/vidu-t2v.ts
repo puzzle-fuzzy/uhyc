@@ -13,6 +13,7 @@ import type { VideoSubCategory } from '../types'
 // ---------------------------------------------------------------------------
 
 export const viduQ3ProT2v: ModelDefinition<VideoSubCategory> = {
+  id: 'vidu-q3-pro-t2v',
   model: 'vidu/viduq3-pro_text2video',
   supportedModels: ['vidu/viduq3-pro_text2video'],
   displayName: 'Vidu Q3 Pro 文生视频',
@@ -91,6 +92,7 @@ export const viduQ3ProT2v: ModelDefinition<VideoSubCategory> = {
 }
 
 export const viduQ3TurboT2v: ModelDefinition<VideoSubCategory> = {
+  id: 'vidu-q3-turbo-t2v',
   model: 'vidu/viduq3-turbo_text2video',
   supportedModels: ['vidu/viduq3-turbo_text2video'],
   displayName: 'Vidu Q3 Turbo 文生视频',
@@ -169,6 +171,7 @@ export const viduQ3TurboT2v: ModelDefinition<VideoSubCategory> = {
 }
 
 export const viduQ2T2v: ModelDefinition<VideoSubCategory> = {
+  id: 'vidu-q2-t2v',
   model: 'vidu/viduq2_text2video',
   supportedModels: ['vidu/viduq2_text2video'],
   displayName: 'Vidu Q2 文生视频',

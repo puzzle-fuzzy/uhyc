@@ -6,6 +6,7 @@ import type { ModelDefinition, VideoSubCategory } from '../types'
 // ---------------------------------------------------------------------------
 
 export const wan27VideoEdit: ModelDefinition<VideoSubCategory> = {
+  id: 'wan27-video-edit',
   model: 'wan2.7-videoedit',
   supportedModels: ['wan2.7-videoedit'],
   displayName: '万相2.7 视频编辑',

@@ -88,6 +88,8 @@ export type VideoSubCategory =
 
 /** 模型完整定义 */
 export interface ModelDefinition<SubCategory extends string = string> {
+  /** 前端唯一标识，用于模型选择和数据关联。不与 API 模型 ID 耦合 */
+  id: string
   /** API 调用时的模型标识，如 "wan2.7-t2v" */
   model: string
   /** 该模型支持的所有版本 */

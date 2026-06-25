@@ -73,6 +73,7 @@ const BASE_FIELDS_KLING_I2V = [
 // ---- 首帧模型 ----
 
 export const klingV3I2v: ModelDefinition<VideoSubCategory> = {
+  id: 'kling-v3-i2v',
   model: 'kling/kling-v3-video-generation',
   supportedModels: ['kling/kling-v3-video-generation'],
   displayName: '可灵 V3 图生视频（首帧）',
@@ -93,6 +94,7 @@ export const klingV3I2v: ModelDefinition<VideoSubCategory> = {
 }
 
 export const klingV3OmniI2v: ModelDefinition<VideoSubCategory> = {
+  id: 'kling-v3-omni-i2v',
   model: 'kling/kling-v3-omni-video-generation',
   supportedModels: ['kling/kling-v3-omni-video-generation'],
   displayName: '可灵 V3 Omni 图生视频（首帧）',
@@ -134,6 +136,7 @@ const KEYFRAME_MEDIA_FIELD = {
 }
 
 export const klingV3I2vKF: ModelDefinition<VideoSubCategory> = {
+  id: 'kling-v3-i2v-kf',
   model: 'kling/kling-v3-video-generation',
   supportedModels: ['kling/kling-v3-video-generation'],
   displayName: '可灵 V3 图生视频（首尾帧）',
@@ -161,6 +164,7 @@ export const klingV3I2vKF: ModelDefinition<VideoSubCategory> = {
 }
 
 export const klingV3OmniI2vKF: ModelDefinition<VideoSubCategory> = {
+  id: 'kling-v3-omni-i2v-kf',
   model: 'kling/kling-v3-omni-video-generation',
   supportedModels: ['kling/kling-v3-omni-video-generation'],
   displayName: '可灵 V3 Omni 图生视频（首尾帧）',

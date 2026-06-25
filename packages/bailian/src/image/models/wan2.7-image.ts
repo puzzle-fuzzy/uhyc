@@ -69,6 +69,7 @@ const COMMON_FIELDS = [
 ]
 
 export const wan27ImagePro: ModelDefinition<ImageSubCategory> = {
+  id: 'wan27-image-pro',
   model: 'wan2.7-image-pro',
   supportedModels: [
     'wan2.7-image-pro',
@@ -90,6 +91,7 @@ export const wan27ImagePro: ModelDefinition<ImageSubCategory> = {
 }
 
 export const wan27Image: ModelDefinition<ImageSubCategory> = {
+  id: 'wan27-image',
   model: 'wan2.7-image',
   supportedModels: [
     'wan2.7-image',

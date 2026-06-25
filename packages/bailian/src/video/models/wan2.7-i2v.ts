@@ -6,6 +6,7 @@ import type { ModelDefinition, VideoSubCategory } from '../types'
 // ---------------------------------------------------------------------------
 
 export const wan27I2v: ModelDefinition<VideoSubCategory> = {
+  id: 'wan27-i2v',
   model: 'wan2.7-i2v-2026-04-25',
   supportedModels: ['wan2.7-i2v-2026-04-25'],
   displayName: '万相2.7 图生视频',

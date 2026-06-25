@@ -75,6 +75,7 @@ const BASE_FIELDS_KLING_T2V = [
 ]
 
 export const klingV3T2v: ModelDefinition<VideoSubCategory> = {
+  id: 'kling-v3-t2v',
   model: 'kling/kling-v3-video-generation',
   supportedModels: ['kling/kling-v3-video-generation'],
   displayName: '可灵 V3 文生视频',
@@ -96,6 +97,7 @@ export const klingV3T2v: ModelDefinition<VideoSubCategory> = {
 }
 
 export const klingV3OmniT2v: ModelDefinition<VideoSubCategory> = {
+  id: 'kling-v3-omni-t2v',
   model: 'kling/kling-v3-omni-video-generation',
   supportedModels: ['kling/kling-v3-omni-video-generation'],
   displayName: '可灵 V3 Omni 文生视频',

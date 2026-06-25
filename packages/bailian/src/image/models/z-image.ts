@@ -9,6 +9,7 @@ import type { ModelDefinition } from '../../video/types'
 type ImageSubCategory = 'text-to-image' | 'image-to-image' | 'reference-to-image'
 
 export const zImageTurbo: ModelDefinition<ImageSubCategory> = {
+  id: 'z-image-turbo',
   model: 'z-image-turbo',
   supportedModels: [
     'z-image-turbo',

@@ -81,6 +81,7 @@ const AUDIO_FIELD_R2V = {
 }
 
 export const viduQ3MixR2v: ModelDefinition<VideoSubCategory> = {
+  id: 'vidu-q3-mix-r2v',
   model: 'vidu/viduq3-mix_reference2video',
   supportedModels: ['vidu/viduq3-mix_reference2video'],
   displayName: 'Vidu Q3 Mix 参考生视频',
@@ -115,6 +116,7 @@ export const viduQ3MixR2v: ModelDefinition<VideoSubCategory> = {
 }
 
 export const viduQ3R2v: ModelDefinition<VideoSubCategory> = {
+  id: 'vidu-q3-r2v',
   model: 'vidu/viduq3_reference2video',
   supportedModels: ['vidu/viduq3_reference2video'],
   displayName: 'Vidu Q3 参考生视频',
@@ -144,6 +146,7 @@ export const viduQ3R2v: ModelDefinition<VideoSubCategory> = {
 }
 
 export const viduQ3TurboR2v: ModelDefinition<VideoSubCategory> = {
+  id: 'vidu-q3-turbo-r2v',
   model: 'vidu/viduq3-turbo_reference2video',
   supportedModels: ['vidu/viduq3-turbo_reference2video'],
   displayName: 'Vidu Q3 Turbo 参考生视频',
@@ -173,6 +176,7 @@ export const viduQ3TurboR2v: ModelDefinition<VideoSubCategory> = {
 }
 
 export const viduQ2ProR2v: ModelDefinition<VideoSubCategory> = {
+  id: 'vidu-q2-pro-r2v',
   model: 'vidu/viduq2-pro_reference2video',
   supportedModels: ['vidu/viduq2-pro_reference2video'],
   displayName: 'Vidu Q2 Pro 参考生视频',
@@ -201,6 +205,7 @@ export const viduQ2ProR2v: ModelDefinition<VideoSubCategory> = {
 }
 
 export const viduQ2R2v: ModelDefinition<VideoSubCategory> = {
+  id: 'vidu-q2-r2v',
   model: 'vidu/viduq2_reference2video',
   supportedModels: ['vidu/viduq2_reference2video'],
   displayName: 'Vidu Q2 参考生视频',

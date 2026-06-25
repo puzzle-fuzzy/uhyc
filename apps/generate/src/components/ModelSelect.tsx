@@ -16,7 +16,7 @@ export function ModelSelect({ models, value, onChange }: ModelSelectProps) {
       <span className="uhyc-field__label">模型</span>
       <Select
         value={value ?? ''}
-        options={models.map((m) => ({ label: m.displayName, value: m.model }))}
+        options={models.map((m) => ({ label: m.displayName, value: m.id }))}
         onChange={(v) => onChange(String(v))}
         placeholder="请选择模型"
       />

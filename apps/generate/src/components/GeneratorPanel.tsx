@@ -58,7 +58,7 @@ export function GeneratorPanel({
   )
   const [modelName, setModelName] = useState<string | null>(null)
   const model = useMemo(
-    () => models.find((m) => m.model === modelName) ?? null,
+    () => models.find((m) => m.id === modelName) ?? null,
     [models, modelName],
   )
   const [params, setParams] = useState<Record<string, unknown>>({})

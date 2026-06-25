@@ -9,6 +9,7 @@ import type { ModelDefinition } from '../../video/types'
 type ImageSubCategory = 'text-to-image' | 'image-to-image' | 'reference-to-image'
 
 export const klingImageGen: ModelDefinition<ImageSubCategory> = {
+  id: 'kling-image-gen',
   model: 'kling/kling-v3-image-generation',
   supportedModels: [
     'kling/kling-v3-image-generation',
@@ -84,6 +85,7 @@ export const klingImageGen: ModelDefinition<ImageSubCategory> = {
 }
 
 export const klingOmniImageGen: ModelDefinition<ImageSubCategory> = {
+  id: 'kling-omni-image-gen',
   model: 'kling/kling-v3-omni-image-generation',
   supportedModels: [
     'kling/kling-v3-omni-image-generation',
