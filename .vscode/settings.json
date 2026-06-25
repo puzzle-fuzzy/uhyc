@@ -3,7 +3,7 @@
 
   // Keep file explorer clean
   "files.exclude": {
-    "**/node_modules": true,
+    // "**/node_modules": true,
     "**/dist": true,
     "**/.turbo": true,
     "**/.bun": true
@@ -25,5 +25,16 @@
 
   "editor.codeActionsOnSave": {
     "source.organizeImports": "always"
-  }
+  },
+
+  "json.schemaDownload.enable": true,
+  "json.schemas": [
+    {
+      "fileMatch": [
+        "/*.json",
+        "/*.jsonc"
+      ],
+      "url": "https://turbo.build/schema.json"
+    }
+  ]
 }

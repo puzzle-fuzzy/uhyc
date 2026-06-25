@@ -1,11 +1,11 @@
 {
-  "name": "@uhyc/backend",
+  "name": "@uhyc/api",
   "version": "0.1.0",
   "type": "module",
   "module": "src/index.js",
   "scripts": {
     "test": "bun test",
-    "dev": "bun run --watch src/index.ts",
+    "dev": "bun run src/index.ts",
     "db:push": "bun --filter '@uhyc/db' push"
   },
   "dependencies": {
