@@ -145,25 +145,25 @@ function App() {
       })
     }
 
-    // 转换 prompt 字符串 → PromptToken[]（含 chip 引用）
+    // 转换 prompt 字符串 → PromptToken[]（含 chip 引用，仅 refSyntax 模型需要）
     if (typeof params.prompt === 'string') {
       const refSyntax = getRefSyntax(catalog, task.category, task.subCategory, task.model)
-      // computeLabels 需要 refSyntax 和 items 来生成 label，但 items 已在上一步创建
-      // 用 refSyntax 生成 label 映射
-      const mediaItems = (params.media as Array<{ id: string; label: string; type: string }>) ?? []
-      // 预计算 labels
-      let imgIdx = 0
-      let vidIdx = 0
-      for (const item of mediaItems) {
-        if (item.type === 'reference_video') {
-          vidIdx += 1
-          item.label = refSyntax === 'cn-prefixed' ? `视频${vidIdx}` : item.label
-        } else {
-          imgIdx += 1
-          item.label = refSyntax === 'cn-prefixed' ? `图${imgIdx}` : `[Image ${imgIdx}]`
+      if (refSyntax) {
+        const mediaItems = (params.media as Array<{ id: string; label: string; type: string }>) ?? []
+        let imgIdx = 0
+        let vidIdx = 0
+        for (const item of mediaItems) {
+          if (item.type === 'reference_video') {
+            vidIdx += 1
+            item.label = refSyntax === 'cn-prefixed' ? `视频${vidIdx}` : item.label
+          } else {
+            imgIdx += 1
+            item.label = refSyntax === 'cn-prefixed' ? `图${imgIdx}` : `[Image ${imgIdx}]`
+          }
         }
+        params.prompt = parsePromptIntoTokens(params.prompt, mediaItems, refSyntax)
       }
-      params.prompt = parsePromptIntoTokens(params.prompt, mediaItems, refSyntax)
+      // 非 refSyntax 模型：prompt 保持字符串，textarea 直接展示
     }
 
     setFormFill({ category: task.category, subCategory: task.subCategory, model: task.model, params })
