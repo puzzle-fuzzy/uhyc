@@ -223,23 +223,14 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  width: 100%;
-  border: var(--border);
-  border-radius: 8px;
-  background: var(--paper);
-  padding: 12px 14px;
-  font-family: var(--font);
-  font-size: 15px;
   font-weight: 600;
-  color: var(--ink);
   cursor: pointer;
-  outline: none;
-  transition: box-shadow 0.12s ease, transform 0.12s ease;
+  text-align: left;
 }
 .gen-dropdown__btn:hover,
 .gen-dropdown__btn--open {
-  box-shadow: var(--shadow-sm);
-  transform: translate(-1px, -1px);
+  box-shadow: var(--shadow-sm) !important;
+  transform: translate(-1px, -1px) !important;
 }
 .gen-dropdown__chevron {
   width: 18px;
@@ -493,6 +484,12 @@ body {
 .gen-task__image-link {
   display: block;
   line-height: 0;
+}
+.gen-task__image-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 8px;
+  width: 100%;
 }
 .gen-task__image {
   width: 100%;

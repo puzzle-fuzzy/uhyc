@@ -23,6 +23,8 @@ export function PromptEditor({
 }: PromptEditorProps) {
   const rootRef = useRef<HTMLDivElement>(null)
   const pickerRef = useRef<HTMLDivElement>(null)
+  /** 标记当前用户输入引起的变更 — 此时 DOM 已是最新，无需重建 */
+  const dirtyFromSelf = useRef(false)
   const [pickerOpen, setPickerOpen] = useState(false)
   const [pickerPos, setPickerPos] = useState<{ top: number; left: number } | null>(null)
   const [filterQuery, setFilterQuery] = useState('')
@@ -33,8 +35,13 @@ export function PromptEditor({
     ? labeled.filter((it) => it.label.includes(filterQuery))
     : labeled
 
-  // 受控 → DOM：tokens 变化时重建内容（chip 用 data-item-id 标记）
+  // 受控 → DOM：tokens 变化时重建内容（chip 用 data-item-id 标记）。
+  // 但用户打字产生的变更不重建——DOM 已是最新，重建会破坏光标位置。
   useEffect(() => {
+    if (dirtyFromSelf.current) {
+      dirtyFromSelf.current = false
+      return
+    }
     const root = rootRef.current
     if (!root) return
     root.innerHTML = ''
@@ -74,6 +81,7 @@ export function PromptEditor({
   }
 
   function handleInput() {
+    dirtyFromSelf.current = true
     onChange(readTokens())
     detectAtTrigger()
   }
@@ -176,6 +184,7 @@ export function PromptEditor({
     sel.addRange(range)
 
     closePicker()
+    dirtyFromSelf.current = true
     onChange(readTokens())
   }
 

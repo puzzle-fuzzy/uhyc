@@ -1,3 +1,5 @@
+import { Select } from './Select'
+
 interface CategorySelectProps {
   value: string
   options: string[]
@@ -14,17 +16,11 @@ export function CategorySelect({ value, options, onChange }: CategorySelectProps
   return (
     <label className="uhyc-field">
       <span className="uhyc-field__label">生成类型</span>
-      <select
-        className="uhyc-input"
+      <Select
         value={value}
-        onChange={(e) => onChange(e.target.value)}
-      >
-        {options.map((c) => (
-          <option key={c} value={c}>
-            {LABELS[c] ?? c}
-          </option>
-        ))}
-      </select>
+        options={options.map((c) => ({ label: LABELS[c] ?? c, value: c }))}
+        onChange={(v) => onChange(String(v))}
+      />
     </label>
   )
 }

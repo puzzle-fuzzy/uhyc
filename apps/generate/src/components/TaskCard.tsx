@@ -37,9 +37,19 @@ interface TaskCardProps {
   onDelete?: (task: TaskResponse) => void
 }
 
+function downloadAll(files: TaskResponse['files']) {
+  for (const f of files ?? []) {
+    const a = document.createElement('a')
+    a.href = artifactUrl(f.storagePath)
+    a.download = f.originalFilename || 'download'
+    a.click()
+  }
+}
+
 export function TaskCard({ task, onRerun, onDelete }: TaskCardProps) {
   const [expanded, setExpanded] = useState(false)
-  const file = primaryFile(task)
+  const files = task.files?.filter((f) => f.kind === 'primary') ?? []
+  const file = files[0]
 
   return (
     <div className="gen-task">
@@ -59,18 +69,23 @@ export function TaskCard({ task, onRerun, onDelete }: TaskCardProps) {
               className="gen-media"
             />
           ) : (
-            <a
-              href={artifactUrl(file.storagePath)}
-              className="gen-task__image-link"
-              target="_blank"
-              rel="noreferrer"
-            >
-              <img
-                src={artifactUrl(file.storagePath)}
-                alt="生成结果"
-                className="gen-task__image"
-              />
-            </a>
+            <div className="gen-task__image-grid">
+              {files.map((f, idx) => (
+                <a
+                  key={f.id}
+                  href={artifactUrl(f.storagePath)}
+                  className="gen-task__image-link"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <img
+                    src={artifactUrl(f.storagePath)}
+                    alt={`生成结果 ${idx + 1}`}
+                    className="gen-task__image"
+                  />
+                </a>
+              ))}
+            </div>
           )
         ) : task.status === 'PENDING' || task.status === 'RUNNING' ? (
           <div className="gen-task__loading">
@@ -102,6 +117,15 @@ export function TaskCard({ task, onRerun, onDelete }: TaskCardProps) {
               onClick={() => onDelete(task)}
             >
               删除
+            </button>
+          )}
+          {files.length > 0 && (
+            <button
+              type="button"
+              className="gen-task__btn"
+              onClick={() => downloadAll(files)}
+            >
+              下载
             </button>
           )}
           <button

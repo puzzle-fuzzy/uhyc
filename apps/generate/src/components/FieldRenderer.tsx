@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import type { FieldMeta } from '../types'
+import { Select } from './Select'
 
 interface FieldRendererProps {
   field: FieldMeta
@@ -100,7 +101,7 @@ export function FieldRenderer({ field, value, error, onChange }: FieldRendererPr
       return (
         <label className="uhyc-field">
           {label}
-          <CustomSelect
+          <Select
             value={(value as string) ?? ''}
             options={field.options ?? []}
             onChange={onChange}
@@ -230,92 +231,7 @@ function MediaUpload({
 }
 
 /**
- * Fully custom dropdown (no native <select>). Button trigger + popover list,
- * styled to match the neo-brutalist aesthetic. Closes on outside click / Esc.
- */
-function CustomSelect({
-  value,
-  options,
-  onChange,
-}: {
-  value: string
-  options: { label: string; value: unknown }[]
-  onChange: (value: unknown) => void
-}) {
-  const [open, setOpen] = useState(false)
-  const rootRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    if (!open) return
-    function onDoc(e: MouseEvent) {
-      if (rootRef.current && !rootRef.current.contains(e.target as Node)) {
-        setOpen(false)
-      }
-    }
-    function onEsc(e: KeyboardEvent) {
-      if (e.key === 'Escape') setOpen(false)
-    }
-    document.addEventListener('mousedown', onDoc)
-    document.addEventListener('keydown', onEsc)
-    return () => {
-      document.removeEventListener('mousedown', onDoc)
-      document.removeEventListener('keydown', onEsc)
-    }
-  }, [open])
-
-  const selected = options.find((o) => String(o.value) === value)
-
-  return (
-    <div className="gen-dropdown" ref={rootRef}>
-      <button
-        type="button"
-        className={`gen-dropdown__btn ${open ? 'gen-dropdown__btn--open' : ''}`}
-        onClick={() => setOpen((o) => !o)}
-        aria-haspopup="listbox"
-        aria-expanded={open}
-      >
-        <span>{selected?.label ?? '请选择'}</span>
-        <svg
-          className={`gen-dropdown__chevron ${open ? 'gen-dropdown__chevron--up' : ''}`}
-          viewBox="0 0 24 24"
-          aria-hidden="true"
-        >
-          <path
-            d="M6 9l6 6 6-6"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-      </button>
-      {open && (
-        <ul className="gen-dropdown__list" role="listbox">
-          {options.map((o) => {
-            const active = String(o.value) === value
-            return (
-              <li key={String(o.value)} role="option" aria-selected={active}>
-                <button
-                  type="button"
-                  className={`gen-dropdown__option ${active ? 'gen-dropdown__option--active' : ''}`}
-                  onClick={() => {
-                    onChange(o.value)
-                    setOpen(false)
-                  }}
-                >
-                  {o.label}
-                </button>
-              </li>
-            )
-          })}
-        </ul>
-      )}
-    </div>
-  )
-}
-
-/** 根据 range 字段的 key 返回对应的单位后缀。 */
+ * 根据 range 字段的 key 返回对应的单位后缀。 */
 function rangeUnit(key: string): string {
   switch (key) {
     case 'duration':

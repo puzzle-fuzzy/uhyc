@@ -1,4 +1,5 @@
 import type { ModelDefinition } from '../types'
+import { Select } from './Select'
 
 interface ModelSelectProps {
   models: ModelDefinition[]
@@ -13,17 +14,12 @@ export function ModelSelect({ models, value, onChange }: ModelSelectProps) {
   return (
     <label className="uhyc-field">
       <span className="uhyc-field__label">模型</span>
-      <select
-        className="uhyc-input"
+      <Select
         value={value ?? ''}
-        onChange={(e) => onChange(e.target.value)}
-      >
-        {models.map((m) => (
-          <option key={m.model} value={m.model}>
-            {m.displayName}
-          </option>
-        ))}
-      </select>
+        options={models.map((m) => ({ label: m.displayName, value: m.model }))}
+        onChange={(v) => onChange(String(v))}
+        placeholder="请选择模型"
+      />
     </label>
   )
 }
