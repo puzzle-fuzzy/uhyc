@@ -66,12 +66,42 @@ export function useGenerate(
     }) => {
       setSubmitting(true)
       setError(null)
+
+      // 乐观添加：立即插入一条 PENDING 记录，保证右侧面板即时可见
+      const tempId = `temp-${Date.now()}`
+      setTasks((prev) => [
+        {
+          id: tempId,
+          userId: '',
+          bailianTaskId: null,
+          createRequestId: null,
+          category: input.category,
+          subCategory: input.subCategory,
+          model: input.model,
+          params: input.params,
+          status: 'PENDING',
+          errorMessage: null,
+          files: [],
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        } as TaskResponse,
+        ...prev,
+      ])
+
       try {
         const { task } = await generateApi.createTask(input)
-        setTasks((prev) => [task, ...prev])
+        // 用真实数据替换乐观记录
+        setTasks((prev) => prev.map((t) => (t.id === tempId ? task : t)))
         timers.current[task.id] = setTimeout(() => void pollTask(task.id), POLL_INTERVAL)
       } catch (e) {
-        setError(e instanceof Error ? e.message : '提交失败')
+        // 乐观记录标记为失败
+        const msg = e instanceof Error ? e.message : '提交失败'
+        setTasks((prev) =>
+          prev.map((t) =>
+            t.id === tempId ? { ...t, status: 'FAILED' as const, errorMessage: msg } : t,
+          ),
+        )
+        setError(msg)
         throw e
       } finally {
         setSubmitting(false)
