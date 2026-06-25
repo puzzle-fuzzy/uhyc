@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { TaskResponse } from '../types'
 import { artifactUrl } from '../api'
 
@@ -10,6 +10,20 @@ const STATUS_LABEL: Record<string, string> = {
   CANCELED: '已取消',
   UNKNOWN: '未知',
 }
+
+/** RUNNING 状态下循环显示的趣味标语 */
+const RUNNING_SLOGANS = [
+  '尊贵VIP全力生成中',
+  'AI 正在挥洒创意…',
+  '稍安勿躁，好饭不怕晚',
+  '正在调教模型…',
+  '灵感迸发中…',
+  '渲染引擎轰鸣中…',
+  '像素正在排列组合…',
+  '魔法正在生效 ✨',
+  '即将呈现，请勿走开',
+  '正在把想法变成现实…',
+]
 
 function statusClass(s: string): string {
   if (s === 'SUCCEEDED') return 'gen-status--ok'
@@ -45,11 +59,32 @@ function downloadAll(files: TaskResponse['files']) {
 export function TaskCard({ task, onRerun, onDelete }: TaskCardProps) {
   const [expanded, setExpanded] = useState(false)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+  const [sloganIdx, setSloganIdx] = useState(0)
+  const [justLanded, setJustLanded] = useState(false)
   const files = task.files?.filter((f) => f.kind === 'primary') ?? []
   const file = files[0]
 
+  // 新卡入场动画
+  useEffect(() => {
+    const t = setTimeout(() => setJustLanded(true), 50)
+    return () => clearTimeout(t)
+  }, [])
+
+  // RUNNING 时循环切换标语
+  useEffect(() => {
+    if (task.status !== 'PENDING' && task.status !== 'RUNNING') return
+    const t = setInterval(() => {
+      setSloganIdx((i) => (i + 1) % RUNNING_SLOGANS.length)
+    }, 3000)
+    return () => clearInterval(t)
+  }, [task.status])
+
+  const runningLabel = task.status === 'PENDING'
+    ? STATUS_LABEL[task.status]
+    : RUNNING_SLOGANS[sloganIdx]
+
   return (
-    <div className="gen-task">
+    <div className={`gen-task${justLanded ? ' gen-task--visible' : ''}${task.status === 'SUCCEEDED' && justLanded ? ' gen-task--celebrate' : ''}`}>
       <div className="gen-task__head">
         <span className="gen-task__model">{task.model}</span>
         <span className={`gen-status ${statusClass(task.status)}`}>
@@ -93,7 +128,7 @@ export function TaskCard({ task, onRerun, onDelete }: TaskCardProps) {
               <span className="gen-progress__seg gen-progress__seg--4" />
               <span className="gen-progress__seg gen-progress__seg--5" />
             </div>
-            <span className="gen-progress__label">{STATUS_LABEL[task.status]}</span>
+            <span className="gen-progress__label">{runningLabel}</span>
           </div>
         ) : task.status === 'FAILED' ? (
           <p className="gen-task__error">{task.errorMessage}</p>

@@ -24,7 +24,19 @@
       "Bash(node /Users/yxswy/.claude/skills/impeccable/scripts/detect-csp.mjs)",
       "Bash(lsof -ti:3000 -ti:5173 -ti:5174 -ti:5175)",
       "Bash(xargs kill -9)",
-      "Bash(git commit -m 'feat: Phase 1 security hardening *)"
+      "Bash(git commit -m 'feat: Phase 1 security hardening *)",
+      "Bash(git commit -m 'docs: online presence feature design spec *)",
+      "Bash(bun run *)",
+      "Bash(git commit -m 'feat: online user presence in header via WebSocket *)",
+      "Bash(git commit -m 'docs: restructure bailian docs by category \\(image/video/audio\\) *)",
+      "Bash(git commit -m 'refine: stack all avatars together with overlap effect *)",
+      "Bash(git commit -m 'docs: WebSocket task status push design spec *)",
+      "Bash(git commit -m 'feat: replace HTTP task polling with WebSocket push *)",
+      "Bash(git commit -m 'fix: narrow Vite WS proxy from /ws to /ws/presence *)",
+      "Bash(git commit -m 'docs: fixed left panel + unified scroll design spec *)",
+      "Bash(curl -s http://localhost:5174)",
+      "Bash(lsof -ti:5173,5174,5175)",
+      "Bash(git commit -m 'feat: fixed left panel + unified scroll, plus UI polish *)"
     ]
   }
 }

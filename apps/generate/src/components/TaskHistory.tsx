@@ -1,6 +1,7 @@
 import * as ScrollArea from '@radix-ui/react-scroll-area'
 import type { TaskResponse } from '../types'
 import { TaskCard } from './TaskCard'
+import { EmptyState } from './EmptyState'
 
 interface TaskHistoryProps {
   tasks: TaskResponse[]
@@ -15,7 +16,7 @@ export function TaskHistory({ tasks, onRerun, onDelete }: TaskHistoryProps) {
       <ScrollArea.Root className="gen-scroll">
         <ScrollArea.Viewport className="gen-scroll__viewport">
           {tasks.length === 0 ? (
-            <p className="gen-empty">空空如也，去左边搞点创作吧 ✨</p>
+            <EmptyState />
           ) : (
             <div className="gen-history__list">
               {tasks.map((t) => (

@@ -6,7 +6,7 @@ const POLL_INTERVAL = 8000
 const TERMINAL = new Set(['SUCCEEDED', 'FAILED', 'CANCELED', 'UNKNOWN'])
 
 export function useGenerate(
-  tasks: TaskResponse[],
+  _tasks: TaskResponse[],
   setTasks: React.Dispatch<React.SetStateAction<TaskResponse[]>>,
 ) {
   const [submitting, setSubmitting] = useState(false)

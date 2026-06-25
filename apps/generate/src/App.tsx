@@ -1,5 +1,5 @@
 import { useAuth, buildLoginUrl, usePresence, getPresenceColor, type PresenceUser } from '@uhyc/shared'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { TaskResponse, Catalog } from './types'
 import type { PromptToken } from './lib/promptSerializer'
 import { useCatalog } from './hooks/useCatalog'
@@ -8,8 +8,81 @@ import { useGenerate } from './hooks/useGenerate'
 import { GeneratorPanel } from './components/GeneratorPanel'
 import type { FormValues } from './components/GeneratorPanel'
 import { TaskHistory } from './components/TaskHistory'
+import { ToastContainer, toast } from './components/Toast'
 import { generateApi } from './api'
 import './App.css'
+
+/** 加载中的随机趣味文案 */
+const LOADING_MESSAGES = [
+  '正在唤醒尊贵VIP通道…',
+  '正在和百炼服务器握手…',
+  '正在调校炼丹炉参数…',
+  '正在擦拭镜头…',
+  '正在调色…',
+  '正在给模型喂数据…',
+  'Loading… 好吧，其实是中文加载中',
+  '正在连接生成引擎…',
+  '一切准备就绪… 还差一点',
+]
+
+/** 登录加载界面 — 带随机文案 */
+function LoadingScreen() {
+  const [msg, setMsg] = useState(() => LOADING_MESSAGES[Math.floor(Math.random() * LOADING_MESSAGES.length)])
+  useEffect(() => {
+    const t = setInterval(() => {
+      setMsg(LOADING_MESSAGES[Math.floor(Math.random() * LOADING_MESSAGES.length)])
+    }, 2000)
+    return () => clearInterval(t)
+  }, [])
+  return (
+    <main className="center-screen">
+      <div className="gen-loading">
+        <span className="uhyc-spinner" />
+        <p className="gen-loading__msg">{msg}</p>
+      </div>
+    </main>
+  )
+}
+
+/** 快捷键帮助浮层 */
+const SHORTCUTS: [string, string][] = [
+  ['Enter', '提交生成'],
+  ['?', '显示/隐藏此帮助'],
+  ['Esc', '关闭浮层/弹窗'],
+  ['@', '在提示词中引用素材'],
+  ['↑↓', '在候选中导航'],
+  ['双击 Logo', '触发彩蛋'],
+]
+
+function ShortcutOverlay({ open, onClose }: { open: boolean; onClose: () => void }) {
+  useEffect(() => {
+    if (!open) return
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape' || e.key === '?') onClose()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [open, onClose])
+
+  if (!open) return null
+
+  return (
+    <div className="gen-shortcut-overlay" onClick={onClose}>
+      <div className="gen-shortcut-card" onClick={(e) => e.stopPropagation()}>
+        <h2 className="gen-shortcut__title">快捷键</h2>
+        <ul className="gen-shortcut__list">
+          {SHORTCUTS.map(([key, desc]) => (
+            <li key={key} className="gen-shortcut__item">
+              <kbd className="gen-shortcut__key">{key}</kbd>
+              <span>{desc}</span>
+            </li>
+          ))}
+        </ul>
+        <p className="gen-shortcut__hint">点击遮罩或按 Esc / ? 关闭</p>
+      </div>
+    </div>
+  )
+}
 
 const LOGO_SVG = (
   <svg viewBox="0 0 32 32" fill="none" aria-hidden="true">
@@ -150,6 +223,43 @@ function App() {
 
   const [formFill, setFormFill] = useState<FormValues | null>(null)
   const [formFillVersion, setFormFillVersion] = useState(0)
+  const [shortcutOpen, setShortcutOpen] = useState(false)
+  const [logoSpins, setLogoSpins] = useState(0)
+
+  // 跟踪上一次任务状态，用于检测 SUCCEEDED 转换
+  const prevStatusRef = useRef<Map<string, string>>(new Map())
+
+  useEffect(() => {
+    for (const t of tasks) {
+      const prev = prevStatusRef.current.get(t.id)
+      if (prev && prev !== 'SUCCEEDED' && t.status === 'SUCCEEDED') {
+        const modelName = t.model.length > 20 ? t.model.slice(0, 20) + '…' : t.model
+        toast(`🎉 ${modelName} 生成完成！`, 'success')
+      }
+    }
+    // 更新记录
+    const next = new Map<string, string>()
+    for (const t of tasks) next.set(t.id, t.status)
+    prevStatusRef.current = next
+  }, [tasks])
+
+  // 全局键盘快捷键
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      // 忽略在输入框中的按键
+      const tag = (e.target as HTMLElement)?.tagName?.toLowerCase()
+      if (tag === 'input' || tag === 'textarea' || (e.target as HTMLElement)?.isContentEditable) return
+      if (e.key === '?') {
+        e.preventDefault()
+        setShortcutOpen((o) => !o)
+      }
+      if (e.key === 'Escape' && shortcutOpen) {
+        setShortcutOpen(false)
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [shortcutOpen])
 
   useEffect(() => {
     if (auth.status === 'unauthenticated') {
@@ -162,17 +272,21 @@ function App() {
   }, [auth.status, refresh])
 
   if (auth.status !== 'authenticated' || !auth.user) {
-    return (
-      <main className="center-screen">
-        <span className="uhyc-spinner" />
-      </main>
-    )
+    return <LoadingScreen />
   }
 
   const initial = auth.user.username.charAt(0).toUpperCase()
 
   function handleAvatarClick() {
     setShowAll(!showAll)
+  }
+
+  /** Logo 双击彩蛋：旋转递增 */
+  function handleLogoDblClick() {
+    setLogoSpins((n) => n + 1)
+    if (logoSpins >= 5) {
+      toast('🎠 别转了，再转头都晕了', 'info')
+    }
   }
 
   async function handleDelete(task: TaskResponse) {
@@ -234,7 +348,14 @@ function App() {
     <main className="gen-app">
       <header className="topbar">
         <div className="topbar__brand">
-          {LOGO_SVG}
+          <span
+            className="gen-logo"
+            style={{ transform: `rotate(${logoSpins * 360}deg)`, transition: 'transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)' }}
+            onDoubleClick={handleLogoDblClick}
+            title="双击有惊喜"
+          >
+            {LOGO_SVG}
+          </span>
           <span>uhyc · generate</span>
         </div>
         <div className="topbar__user">
@@ -278,6 +399,9 @@ function App() {
           />
         </section>
       </div>
+
+      <ShortcutOverlay open={shortcutOpen} onClose={() => setShortcutOpen(false)} />
+      <ToastContainer />
     </main>
   )
 }
