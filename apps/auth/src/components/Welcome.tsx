@@ -1,9 +1,16 @@
 import type { User } from '@uhyc/shared'
-import { GENERATE_URL } from '@uhyc/shared'
 
 interface WelcomeProps {
   user: User
   onLogout: () => void
+}
+
+/** 根据当前主机名推断 generate 应用地址（同主机，端口 5174）。 */
+function generateUrl(): string {
+  const env = (import.meta as unknown as { env?: Record<string, string> }).env
+    ?.VITE_GENERATE_URL
+  if (env) return env
+  return `${location.protocol}//${location.hostname}:5174`
 }
 
 export function Welcome({ user, onLogout }: WelcomeProps) {
@@ -21,7 +28,7 @@ export function Welcome({ user, onLogout }: WelcomeProps) {
         <span className="uhyc-badge">Last active · {last}</span>
         <div className="welcome__actions">
           <a
-            href={GENERATE_URL}
+            href={generateUrl()}
             className="uhyc-btn uhyc-btn--accent"
           >
             去创作
