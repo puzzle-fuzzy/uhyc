@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useMemo, useRef } from 'react'
 import type { MediaItem, RefSyntax } from '../types'
 import { computeLabels } from '../lib/promptSerializer'
 import { uploadFile } from '../api'
@@ -27,7 +27,7 @@ export function ReferenceAssets({
   const fileImg = useRef<HTMLInputElement>(null)
   const fileVid = useRef<HTMLInputElement>(null)
 
-  const labeled = computeLabels(items, refSyntax)
+  const labeled = useMemo(() => computeLabels(items, refSyntax), [items, refSyntax])
 
   async function addFiles(files: FileList | null, type: MediaItem['type']) {
     if (!files) return

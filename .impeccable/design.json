@@ -1,0 +1,332 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-06-25T00:00:00.000Z",
+  "title": "Design System: uhyc",
+  "extensions": {
+    "colorMeta": {
+      "primary": {
+        "role": "primary",
+        "displayName": "薰衣草紫",
+        "canonical": "#cba0ff",
+        "tonalRamp": [
+          "#1a1028",
+          "#2d1a4a",
+          "#452570",
+          "#60328f",
+          "#7d45b0",
+          "#9d62cc",
+          "#b884e6",
+          "#d4adf5"
+        ]
+      },
+      "secondary": {
+        "role": "secondary",
+        "displayName": "樱花粉",
+        "canonical": "#ffaef3",
+        "tonalRamp": [
+          "#2e1428",
+          "#521e42",
+          "#78285e",
+          "#9e387a",
+          "#c24e96",
+          "#e06eaf",
+          "#f292c8",
+          "#ffbadd"
+        ]
+      },
+      "tertiary": {
+        "role": "tertiary",
+        "displayName": "薄荷青",
+        "canonical": "#93ecff",
+        "tonalRamp": [
+          "#0a2228",
+          "#0a3d47",
+          "#0a5a69",
+          "#0e788c",
+          "#1a96ad",
+          "#3ab3c9",
+          "#62cee0",
+          "#90e5f5"
+        ]
+      },
+      "neutral-bg": {
+        "role": "neutral",
+        "displayName": "暖白基底",
+        "canonical": "#f4f3ec",
+        "tonalRamp": [
+          "#1a1a18",
+          "#2e2d2a",
+          "#45433e",
+          "#5e5c55",
+          "#7a776e",
+          "#98948a",
+          "#b8b4a8",
+          "#dad6c9"
+        ]
+      },
+      "neutral-paper": {
+        "role": "neutral",
+        "displayName": "纯白纸面",
+        "canonical": "#ffffff",
+        "tonalRamp": [
+          "#1a1a1a",
+          "#2e2e2e",
+          "#454545",
+          "#5e5e5e",
+          "#7a7a7a",
+          "#989898",
+          "#b8b8b8",
+          "#dadada"
+        ]
+      },
+      "neutral-ink": {
+        "role": "neutral",
+        "displayName": "墨黑",
+        "canonical": "#0a0a0a",
+        "tonalRamp": [
+          "#0a0a0a",
+          "#1a1a1a",
+          "#2e2e2e",
+          "#454545",
+          "#5e5e5e",
+          "#7a7a7a",
+          "#989898",
+          "#b8b8b8"
+        ]
+      },
+      "neutral-muted": {
+        "role": "neutral",
+        "displayName": "石板灰",
+        "canonical": "#6b7280",
+        "tonalRamp": [
+          "#111318",
+          "#1f2229",
+          "#30343d",
+          "#434853",
+          "#585e6b",
+          "#6f7684",
+          "#89909e",
+          "#a5acb8"
+        ]
+      },
+      "semantic-danger": {
+        "role": "semantic",
+        "displayName": "警示红",
+        "canonical": "#ff5a5f",
+        "tonalRamp": [
+          "#2e0a0c",
+          "#521014",
+          "#78181c",
+          "#9e2226",
+          "#c23033",
+          "#e04346",
+          "#f56669",
+          "#ff9699"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "面板标题、历史列表标题。页面最高层级信息标识。"
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "正文、表单标签、按钮文字、下拉选项。15px 适配粗边框系统。"
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "表单字段标签、分类小标题。小型大写提供视觉锚点。"
+      }
+    },
+    "shadows": [
+      {
+        "name": "印刷偏移-sm",
+        "value": "2px 2px 0 #0a0a0a",
+        "purpose": "轻度抬起：ghost 按钮默认态、badge、输入框 focus 态。"
+      },
+      {
+        "name": "印刷偏移",
+        "value": "4px 4px 0 #0a0a0a",
+        "purpose": "标准抬起：主按钮、下拉菜单、任务卡片。"
+      },
+      {
+        "name": "印刷偏移-lg",
+        "value": "6px 6px 0 #0a0a0a",
+        "purpose": "深度抬起：hover 态按钮、主卡片默认态。"
+      },
+      {
+        "name": "全屏遮罩",
+        "value": "0 0 40px rgba(0,0,0,0.5)",
+        "purpose": "仅用于全屏图片 overlay 的注意力遮罩。系统中唯一使用模糊阴影的地方。"
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-standard",
+        "value": "cubic-bezier(0.4, 0, 0.2, 1)",
+        "purpose": "默认缓动：hover 变换、颜色过渡、toggle 切换。"
+      },
+      {
+        "name": "duration-fast",
+        "value": "120ms",
+        "purpose": "微交互：hover 进入、focus 变换、toggle 切换。"
+      },
+      {
+        "name": "duration-normal",
+        "value": "150ms",
+        "purpose": "标准过渡：toggle thumb 位移、阴影变化。"
+      },
+      {
+        "name": "ease-linear-loop",
+        "value": "linear",
+        "purpose": "无限循环动画：spinner 旋转 (0.6s)、progress segments (1.4s)。"
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "mobile-max",
+        "value": "960px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "最高权重操作按钮：提交生成、确认操作。墨黑背景白字，hover 浮起，active 按下。",
+      "html": "<button class=\"ds-btn-primary\">生成</button>",
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%; border: 2px solid #0a0a0a; border-radius: 8px; background: #0a0a0a; color: #ffffff; padding: 13px 16px; font-family: Inter, system-ui, sans-serif; font-weight: 800; font-size: 15px; letter-spacing: 0.01em; cursor: pointer; box-shadow: 4px 4px 0 #0a0a0a; transition: transform 0.12s ease, box-shadow 0.12s ease; } .ds-btn-primary:hover:not(:disabled) { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 #0a0a0a; } .ds-btn-primary:active:not(:disabled) { transform: translate(1px, 1px); box-shadow: 2px 2px 0 #0a0a0a; } .ds-btn-primary:disabled { opacity: 0.6; cursor: not-allowed; } .ds-btn-primary:focus-visible { outline: 2px solid #0a0a0a; outline-offset: 2px; }"
+    },
+    {
+      "name": "Accent Button",
+      "kind": "button",
+      "refersTo": "button-accent",
+      "description": "次级强调操作。薰衣草紫背景，墨黑文字。",
+      "html": "<button class=\"ds-btn-accent\">重试</button>",
+      "css": ".ds-btn-accent { display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%; border: 2px solid #0a0a0a; border-radius: 8px; background: #cba0ff; color: #0a0a0a; padding: 13px 16px; font-family: Inter, system-ui, sans-serif; font-weight: 800; font-size: 15px; letter-spacing: 0.01em; cursor: pointer; box-shadow: 4px 4px 0 #0a0a0a; transition: transform 0.12s ease, box-shadow 0.12s ease; } .ds-btn-accent:hover:not(:disabled) { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 #0a0a0a; } .ds-btn-accent:active:not(:disabled) { transform: translate(1px, 1px); box-shadow: 2px 2px 0 #0a0a0a; } .ds-btn-accent:disabled { opacity: 0.6; cursor: not-allowed; } .ds-btn-accent:focus-visible { outline: 2px solid #0a0a0a; outline-offset: 2px; }"
+    },
+    {
+      "name": "Ghost Button",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "三级操作：取消、登出、辅助功能。白色背景，较轻阴影。",
+      "html": "<button class=\"ds-btn-ghost\">登出</button>",
+      "css": ".ds-btn-ghost { display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 2px solid #0a0a0a; border-radius: 8px; background: #ffffff; color: #0a0a0a; padding: 13px 16px; font-family: Inter, system-ui, sans-serif; font-weight: 800; font-size: 15px; letter-spacing: 0.01em; cursor: pointer; box-shadow: 2px 2px 0 #0a0a0a; transition: transform 0.12s ease, box-shadow 0.12s ease; } .ds-btn-ghost:hover:not(:disabled) { transform: translate(-2px, -2px); box-shadow: 4px 4px 0 #0a0a0a; } .ds-btn-ghost:active:not(:disabled) { transform: translate(1px, 1px); box-shadow: 2px 2px 0 #0a0a0a; } .ds-btn-ghost:disabled { opacity: 0.6; cursor: not-allowed; } .ds-btn-ghost:focus-visible { outline: 2px solid #0a0a0a; outline-offset: 2px; }"
+    },
+    {
+      "name": "Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "主容器：生成面板、任务卡片。白色纸面，硬阴影边框。",
+      "html": "<div class=\"ds-card\"><div class=\"ds-card__body\"><h3 class=\"ds-card__heading\">任务名称</h3><p class=\"ds-card__hint\">模型 · 状态</p></div></div>",
+      "css": ".ds-card { background: #ffffff; border: 2px solid #0a0a0a; border-radius: 10px; box-shadow: 6px 6px 0 #0a0a0a; overflow: hidden; } .ds-card__body { padding: 28px; } .ds-card__heading { font-family: Inter, system-ui, sans-serif; font-weight: 900; font-size: 24px; letter-spacing: -0.02em; margin: 0 0 4px; color: #0a0a0a; } .ds-card__hint { font-family: Inter, system-ui, sans-serif; font-size: 14px; color: #6b7280; margin: 0 0 22px; }"
+    },
+    {
+      "name": "Input Field",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "文本输入框。白色背景，2px 边框，focus 时轻微浮起。",
+      "html": "<div class=\"ds-field\"><label class=\"ds-field__label\">Prompt</label><input class=\"ds-input\" type=\"text\" placeholder=\"描述你想要生成的画面…\" /></div>",
+      "css": ".ds-field { display: block; margin-bottom: 16px; } .ds-field__label { display: block; font-family: Inter, system-ui, sans-serif; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; color: #0a0a0a; } .ds-input { width: 100%; border: 2px solid #0a0a0a; border-radius: 8px; background: #ffffff; padding: 12px 14px; font-family: Inter, system-ui, sans-serif; font-size: 15px; color: #0a0a0a; outline: none; transition: box-shadow 0.12s ease, transform 0.12s ease; } .ds-input::placeholder { color: #6b7280; } .ds-input:focus { box-shadow: 2px 2px 0 #0a0a0a; transform: translate(-1px, -1px); }"
+    },
+    {
+      "name": "Chip",
+      "kind": "chip",
+      "refersTo": "chip",
+      "description": "内联引用 chip，嵌入 prompt 编辑器文本流中标识素材引用。",
+      "html": "<span class=\"ds-chip\">图1</span>",
+      "css": ".ds-chip { display: inline-flex; align-items: center; background: #cba0ff; color: #0a0a0a; border: 2px solid #0a0a0a; border-radius: 6px; padding: 0 6px; margin: 0 2px; font-family: Inter, system-ui, sans-serif; font-weight: 800; font-size: 13px; user-select: none; vertical-align: baseline; }"
+    },
+    {
+      "name": "Status Badge",
+      "kind": "chip",
+      "refersTo": "badge",
+      "description": "状态指示 pill：成功（青）、运行中（紫）、错误（红）。",
+      "html": "<span class=\"ds-badge ds-badge--ok\">SUCCEEDED</span>",
+      "css": ".ds-badge { display: inline-block; font-family: Inter, system-ui, sans-serif; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; padding: 4px 10px; border-radius: 999px; border: 2px solid #0a0a0a; } .ds-badge--ok { background: #93ecff; color: #0a0a0a; } .ds-badge--run { background: #cba0ff; color: #0a0a0a; } .ds-badge--err { background: #ffe6e7; color: #ff5a5f; }"
+    },
+    {
+      "name": "Toggle Switch",
+      "kind": "custom",
+      "refersTo": "toggle",
+      "description": "自定义 toggle 开关。44×24px pill，紫色表示开启。",
+      "html": "<button class=\"ds-toggle ds-toggle--on\" role=\"switch\" aria-checked=\"true\"><span class=\"ds-toggle__thumb\"></span></button>",
+      "css": ".ds-toggle { position: relative; width: 44px; height: 24px; border: 2px solid #0a0a0a; border-radius: 999px; background: #cba0ff; cursor: pointer; padding: 0; transition: background 0.15s ease; } .ds-toggle:not(.ds-toggle--on) { background: #ffffff; } .ds-toggle__thumb { position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: #0a0a0a; transition: transform 0.15s ease; } .ds-toggle--on .ds-toggle__thumb { transform: translateX(20px); } .ds-toggle:focus-visible { outline: 2px solid #0a0a0a; outline-offset: 2px; }"
+    },
+    {
+      "name": "Dropdown Select",
+      "kind": "custom",
+      "refersTo": "dropdown",
+      "description": "自定义下拉选择器，替代原生 select。chevron 翻转指示开合。",
+      "html": "<div class=\"ds-dropdown\"><button class=\"ds-dropdown__btn\"><span>选择模型</span><svg class=\"ds-dropdown__chevron\" width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\"><polyline points=\"6 9 12 15 18 9\"/></svg></button></div>",
+      "css": ".ds-dropdown { position: relative; } .ds-dropdown__btn { display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; border: 2px solid #0a0a0a; border-radius: 8px; background: #ffffff; padding: 12px 14px; font-family: Inter, system-ui, sans-serif; font-weight: 600; font-size: 15px; color: #0a0a0a; cursor: pointer; text-align: left; transition: box-shadow 0.12s ease, transform 0.12s ease; } .ds-dropdown__btn:hover { box-shadow: 2px 2px 0 #0a0a0a; transform: translate(-1px, -1px); } .ds-dropdown__chevron { width: 18px; height: 18px; flex-shrink: 0; color: #0a0a0a; transition: transform 0.15s ease; }"
+    },
+    {
+      "name": "Tab",
+      "kind": "nav",
+      "refersTo": "tab",
+      "description": "主 tab 切换。2-column grid，激活态柔紫底 + 底部指示条。",
+      "html": "<nav class=\"ds-tabs\"><button class=\"ds-tab ds-tab--active\">图片</button><button class=\"ds-tab\">视频</button></nav>",
+      "css": ".ds-tabs { display: grid; grid-template-columns: 1fr 1fr; border-bottom: 2px solid #0a0a0a; } .ds-tab { appearance: none; border: none; border-left: 2px solid #0a0a0a; background: transparent; padding: 16px 12px; font-family: Inter, system-ui, sans-serif; font-weight: 800; font-size: 15px; letter-spacing: 0.02em; color: #6b7280; cursor: pointer; position: relative; transition: background 0.12s ease, color 0.12s ease; } .ds-tab:first-child { border-left: none; } .ds-tab:hover { background: #f4f3ec; } .ds-tab--active { color: #0a0a0a; background: #ebdbff; } .ds-tab--active::after { content: ''; position: absolute; left: 0; right: 0; bottom: -2px; height: 3px; background: #0a0a0a; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "创作工坊 (The Creative Workshop)",
+    "overview": "uhyc 的界面是一个明亮的数字创作工坊。想象一张铺着网格纸的工作台：墨色工具轮廓分明，薰衣草紫、樱花粉、薄荷青的颜料块散落其间，每件工具拿起来都有实在的分量。这不是一个冷峻的实验室，也不是一个花哨的画廊 — 它是一个让人想动手操作的空间。\n\n设计语言源于新粗野主义（Neo-Brutalism）但用柔和的东亚色感做了驯化。2px 实心黑边框和硬偏移阴影提供结构和触觉反馈；柔色块作为强调色注入温度和趣味，而不是刺眼的霓虹。Inter 字体作为唯一的字体选择，避免了字体间的竞争，让层次完全通过粗细和大小来表达。\n\n这个系统明确拒绝：暗黑终端美学、SaaS 蓝色模板、过度极简的苹果风、以及玻璃态/模糊的装饰性效果。它始终保持在亮色模式下，底色是温暖的灰白色（#f4f3ec），上面覆盖点阵网格纹理。",
+    "keyCharacteristics": [
+      "2px 实心黑边框作为主要的结构语言",
+      "硬偏移阴影（无模糊）提供触觉式深度反馈",
+      "三种柔色强调色（薰衣草紫、樱花粉、薄荷青）各司其职",
+      "单字体体系（Inter），通过粗细对比建立层次",
+      "点阵网格背景纹理贯穿整个应用",
+      "亮色模式 only — 暖白基底，墨黑文字"
+    ],
+    "rules": [
+      {
+        "name": "三色分工规则",
+        "body": "紫色 = 交互（按钮、选中态、chips），青色 = 状态（badge、成功、信息），粉色 = 装饰（LOGO、动画过渡）。绝不混用：不用青色做主要按钮，不用紫色做成功提示。",
+        "section": "colors"
+      },
+      {
+        "name": "墨黑唯一规则",
+        "body": "所有边框和主要文字使用同一个 #0a0a0a。没有「深灰边框」或「浅黑文字」— 系统的结构语言是二元的（墨黑线条 + 柔色块面），灰度仅用于辅助文字层级。",
+        "section": "colors"
+      },
+      {
+        "name": "粗细即层次规则",
+        "body": "不依赖字号缩放来建立层次。Display 和 Body 之间只差 9px，但 900 vs 400 的粗细差距提供了足够的对比。如果需要第三个层次，使用 600–700 的 semibold/bold，而不是引入第三级字号。",
+        "section": "typography"
+      },
+      {
+        "name": "无衬线单轨规则",
+        "body": "全界面使用 Inter 一个字体家族。不用等宽体展示代码，不用衬线体增加「人文感」。工具型产品的字体一致性本身就是一种清晰的声明。",
+        "section": "typography"
+      },
+      {
+        "name": "The Tactile Feedback Rule",
+        "body": "阴影是交互状态的函数，不是静态装饰。默认态元素没有明显阴影（卡片除外，使用硬阴影作为容器边界）；hover 时元素「抬起」（shadow 增大 + translate 偏移）；active 时元素「按下」（shadow 缩小 + translate 反向）。禁用态没有任何阴影变化。",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "所有边框使用同一个 #0a0a0a 和 2px 宽度。这是系统的结构骨架，不要引入不同颜色的边框。",
+      "紫色 = 交互、青色 = 状态、粉色 = 装饰。保持三色的功能分工。",
+      "在 hover/active 时使用 translate + shadow 变化提供触觉反馈。静态元素不需要阴影。",
+      "使用 dot-grid 背景（radial-gradient, 22px 间距）作为默认页面纹理。不要用纯色背景替代。",
+      "保持亮色模式。暖白基底 (#f4f3ec) 是系统的底色，不要引入暗色模式。",
+      "正文文字与背景的对比度 ≥ 4.5:1，大号文字（≥18px 或 bold ≥14px）≥ 3:1。Placeholder 文字同样需要 4.5:1。"
+    ],
+    "donts": [
+      "使用暗黑科技/终端风格 — 严禁纯黑背景、霓虹色、等宽字体默认排版、终端绿。这不是一个 hacker 工具。",
+      "使用 SaaS 蓝色调模板 — 禁止蓝色作为主强调色、柔和阴影白卡片堆叠、标准 SaaS 布局套路。",
+      "使用玻璃态/毛玻璃效果做默认装饰。模糊和半透明只在必要时使用（如图片 overlay 遮罩），不作为常规设计语言。",
+      "引入 border-left 或 border-right 大于 1px 的侧边彩色条纹。系统的边框语言是全边框 2px。",
+      "使用渐变文字（background-clip: text）。强调通过粗细或颜色变化，不通过渐变。",
+      "使用超过 16px 的圆角在卡片或容器上。10–12px 是上限。全圆角 pill 仅用于 badges、tabs、toggles 等小元素。",
+      "在没有交互状态变化时添加阴影。静态 decorative 阴影违背触觉反馈原则。",
+      "在 hover 时同时使用 border: 1px solid + box-shadow 大 blur（≥16px）。这个系统的阴影是硬偏移，不是柔和投影。"
+    ]
+  }
+}

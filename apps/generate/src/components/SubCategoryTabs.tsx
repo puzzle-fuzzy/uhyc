@@ -24,6 +24,7 @@ export function SubCategoryTabs({ options, value, onChange }: SubCategoryTabsPro
           key={s}
           type="button"
           role="tab"
+          aria-selected={s === value}
           className={`gen-subtab ${s === value ? 'gen-subtab--active' : ''}`}
           onClick={() => onChange(s)}
         >

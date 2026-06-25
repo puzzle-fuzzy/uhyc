@@ -36,6 +36,7 @@ export function ResolutionPicker({ value, options, onChange }: ResolutionPickerP
           <button
             key={opt.value}
             type="button"
+            aria-label={`选择 ${opt.label}`}
             className={`res-picker__card${active ? ' res-picker__card--active' : ''}`}
             onClick={() => onChange(opt.value)}
           >

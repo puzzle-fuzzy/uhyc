@@ -161,7 +161,7 @@ body {
 }
 .gen-field__desc {
   font-size: 12px;
-  color: var(--muted);
+  color: var(--muted-strong);
   margin: 4px 0 0;
 }
 .gen-field__error {
@@ -419,7 +419,7 @@ body {
   top: 50%;
   left: 0;
   width: 100%;
-  height: 20px;
+  height: 24px;
   margin: 0;
   transform: translateY(-50%);
   background: transparent;
@@ -477,7 +477,7 @@ body {
   cursor: pointer;
 }
 .gen-empty-inline {
-  color: var(--muted);
+  color: var(--muted-strong);
   font-size: 14px;
   padding: 8px 0;
 }
@@ -500,7 +500,7 @@ body {
   gap: 16px;
 }
 .gen-empty {
-  color: var(--muted);
+  color: var(--muted-strong);
   text-align: center;
   padding: 40px 0;
 }
@@ -690,7 +690,7 @@ body {
   border: var(--border);
   background: var(--paper);
   border-radius: 6px;
-  padding: 4px 10px;
+  padding: 8px 14px;
   font-family: var(--font);
   font-weight: 700;
   font-size: 12px;
@@ -708,12 +708,12 @@ body {
   color: var(--ink);
 }
 .gen-task__btn--delete {
-  color: #e74c3c;
-  border-color: #e74c3c;
+  color: var(--danger);
+  border-color: var(--danger);
 }
 .gen-task__btn--delete:hover {
-  background: #e74c3c;
-  color: #fff;
+  background: var(--danger);
+  color: var(--paper);
 }
 .gen-task__params {
   background: var(--bg);
@@ -856,8 +856,8 @@ body {
   border-radius: 50%;
   background: var(--red-soft);
   color: var(--danger);
-  width: 20px;
-  height: 20px;
+  width: 28px;
+  height: 28px;
   line-height: 1;
   font-weight: 800;
   cursor: pointer;
@@ -882,7 +882,7 @@ body {
 }
 .gen-prompteditor__input:empty::before {
   content: attr(data-placeholder);
-  color: #9aa3af;
+  color: var(--muted);
 }
 .gen-prompteditor__input:focus {
   box-shadow: var(--shadow-sm);
@@ -961,7 +961,7 @@ body {
   width: 100%;
   border: none;
   background: transparent;
-  padding: 6px 8px;
+  padding: 8px 12px;
   border-radius: 6px;
   font-family: var(--font);
   font-size: 14px;

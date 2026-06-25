@@ -17,7 +17,14 @@
       "Read(//Users/yxswy/.agents/skills/impeccable/reference/**)",
       "Bash(ls /Users/yxswy/.claude/skills/impeccable/scripts/ 2>/dev/null && echo \"---FOUND_GLOBAL---\" ; ls /Users/yxswy/Documents/uhyc/.agents/ 2>/dev/null || echo \"NO_PROJECT_AGENTS_DIR\")",
       "Read(//Users/yxswy/.agents/skills/impeccable/scripts/**)",
-      "Bash(node /Users/yxswy/.claude/skills/impeccable/scripts/context.mjs)"
+      "Bash(node /Users/yxswy/.claude/skills/impeccable/scripts/context.mjs)",
+      "Bash(git commit -m 'feat: add soft-delete for tasks & Bailian video models \\(Vidu, PixVerse, Kling\\) *)",
+      "Bash(grep -n \"\\\\\\\\\\\\\\\\\" /Users/yxswy/Documents/uhyc/packages/bailian/src/video/models/happyhorse-t2v.ts /dev/null 2>/dev/null; head -60 /Users/yxswy/Documents/uhyc/packages/bailian/src/video/models/happyhorse-t2v.ts)",
+      "Read(//dev/**)",
+      "Bash(node /Users/yxswy/.claude/skills/impeccable/scripts/detect-csp.mjs)",
+      "Bash(lsof -ti:3000 -ti:5173 -ti:5174 -ti:5175)",
+      "Bash(xargs kill -9)",
+      "Bash(git commit -m 'feat: Phase 1 security hardening *)"
     ]
   }
 }

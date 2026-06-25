@@ -40,7 +40,6 @@ function defaultsFor(model: ModelDefinition | null): Record<string, unknown> {
 
 export function GeneratorPanel({
   catalog,
-  submitting,
   submitError,
   onSubmit,
   formFill,
@@ -218,7 +217,14 @@ export function GeneratorPanel({
         />
       </div>
 
-      <div className="gen-panel__body">
+      <form
+        id="gen-form"
+        className="gen-panel__body"
+        onSubmit={(e) => {
+          e.preventDefault()
+          handleSubmit()
+        }}
+      >
         <ModelSelect models={models} value={modelName} onChange={setModelName} />
         <DynamicForm
           model={model}
@@ -231,15 +237,15 @@ export function GeneratorPanel({
             {submitError}
           </div>
         )}
-      </div>
+      </form>
 
       <div className="gen-panel__foot">
         <div className="gen-panel__foot-row">
           <button
-            type="button"
+            type="submit"
+            form="gen-form"
             className="uhyc-btn uhyc-btn--accent"
             disabled={!model || uploading}
-            onClick={handleSubmit}
           >
             {uploading ? '上传素材中…' : '生成'}
           </button>

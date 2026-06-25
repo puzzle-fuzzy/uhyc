@@ -9,7 +9,7 @@ interface ModelSelectProps {
 
 export function ModelSelect({ models, value, onChange }: ModelSelectProps) {
   if (models.length === 0) {
-    return <p className="gen-empty-inline">该类别暂无可用模型</p>
+    return <p className="gen-empty-inline">这里还什么都没有，换个分类试试？</p>
   }
   return (
     <label className="uhyc-field">

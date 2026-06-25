@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import type { MediaItem, RefSyntax } from '../types'
 import { computeLabels, type PromptToken } from '../lib/promptSerializer'
 
@@ -30,10 +30,10 @@ export function PromptEditor({
   const [filterQuery, setFilterQuery] = useState('')
   const [activeIdx, setActiveIdx] = useState(0)
 
-  const labeled = computeLabels(items, refSyntax)
-  const filtered = filterQuery
+  const labeled = useMemo(() => computeLabels(items, refSyntax), [items, refSyntax])
+  const filtered = useMemo(() => filterQuery
     ? labeled.filter((it) => it.label.includes(filterQuery))
-    : labeled
+    : labeled, [labeled, filterQuery])
 
   // 受控 → DOM：tokens 变化时重建内容（chip 用 data-item-id 标记）。
   // 但用户打字产生的变更不重建——DOM 已是最新，重建会破坏光标位置。
@@ -265,6 +265,7 @@ export function PromptEditor({
         <div
           ref={pickerRef}
           className="gen-promptpicker"
+          role="listbox"
           style={pickerPos ? { top: pickerPos.top, left: pickerPos.left } : undefined}
         >
           {filtered.length === 0 ? (
@@ -278,6 +279,8 @@ export function PromptEditor({
               <button
                 key={it.id}
                 type="button"
+                role="option"
+                aria-selected={idx === activeIdx}
                 className={`gen-promptpicker__item${idx === activeIdx ? ' gen-promptpicker__item--active' : ''}`}
                 onMouseDown={(e) => {
                   e.preventDefault() // 不让 editor 失焦

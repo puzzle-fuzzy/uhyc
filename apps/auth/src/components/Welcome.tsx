@@ -17,15 +17,15 @@ export function Welcome({ user, onLogout }: WelcomeProps) {
   const initial = user.username.charAt(0).toUpperCase()
   const last = user.lastLoginAt
     ? new Date(user.lastLoginAt).toLocaleString()
-    : 'first login'
+    : '首次登录'
 
   return (
     <div className="uhyc-card form-card">
       <div className="uhyc-card__body welcome">
         <div className="welcome__avatar">{initial}</div>
-        <p className="welcome__name">Welcome, {user.username}</p>
+        <p className="welcome__name">欢迎回来，{user.username}</p>
         <p className="welcome__email">{user.email}</p>
-        <span className="uhyc-badge">Last active · {last}</span>
+        <span className="uhyc-badge">上次登录 · {last}</span>
         <div className="welcome__actions">
           <a
             href={generateUrl()}
@@ -38,7 +38,7 @@ export function Welcome({ user, onLogout }: WelcomeProps) {
             className="uhyc-btn uhyc-btn--ghost"
             onClick={onLogout}
           >
-            Log out
+            退出登录
           </button>
         </div>
       </div>

@@ -57,7 +57,7 @@ body {
   z-index: 1;
 }
 
-.brand__title em {
+.brand__title-highlight {
   font-style: normal;
   background: var(--purple);
   padding: 0 10px;

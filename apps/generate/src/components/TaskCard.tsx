@@ -4,9 +4,9 @@ import { artifactUrl } from '../api'
 
 const STATUS_LABEL: Record<string, string> = {
   PENDING: '正在为尊贵超级VIP极速生成中',
-  RUNNING: '生成中',
-  SUCCEEDED: '成功',
-  FAILED: '失败',
+  RUNNING: '尊贵VIP全力生成中',
+  SUCCEEDED: '生成完成 🎉',
+  FAILED: '生成失败',
   CANCELED: '已取消',
   UNKNOWN: '未知',
 }
@@ -15,10 +15,6 @@ function statusClass(s: string): string {
   if (s === 'SUCCEEDED') return 'gen-status--ok'
   if (s === 'FAILED' || s === 'CANCELED' || s === 'UNKNOWN') return 'gen-status--err'
   return 'gen-status--run'
-}
-
-function primaryFile(task: TaskResponse) {
-  return task.files?.find((f) => f.kind === 'primary')
 }
 
 function timeAgo(iso: string): string {
@@ -82,6 +78,7 @@ export function TaskCard({ task, onRerun, onDelete }: TaskCardProps) {
                     src={artifactUrl(f.storagePath)}
                     alt={`生成结果 ${idx + 1}`}
                     className="gen-task__image"
+                    loading="lazy"
                   />
                 </button>
               ))}

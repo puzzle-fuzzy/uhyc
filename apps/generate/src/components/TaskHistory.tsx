@@ -15,7 +15,7 @@ export function TaskHistory({ tasks, onRerun, onDelete }: TaskHistoryProps) {
       <ScrollArea.Root className="gen-scroll">
         <ScrollArea.Viewport className="gen-scroll__viewport">
           {tasks.length === 0 ? (
-            <p className="gen-empty">还没有生成记录</p>
+            <p className="gen-empty">空空如也，去左边搞点创作吧 ✨</p>
           ) : (
             <div className="gen-history__list">
               {tasks.map((t) => (

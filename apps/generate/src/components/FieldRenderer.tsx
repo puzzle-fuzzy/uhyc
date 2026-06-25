@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useRef } from 'react'
 import type { FieldMeta } from '../types'
 import { Select } from './Select'
 import { ResolutionPicker } from './ResolutionPicker'
@@ -8,6 +8,10 @@ interface FieldRendererProps {
   value: unknown
   error?: string
   onChange: (value: unknown) => void
+}
+
+function errorId(key: string): string {
+  return `field-error-${key}`
 }
 
 export function FieldRenderer({ field, value, error, onChange }: FieldRendererProps) {
@@ -38,6 +42,7 @@ export function FieldRenderer({ field, value, error, onChange }: FieldRendererPr
               value={(value as string) ?? ''}
               maxLength={field.maxLength}
               placeholder={field.label}
+              aria-describedby={error ? errorId(field.key) : undefined}
               onChange={(e) => onChange(e.target.value)}
             />
           ) : (
@@ -47,11 +52,12 @@ export function FieldRenderer({ field, value, error, onChange }: FieldRendererPr
               value={(value as string) ?? ''}
               maxLength={field.maxLength}
               placeholder={field.label}
+              aria-describedby={error ? errorId(field.key) : undefined}
               onChange={(e) => onChange(e.target.value)}
             />
           )}
           {desc}
-          {error && <p className="gen-field__error">{error}</p>}
+          {error && <p id={errorId(field.key)} className="gen-field__error">{error}</p>}
         </label>
       )
 
@@ -66,6 +72,7 @@ export function FieldRenderer({ field, value, error, onChange }: FieldRendererPr
             min={field.min}
             max={field.max}
             placeholder={field.label}
+            aria-describedby={error ? errorId(field.key) : undefined}
             onChange={(e) =>
               onChange(
                 e.target.value === '' ? undefined : Number(e.target.value),
@@ -73,7 +80,7 @@ export function FieldRenderer({ field, value, error, onChange }: FieldRendererPr
             }
           />
           {desc}
-          {error && <p className="gen-field__error">{error}</p>}
+          {error && <p id={errorId(field.key)} className="gen-field__error">{error}</p>}
         </label>
       )
 
@@ -104,11 +111,11 @@ export function FieldRenderer({ field, value, error, onChange }: FieldRendererPr
             {label}
             <ResolutionPicker
               value={(value as string) ?? ''}
-              options={field.options ?? []}
+              options={(field.options ?? []) as { label: string; value: string }[]}
               onChange={onChange}
             />
             {desc}
-            {error && <p className="gen-field__error">{error}</p>}
+            {error && <p id={errorId(field.key)} className="gen-field__error">{error}</p>}
           </label>
         )
       }
@@ -121,7 +128,7 @@ export function FieldRenderer({ field, value, error, onChange }: FieldRendererPr
             onChange={onChange}
           />
           {desc}
-          {error && <p className="gen-field__error">{error}</p>}
+          {error && <p id={errorId(field.key)} className="gen-field__error">{error}</p>}
         </label>
       )
 
@@ -143,13 +150,14 @@ export function FieldRenderer({ field, value, error, onChange }: FieldRendererPr
                 min={min}
                 max={max}
                 value={v}
+                aria-describedby={error ? errorId(field.key) : undefined}
                 onChange={(e) => onChange(Number(e.target.value))}
               />
             </div>
             <span className="gen-range__value">{v}{rangeUnit(field.key)}</span>
           </div>
           {desc}
-          {error && <p className="gen-field__error">{error}</p>}
+          {error && <p id={errorId(field.key)} className="gen-field__error">{error}</p>}
         </label>
       )
     }

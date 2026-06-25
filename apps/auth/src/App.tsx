@@ -51,21 +51,20 @@ function App() {
   return (
     <>
       <aside className="brand">
-        <div className="nodes">
-          <div className="node node--1">concept maps</div>
-          <div className="node node--2">flashcards</div>
-          <div className="node node--3">study notes</div>
+        <div className="nodes" aria-hidden="true">
+          <div className="node node--1">AI 图片</div>
+          <div className="node node--2">视频生成</div>
+          <div className="node node--3">音乐创作</div>
         </div>
         <div className="brand__logo">
           {LOGO_SVG}
           <span>uhyc</span>
         </div>
         <h1 className="brand__title">
-          Think in <em>maps.</em>
+          用 AI 创造<span className="brand__title-highlight">媒体</span>
         </h1>
         <p className="brand__sub">
-          Sign in to organize ideas, expand them into study materials, and chat
-          with AI — all in one place.
+          基于百炼模型平台，一站式生成图片、视频和音乐。选模型，调参数，提交即可。
         </p>
       </aside>
 
