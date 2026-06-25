@@ -90,7 +90,7 @@ export function GeneratorPanel({
     setErrors({})
   }, [model])
 
-  // 填充表单（重新生成）
+  // 填充表单（重新生成）— 分步设置，让级联 effect 逐步收敛
   const prevFillVer = useRef(0)
   useEffect(() => {
     if (formFillVersion === 0 || !formFill || formFillVersion === prevFillVer.current) return
@@ -102,7 +102,7 @@ export function GeneratorPanel({
     setModelName(formFill.model)
     setParams(formFill.params)
     setErrors({})
-    queueMicrotask(() => { skipCascade.current = false })
+    setTimeout(() => { skipCascade.current = false }, 50)
   }, [formFillVersion, formFill])
 
   function setParam(key: string, value: unknown) {
