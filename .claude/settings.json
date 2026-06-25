@@ -55,7 +55,8 @@
       "Bash(./node_modules/.bin/tsc --noEmit)",
       "Bash(git commit -m 'feat: migrate creativity app into generate, add global Ctrl+P command panel, unify topbar *)",
       "Bash(git push *)",
-      "Bash(git commit -m 'fix: align PixVerse & Kling model definitions with Bailian API docs *)"
+      "Bash(git commit -m 'fix: align PixVerse & Kling model definitions with Bailian API docs *)",
+      "Bash(git commit -m 'fix: add missing mediaSlots to PixVerse, Vidu, and Qwen image models *)"
     ]
   }
 }

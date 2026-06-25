@@ -29,6 +29,10 @@ const BASE_FIELDS_KF = [
     group: 'input' as const,
     required: true,
     description: '2 张图片：第1张为首帧，第2张为尾帧。支持 JPG/JPEG/PNG/WEBP，分辨率比值 0.8~1.25，不超过 50MB',
+    mediaSlots: [
+      { type: 'first_frame' as const, label: '首帧图片', accept: 'image/*', maxCount: 1, maxSizeMB: 50 },
+      { type: 'last_frame' as const, label: '尾帧图片', accept: 'image/*', maxCount: 1, maxSizeMB: 50 },
+    ],
   },
   {
     key: 'resolution',

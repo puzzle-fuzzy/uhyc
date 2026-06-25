@@ -37,6 +37,10 @@ const BASE_FIELDS_PV_KF = [
     group: 'input' as const,
     required: true,
     description: '2 张图片：第1张为首帧(first_frame)，第2张为尾帧(last_frame)。顺序无关，系统按类型自动匹配。支持 JPG/PNG/WEBP，各维度不超过10000px，不超过 20MB',
+    mediaSlots: [
+      { type: 'first_frame' as const, label: '首帧图片', accept: 'image/*', maxCount: 1, maxSizeMB: 20 },
+      { type: 'last_frame' as const, label: '尾帧图片', accept: 'image/*', maxCount: 1, maxSizeMB: 20 },
+    ],
   },
   {
     key: 'resolution',

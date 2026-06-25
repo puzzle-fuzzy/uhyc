@@ -47,6 +47,9 @@ export const qwenImageEdit: ModelDefinition<ImageSubCategory> = {
       required: true,
       description:
         '输入 1-3 张图像。格式：JPG/JPEG/PNG/BMP/TIFF/WEBP/GIF（仅首帧），建议 384-3072px，≤10MB。支持公网URL、OSS临时URL或Base64',
+      mediaSlots: [
+        { type: 'reference_image' as const, label: '输入图像', accept: 'image/*', maxCount: 3, maxSizeMB: 10 },
+      ],
     },
     {
       key: 'prompt',

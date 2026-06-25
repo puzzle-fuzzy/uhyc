@@ -50,6 +50,9 @@ const BASE_FIELDS_PV_R2V = [
     group: 'input' as const,
     required: true,
     description: '1~7 张参考图片。支持 JPG/PNG/WEBP，各维度不超过10000px，不超过 20MB。每张图可设置 ref_name 用于 prompt 引用',
+    mediaSlots: [
+      { type: 'image_url' as const, label: '参考图片', accept: 'image/*', maxCount: 7, maxSizeMB: 20 },
+    ],
   },
   {
     key: 'size',
