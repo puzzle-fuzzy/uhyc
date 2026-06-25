@@ -78,7 +78,7 @@ function App() {
         type: (m.type as string) || 'reference_image',
         url: (m.url as string) || '',
         label: (m.label as string) || '',
-        thumbnail: m.thumbnail as string | undefined,
+        thumbnail: (m.thumbnail as string) || (m.url as string) || undefined,
       }))
     }
 
