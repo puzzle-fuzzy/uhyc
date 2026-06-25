@@ -54,7 +54,10 @@ export function ReferenceAssets({
         <button
           type="button"
           className="gen-refassets__add"
-          onClick={() => fileImg.current?.click()}
+          onClick={(e) => {
+            e.stopPropagation()
+            fileImg.current?.click()
+          }}
         >
           + 添加图片
         </button>
@@ -62,7 +65,10 @@ export function ReferenceAssets({
           <button
             type="button"
             className="gen-refassets__add"
-            onClick={() => fileVid.current?.click()}
+            onClick={(e) => {
+              e.stopPropagation()
+              fileVid.current?.click()
+            }}
           >
             + 添加视频
           </button>
@@ -73,7 +79,10 @@ export function ReferenceAssets({
           accept="image/*"
           multiple
           className="gen-upload__input"
-          onChange={(e) => addFiles(e.target.files, 'reference_image')}
+          onChange={(e) => {
+            addFiles(e.target.files, 'reference_image')
+            e.target.value = ''
+          }}
         />
         <input
           ref={fileVid}
@@ -81,7 +90,10 @@ export function ReferenceAssets({
           accept="video/*"
           multiple
           className="gen-upload__input"
-          onChange={(e) => addFiles(e.target.files, 'reference_video')}
+          onChange={(e) => {
+            addFiles(e.target.files, 'reference_video')
+            e.target.value = ''
+          }}
         />
       </div>
 

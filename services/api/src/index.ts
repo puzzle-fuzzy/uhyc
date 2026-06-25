@@ -7,6 +7,7 @@ import { openapi } from '@elysia/openapi'
 
 import { authModule } from './modules/auth'
 import { generateModule } from './modules/generate'
+import { uploadModule } from './modules/upload'
 
 const app = new Elysia()
   // `credentials: true` lets browsers send the auth cookie cross-origin.
@@ -31,6 +32,7 @@ const app = new Elysia()
   .get('/', () => 'Hello Elysia')
   .use(authModule)
   .use(generateModule)
+  .use(uploadModule)
   .get(
     '/generate/storage/:taskId/:filename',
     async ({ params, set }) => {

@@ -35,3 +35,4 @@ bun.lockb
 # cache
 .cache/
 .turbo/
+/services/api/storage/

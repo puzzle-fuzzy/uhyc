@@ -19,7 +19,7 @@ export function filenameFromUrl(url: string): string {
 
 /**
  * 下载一个远程文件到本地任务目录。
- * @returns 写入的相对路径（相对 cwd，即 `storage/<taskId>/<filename>`）与元数据。
+ * @returns 写入的相对路径、元数据及原始 buffer（用于 OSS 上传）。
  */
 export async function downloadToTaskDir(
   taskId: string,
@@ -29,6 +29,7 @@ export async function downloadToTaskDir(
   mimeType: string | null
   sizeBytes: number | null
   originalFilename: string
+  buffer: Uint8Array
 }> {
   const res = await fetch(sourceUrl)
   if (!res.ok) {
@@ -45,14 +46,15 @@ export async function downloadToTaskDir(
   const bytes = new Uint8Array(await res.arrayBuffer())
   await writeFile(absPath, bytes)
 
-  // 相对路径（用于 DB 存储 + 静态服务拼接）
-  const storagePath = join('storage', taskId, originalFilename)
+  // 相对路径（用于 DB 存储 + 静态服务拼接）。统一用 / 分隔符，避免 Windows 反斜杠破坏 URL。
+  const storagePath = `storage/${taskId}/${originalFilename}`
 
   return {
     storagePath,
     mimeType: res.headers.get('content-type'),
     sizeBytes: bytes.byteLength,
     originalFilename,
+    buffer: bytes,
   }
 }
 

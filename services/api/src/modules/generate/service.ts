@@ -1,4 +1,4 @@
-import { desc, eq } from 'drizzle-orm'
+import { desc, eq, inArray } from 'drizzle-orm'
 import { status } from 'elysia'
 
 import {
@@ -11,12 +11,16 @@ import {
   queryTask,
   sanitizeParams,
   validateParams,
+  translateBailianError,
+  type CreateTaskResponse,
   type ModelDefinition,
   type BailianClientConfig,
+  type SyncTaskResponse,
 } from '@uhyc/bailian'
 import { db, table, type GenerationTask, type GenerationTaskFile } from '@uhyc/db'
 
 import { downloadToTaskDir, extractVideoResultUrl } from './storage'
+import { generateKey, isOSSConfigured, uploadBuffer } from '../../lib/oss'
 import type { CreateTaskBody } from './model'
 
 const ALL_MODELS: ModelDefinition[] = [
@@ -40,7 +44,7 @@ export const isStatusReturn = (v: unknown): v is StatusReturn =>
 function bailianConfig(): BailianClientConfig {
   const apiKey = process.env.BAILIAN_API_KEY
   if (!apiKey || apiKey === 'replace-with-real-key') {
-    throw new Error('BAILIAN_API_KEY is not configured')
+    throw new Error('未配置 BAILIAN_API_KEY，请在 .env 文件中设置有效的百炼 API Key')
   }
   return {
     apiKey,
@@ -111,11 +115,21 @@ async function downloadResultFiles(
     const url = extractVideoResultUrl(output)
     if (!url) return
     const info = await downloadToTaskDir(taskId, url)
+
+    // 如 OSS 已配置则上传到 OSS
+    let storagePath = info.storagePath
+    if (isOSSConfigured()) {
+      const ext = info.originalFilename.split('.').pop() || 'mp4'
+      const key = generateKey('tasks', taskId, ext)
+      const ossUrl = await uploadBuffer(key, info.buffer, info.mimeType || undefined)
+      storagePath = ossUrl // 用 OSS URL 替代本地路径
+    }
+
     await db.insert(table.generationTaskFiles).values({
       taskId,
       kind: 'primary',
       sourceUrl: url,
-      storagePath: info.storagePath,
+      storagePath,
       mimeType: info.mimeType,
       sizeBytes: info.sizeBytes,
       originalFilename: info.originalFilename,
@@ -163,11 +177,55 @@ export abstract class GenerateService {
 
     try {
       const res = await createTask(bailianConfig(), definition, finalParams)
+
+      if (!definition.async && 'choices' in (res as SyncTaskResponse).output) {
+        // 同步模型：结果已返回，直接处理
+        const syncRes = res as SyncTaskResponse
+        const content = syncRes.output.choices?.[0]?.message?.content ?? []
+        const imageUrls = content
+          .map((c) => c.image)
+          .filter((u): u is string => Boolean(u))
+
+        if (imageUrls.length > 0) {
+          // 下载结果并生成 task_files 记录
+          const files: { storagePath: string; mimeType: string | null; sizeBytes: number | null; originalFilename: string }[] = []
+          for (let i = 0; i < imageUrls.length; i++) {
+            const info = await downloadToTaskDir(row.id, imageUrls[i])
+            files.push(info)
+          }
+
+          await db.insert(table.generationTaskFiles).values(
+            files.map((info) => ({
+              taskId: row.id,
+              kind: 'primary',
+              sourceUrl: imageUrls[0],
+              storagePath: info.storagePath,
+              mimeType: info.mimeType,
+              sizeBytes: info.sizeBytes,
+              originalFilename: info.originalFilename,
+            })),
+          )
+        }
+
+        const [updated] = await db
+          .update(table.generationTasks)
+          .set({ status: 'SUCCEEDED', createRequestId: syncRes.request_id, updatedAt: new Date() })
+          .where(eq(table.generationTasks.id, row.id))
+          .returning()
+        const taskFiles = await db
+          .select()
+          .from(table.generationTaskFiles)
+          .where(eq(table.generationTaskFiles.taskId, row.id))
+        return { task: toTaskResponse(updated, taskFiles) }
+      }
+
+      // 异步模型：回写 task_id，后续轮询
+      const asyncRes = res as CreateTaskResponse
       const [updated] = await db
         .update(table.generationTasks)
         .set({
-          bailianTaskId: res.output.task_id,
-          createRequestId: res.request_id,
+          bailianTaskId: asyncRes.output.task_id,
+          createRequestId: asyncRes.request_id,
           updatedAt: new Date(),
         })
         .where(eq(table.generationTasks.id, row.id))
@@ -184,7 +242,7 @@ export abstract class GenerateService {
     }
   }
 
-  /** 列出当前用户历史记录（最新在前）。 */
+  /** 列出当前用户历史记录（最新在前），附带文件信息。 */
   static async list(userId: string, limit = 50) {
     const rows = await db
       .select()
@@ -193,7 +251,25 @@ export abstract class GenerateService {
       .orderBy(desc(table.generationTasks.createdAt))
       .limit(limit)
 
-    return { items: rows.map((r) => toTaskResponse(r)), total: rows.length }
+    // 批量加载所有任务的 files，按 taskId 分组
+    const taskIds = rows.map((r) => r.id)
+    const filesByTaskId = new Map<string, GenerationTaskFile[]>()
+    if (taskIds.length > 0) {
+      const fileRows = await db
+        .select()
+        .from(table.generationTaskFiles)
+        .where(inArray(table.generationTaskFiles.taskId, taskIds))
+      for (const f of fileRows) {
+        const list = filesByTaskId.get(f.taskId)
+        if (list) list.push(f)
+        else filesByTaskId.set(f.taskId, [f])
+      }
+    }
+
+    return {
+      items: rows.map((r) => toTaskResponse(r, filesByTaskId.get(r.id) ?? [])),
+      total: rows.length,
+    }
   }
 
   /**
@@ -250,9 +326,12 @@ export abstract class GenerateService {
         taskStatus === 'CANCELED' ||
         taskStatus === 'UNKNOWN'
       ) {
-        const msg =
+        const rawMsg =
           [out?.code, out?.message].filter(Boolean).join(': ') ||
           taskStatus
+        const msg = out?.code
+          ? translateBailianError(String(out.code), String(out.message || ''))
+          : rawMsg
         const [updated] = await db
           .update(table.generationTasks)
           .set({
@@ -280,5 +359,27 @@ export abstract class GenerateService {
       const msg = e instanceof Error ? e.message : 'queryTask failed'
       return { task: toTaskResponse(row), warning: msg }
     }
+  }
+
+  /** 删除失败任务。仅允许删除 FAILED 状态的任务。 */
+  static async delete(userId: string, taskId: string) {
+    const [row] = await db
+      .select()
+      .from(table.generationTasks)
+      .where(eq(table.generationTasks.id, taskId))
+      .limit(1)
+
+    if (!row || row.userId !== userId) {
+      return status(404, { error: 'Task not found', errors: [] })
+    }
+
+    if (row.status !== 'FAILED') {
+      return status(400, { error: '仅允许删除失败的任务' })
+    }
+
+    await db
+      .delete(table.generationTasks)
+      .where(eq(table.generationTasks.id, taskId))
+    return { ok: true }
   }
 }

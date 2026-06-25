@@ -35,7 +35,7 @@ export function isTerminalStatus(s: TaskStatus): boolean {
 // 请求 / 响应
 // ---------------------------------------------------------------------------
 
-/** 步骤1 - 创建任务的成功响应 */
+/** 步骤1 - 创建任务的成功响应（异步） */
 export interface CreateTaskOutput {
   task_id: string
   task_status: TaskStatus
@@ -44,6 +44,27 @@ export interface CreateTaskOutput {
 export interface CreateTaskResponse {
   output: CreateTaskOutput
   request_id: string
+}
+
+/** 同步模型的输出（如 qwen-image-edit，结果在 POST 响应中直接返回） */
+export interface SyncOutput {
+  choices: Array<{
+    finish_reason: string
+    message: {
+      role: string
+      content: Array<{ image?: string; text?: string }>
+    }
+  }>
+}
+
+export interface SyncTaskResponse {
+  output: SyncOutput
+  request_id: string
+  usage?: {
+    image_count?: number
+    width?: number
+    height?: number
+  }
 }
 
 /** 步骤2 - 任务查询成功时的 usage 信息 */

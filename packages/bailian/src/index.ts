@@ -37,6 +37,7 @@ export { validateParams, sanitizeParams, applyDefaults } from './video/validate'
 export type {
   TaskStatus,
   CreateTaskResponse,
+  SyncTaskResponse,
   QueryTaskResponse,
   TaskUsage,
   TaskSuccessBase,
@@ -55,6 +56,9 @@ export {
 // ---- API 客户端 ----
 export { createTask, queryTask, waitForCompletion } from './shared/client'
 export type { PollOptions } from './shared/client'
+
+// ---- 错误翻译 ----
+export { translateBailianError, formatBailianError } from './shared/errors'
 
 // ---- 价格计算 ----
 export { calcPrice, getDefaultUnitPrice } from './shared/pricing'

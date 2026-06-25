@@ -63,3 +63,20 @@ export const generateModule = new Elysia({ prefix: '/generate' })
       detail: { summary: 'Get a task and sync its status from Bailian' },
     },
   )
+  .delete(
+    '/tasks/:id',
+    async ({ params, currentUser }) => {
+      const result = await GenerateService.delete(currentUser.id, params.id)
+      if (isStatusReturn(result)) return result
+      return result
+    },
+    {
+      isAuth: true,
+      response: {
+        200: t.Object({ ok: t.Boolean() }),
+        404: ValidationErrorResponse,
+        400: ValidationErrorResponse,
+      },
+      detail: { summary: 'Delete a FAILED task' },
+    },
+  )

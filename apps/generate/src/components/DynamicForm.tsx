@@ -121,7 +121,7 @@ function ReferenceComposite({
 
   return (
     <>
-      <label className="uhyc-field">
+      <div className="uhyc-field">
         <span className="uhyc-field__label">{mediaField.label}</span>
         <ReferenceAssets
           items={items}
@@ -132,9 +132,9 @@ function ReferenceComposite({
         {mediaField.description && (
           <p className="gen-field__desc">{mediaField.description}</p>
         )}
-      </label>
+      </div>
 
-      <label className="uhyc-field">
+      <div className="uhyc-field">
         <span className="uhyc-field__label">
           {promptField.label}
           {promptField.required ? ' *' : ''}
@@ -150,7 +150,7 @@ function ReferenceComposite({
         {promptField.description && (
           <p className="gen-field__desc">{promptField.description}</p>
         )}
-      </label>
+      </div>
     </>
   )
 }

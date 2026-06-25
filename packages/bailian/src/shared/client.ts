@@ -1,14 +1,16 @@
-import type { FieldMeta, ModelDefinition } from '../video/types'
+import type { ModelDefinition } from '../video/types'
 import type {
   CreateTaskResponse,
+  SyncTaskResponse,
   QueryTaskResponse,
   ApiErrorResponse,
   BailianClientConfig,
 } from './types'
 import { DEFAULT_BASE_URL, isTerminalStatus } from './types'
+import { formatBailianError } from './errors'
 
 // ---------------------------------------------------------------------------
-// 百炼异步任务 API 客户端
+// 百炼 API 客户端（支持同步与异步任务）
 // ---------------------------------------------------------------------------
 
 /**
@@ -40,13 +42,72 @@ function buildRequestBody(
   }
 }
 
-/** 通用的 POST 请求头（创建异步任务） */
-function asyncHeaders(apiKey: string): Record<string, string> {
+/**
+ * 多模态生成（multimodal-generation）专用请求体。
+ *
+ * 部分模型（如 qwen-image-edit、qwen-t2i）使用 Chat 风格的 API 格式，
+ * 要求 input 中传 `messages` 数组，而非平铺的 key-value。
+ *
+ * 字段映射规则：
+ *   - type='media' 的 input 字段 → content 中的 `{"image": url}`
+ *   - type='text'   的 input 字段 → content 中的 `{"text": text}`
+ *   - parameters 分组 → 原样放入 parameters
+ */
+function buildMultimodalBody(
+  definition: ModelDefinition,
+  params: Record<string, unknown>,
+): Record<string, unknown> {
+  const content: Record<string, string>[] = []
+  const parameters: Record<string, unknown> = {}
+
+  for (const field of definition.fields) {
+    const value = params[field.key]
+    if (value === undefined || value === null || value === '') continue
+
+    if (field.group === 'input') {
+      if (field.type === 'media') {
+        // images 字段：支持单 URL 或 URL 数组
+        const urls = Array.isArray(value) ? value : [value]
+        for (const url of urls) {
+          if (typeof url === 'string') {
+            content.push({ image: url })
+          }
+        }
+      } else if (field.type === 'text') {
+        content.push({ text: String(value) })
+      }
+    } else {
+      parameters[field.key] = value
+    }
+  }
+
   return {
+    model: definition.model,
+    input: {
+      messages: [
+        {
+          role: 'user',
+          content,
+        },
+      ],
+    },
+    parameters,
+  }
+}
+
+/** POST 请求头。仅当模型标记为 async: true 时添加异步头。 */
+function postHeaders(
+  apiKey: string,
+  definition: ModelDefinition,
+): Record<string, string> {
+  const headers: Record<string, string> = {
     'Content-Type': 'application/json',
     Authorization: `Bearer ${apiKey}`,
-    'X-DashScope-Async': 'enable',
   }
+  if (definition.async) {
+    headers['X-DashScope-Async'] = 'enable'
+  }
+  return headers
 }
 
 /** 通用的 GET 请求头（查询任务） */
@@ -68,18 +129,26 @@ function queryHeaders(apiKey: string): Record<string, string> {
  * @param params  用户填写的参数（key-value）
  * @returns  包含 task_id 的响应
  */
+/** 多模态生成端点使用 Chat 格式，其余使用直接参数格式。 */
+function chooseBodyBuilder(definition: ModelDefinition): typeof buildRequestBody {
+  return definition.endpoint === '/services/aigc/multimodal-generation/generation'
+    ? buildMultimodalBody
+    : buildRequestBody
+}
+
 export async function createTask(
   config: BailianClientConfig,
   definition: ModelDefinition,
   params: Record<string, unknown>,
-): Promise<CreateTaskResponse> {
+): Promise<CreateTaskResponse | SyncTaskResponse> {
   const base = config.baseUrl ?? DEFAULT_BASE_URL
   const url = `${base}${definition.endpoint}`
-  const body = buildRequestBody(definition, params)
+  const buildBody = chooseBodyBuilder(definition)
+  const body = buildBody(definition, params)
 
   const res = await fetch(url, {
     method: 'POST',
-    headers: asyncHeaders(config.apiKey),
+    headers: postHeaders(config.apiKey, definition),
     body: JSON.stringify(body),
   })
 
@@ -87,16 +156,14 @@ export async function createTask(
 
   if (!res.ok) {
     const err = json as ApiErrorResponse
-    throw new Error(
-      `[${err.code}] ${err.message} (request_id: ${err.request_id})`,
-    )
+    throw new Error(formatBailianError(err))
   }
 
-  return json as CreateTaskResponse
+  return json as CreateTaskResponse | SyncTaskResponse
 }
 
 /**
- * 步骤2：查询任务状态与结果。
+ * 步骤2：查询异步任务状态与结果。
  *
  * @param config  客户端配置
  * @param taskId  步骤1返回的 task_id
@@ -118,9 +185,7 @@ export async function queryTask<TOutput = unknown>(
 
   if (!res.ok) {
     const err = json as ApiErrorResponse
-    throw new Error(
-      `[${err.code}] ${err.message} (request_id: ${err.request_id})`,
-    )
+    throw new Error(formatBailianError(err))
   }
 
   return json as QueryTaskResponse<TOutput>

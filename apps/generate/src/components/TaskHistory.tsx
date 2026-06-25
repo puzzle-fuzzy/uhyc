@@ -5,9 +5,10 @@ import { TaskCard } from './TaskCard'
 interface TaskHistoryProps {
   tasks: TaskResponse[]
   onRerun?: (task: TaskResponse) => void
+  onDelete?: (task: TaskResponse) => void
 }
 
-export function TaskHistory({ tasks, onRerun }: TaskHistoryProps) {
+export function TaskHistory({ tasks, onRerun, onDelete }: TaskHistoryProps) {
   return (
     <div className="gen-history">
       <h2 className="gen-history__title">生成记录</h2>
@@ -18,7 +19,7 @@ export function TaskHistory({ tasks, onRerun }: TaskHistoryProps) {
           ) : (
             <div className="gen-history__list">
               {tasks.map((t) => (
-                <TaskCard key={t.id} task={t} onRerun={onRerun} />
+                <TaskCard key={t.id} task={t} onRerun={onRerun} onDelete={onDelete} />
               ))}
             </div>
           )}

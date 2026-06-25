@@ -4,9 +4,9 @@
   "type": "module",
   "module": "src/index.js",
   "scripts": {
-    "test": "bun test",
-    "dev": "bun run src/index.ts",
-    "db:push": "bun --filter '@uhyc/db' push"
+    "test": "bun --env-file=../../.env test",
+    "dev": "bun --env-file=../../.env run src/index.ts",
+    "db:push": "bun --env-file=../../.env --filter '@uhyc/db' push"
   },
   "dependencies": {
     "@elysia/cors": "^1.4.2",
@@ -15,6 +15,7 @@
     "@elysia/openapi": "^1.4.15",
     "@uhyc/bailian": "workspace:*",
     "@uhyc/db": "workspace:*",
+    "ali-oss": "^6.23.0",
     "bcryptjs": "^2.4.3",
     "elysia": "catalog:"
   },

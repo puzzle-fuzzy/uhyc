@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { Catalog, ModelDefinition, MediaItem, PromptToken } from '../types'
 import { serializePrompt } from '../lib/promptSerializer'
+import { uploadFile } from '../api'
 import { CategorySelect } from './CategorySelect'
 import { SubCategoryTabs } from './SubCategoryTabs'
 import { ModelSelect } from './ModelSelect'
@@ -51,6 +52,7 @@ export function GeneratorPanel({
   )
   const [params, setParams] = useState<Record<string, unknown>>({})
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [uploading, setUploading] = useState(false)
 
   // category 变了：取第一个 subCategory
   useEffect(() => {
@@ -75,31 +77,81 @@ export function GeneratorPanel({
   }
 
   async function handleSubmit() {
-    if (!model) return
+    if (!model || uploading) return
     setErrors({})
 
-    // refSyntax 模型：params.prompt 是 PromptToken[]，需序列化成字符串 + media[]
     let submitParams = { ...params }
     const promptField = model.fields.find((f) => f.key === 'prompt')
     const mediaField = model.fields.find((f) => f.type === 'media')
+
+    // 1. 通用：将所有 blob URL 的 media 字段上传到 OSS
+    const mediaFields = model.fields.filter((f) => f.type === 'media')
+    for (const field of mediaFields) {
+      const value = params[field.key]
+      if (!value) continue
+
+      if (Array.isArray(value)) {
+        // refSyntax 风格：MediaItem[] 数组，每个 item 有 id/url/type
+        const items = value as MediaItem[]
+        const blobItems = items.filter((m) => m.url.startsWith('blob:'))
+        if (blobItems.length === 0) continue
+
+        setUploading(true)
+        try {
+          const uploaded = await Promise.all(
+            blobItems.map(async (m) => {
+              const blob = await fetch(m.url).then((r) => r.blob())
+              const ext = blob.type.startsWith('video/') ? 'mp4' : 'png'
+              const file = new File([blob], `ref-${m.id}.${ext}`, { type: blob.type })
+              const { url, thumbnail } = await uploadFile(file)
+              return { ...m, url, thumbnail: thumbnail || url }
+            }),
+          )
+          const urlMap = new Map(uploaded.map((m) => [m.id, m.url]))
+          const thumbMap = new Map(uploaded.map((m) => [m.id, m.thumbnail]))
+          submitParams[field.key] = items.map((m) =>
+            urlMap.has(m.id)
+              ? { ...m, url: urlMap.get(m.id)!, thumbnail: thumbMap.get(m.id)! }
+              : m,
+          )
+        } catch (e) {
+          const msg = e instanceof Error ? e.message : '上传素材失败'
+          setErrors({ [field.key]: msg })
+          return
+        } finally {
+          setUploading(false)
+        }
+      } else if (typeof value === 'string' && value.startsWith('blob:')) {
+        // 单值风格：MediaUpload 存储的 blob URL
+        setUploading(true)
+        try {
+          const blob = await fetch(value).then((r) => r.blob())
+          const ext = blob.type.startsWith('video/') ? 'mp4' : 'png'
+          const file = new File([blob], `media.${ext}`, { type: blob.type })
+          const { url } = await uploadFile(file)
+          submitParams[field.key] = url
+        } catch (e) {
+          const msg = e instanceof Error ? e.message : '上传素材失败'
+          setErrors({ [field.key]: msg })
+          return
+        } finally {
+          setUploading(false)
+        }
+      }
+    }
+
+    // 2. refSyntax 模型：序列化 PromptToken[] + media[]
     if (model.refSyntax && promptField && mediaField) {
       const tokens = (params[promptField.key] as PromptToken[] | undefined) ?? []
-      const items = (params[mediaField.key] as MediaItem[]) ?? []
-      const { prompt, media } = serializePrompt(tokens, items, model.refSyntax)
-      // 前端预校验：至少引用一个素材
+      const currentItems = (submitParams[mediaField.key] as MediaItem[]) ?? []
+      const { prompt, media } = serializePrompt(tokens, currentItems, model.refSyntax)
       if (media.length === 0) {
-        setErrors({
-          [promptField.key]: '请在提示词中至少引用一个参考素材（打 @）',
-        })
+        setErrors({ [promptField.key]: '请在提示词中至少引用一个参考素材（打 @）' })
         return
       }
-      // media[] 仅保留 bailian 需要的 {type, url}，丢弃前端用的 id/label/thumbnail
       const bailianMedia = media.map((m) => ({ type: m.type, url: m.url }))
-      submitParams = {
-        ...submitParams,
-        [promptField.key]: prompt,
-        [mediaField.key]: bailianMedia,
-      }
+      submitParams[promptField.key] = prompt
+      submitParams[mediaField.key] = bailianMedia
     }
 
     try {
@@ -148,10 +200,10 @@ export function GeneratorPanel({
         <button
           type="button"
           className="uhyc-btn uhyc-btn--accent"
-          disabled={!model || submitting}
+          disabled={!model || uploading}
           onClick={handleSubmit}
         >
-          {submitting ? <span className="uhyc-spinner" /> : '生成'}
+          {uploading ? '上传素材中…' : '生成'}
         </button>
       </div>
     </div>

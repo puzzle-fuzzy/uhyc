@@ -34,9 +34,10 @@ function timeAgo(iso: string): string {
 interface TaskCardProps {
   task: TaskResponse
   onRerun?: (task: TaskResponse) => void
+  onDelete?: (task: TaskResponse) => void
 }
 
-export function TaskCard({ task, onRerun }: TaskCardProps) {
+export function TaskCard({ task, onRerun, onDelete }: TaskCardProps) {
   const [expanded, setExpanded] = useState(false)
   const file = primaryFile(task)
 
@@ -60,11 +61,15 @@ export function TaskCard({ task, onRerun }: TaskCardProps) {
           ) : (
             <a
               href={artifactUrl(file.storagePath)}
-              className="gen-task__link"
+              className="gen-task__image-link"
               target="_blank"
               rel="noreferrer"
             >
-              查看产物 {file.originalFilename}
+              <img
+                src={artifactUrl(file.storagePath)}
+                alt="生成结果"
+                className="gen-task__image"
+              />
             </a>
           )
         ) : task.status === 'PENDING' || task.status === 'RUNNING' ? (
@@ -81,6 +86,24 @@ export function TaskCard({ task, onRerun }: TaskCardProps) {
           {task.subCategory} · {timeAgo(task.createdAt)}
         </span>
         <div className="gen-task__actions">
+          {onRerun && (task.status === 'FAILED' || task.status === 'SUCCEEDED') && (
+            <button
+              type="button"
+              className="gen-task__btn gen-task__btn--retry"
+              onClick={() => onRerun(task)}
+            >
+              {task.status === 'SUCCEEDED' ? '重新生成' : '重试'}
+            </button>
+          )}
+          {onDelete && task.status === 'FAILED' && (
+            <button
+              type="button"
+              className="gen-task__btn gen-task__btn--delete"
+              onClick={() => onDelete(task)}
+            >
+              删除
+            </button>
+          )}
           <button
             type="button"
             className="gen-task__btn"
@@ -88,21 +111,12 @@ export function TaskCard({ task, onRerun }: TaskCardProps) {
           >
             {expanded ? '收起' : '详情'}
           </button>
-          {onRerun && (
-            <button
-              type="button"
-              className="gen-task__btn"
-              onClick={() => onRerun(task)}
-            >
-              重跑
-            </button>
-          )}
         </div>
       </div>
 
       {expanded && (
         <pre className="gen-task__params">
-          {JSON.stringify(task.params, null, 2)}
+          {JSON.stringify(task, null, 2)}
         </pre>
       )}
     </div>

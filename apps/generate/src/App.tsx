@@ -5,6 +5,7 @@ import { useTaskHistory } from './hooks/useTaskHistory'
 import { useGenerate } from './hooks/useGenerate'
 import { GeneratorPanel } from './components/GeneratorPanel'
 import { TaskHistory } from './components/TaskHistory'
+import { generateApi } from './api'
 import './App.css'
 
 const LOGO_SVG = (
@@ -42,6 +43,15 @@ function App() {
 
   const initial = auth.user.username.charAt(0).toUpperCase()
 
+  async function handleDelete(task: TaskResponse) {
+    try {
+      await generateApi.deleteTask(task.id)
+      setTasks((prev) => prev.filter((t) => t.id !== task.id))
+    } catch {
+      // 删除失败静默处理，下次刷新会同步
+    }
+  }
+
   return (
     <main className="gen-app">
       <header className="topbar">
@@ -74,7 +84,13 @@ function App() {
           )}
         </section>
         <section className="gen-layout__right">
-          <TaskHistory tasks={tasks} />
+          <TaskHistory
+            tasks={tasks}
+            onRerun={({ category, subCategory, model, params }) =>
+              submit({ category, subCategory, model, params })
+            }
+            onDelete={handleDelete}
+          />
         </section>
       </div>
     </main>

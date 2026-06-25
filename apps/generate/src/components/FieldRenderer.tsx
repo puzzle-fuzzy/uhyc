@@ -131,7 +131,7 @@ export function FieldRenderer({ field, value, error, onChange }: FieldRendererPr
                 onChange={(e) => onChange(Number(e.target.value))}
               />
             </div>
-            <span className="gen-range__value">{v}s</span>
+            <span className="gen-range__value">{v}{rangeUnit(field.key)}</span>
           </div>
           {desc}
           {error && <p className="gen-field__error">{error}</p>}
@@ -169,7 +169,7 @@ function MediaUpload({
   }
 
   return (
-    <label className="uhyc-field">
+    <div className="uhyc-field">
       <span className="uhyc-field__label">
         {field.label}
         {field.required ? ' *' : ''}
@@ -178,7 +178,10 @@ function MediaUpload({
         className="gen-upload"
         role="button"
         tabIndex={0}
-        onClick={() => inputRef.current?.click()}
+        onClick={(e) => {
+          e.stopPropagation()
+          inputRef.current?.click()
+        }}
         onKeyDown={(e) => {
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault()
@@ -191,7 +194,10 @@ function MediaUpload({
           type="file"
           accept="image/*"
           className="gen-upload__input"
-          onChange={(e) => handleFile(e.target.files?.[0])}
+          onChange={(e) => {
+            handleFile(e.target.files?.[0])
+            e.target.value = ''
+          }}
         />
         {preview ? (
           <img src={preview} alt={field.label} className="gen-upload__preview" />
@@ -219,7 +225,7 @@ function MediaUpload({
           移除
         </button>
       )}
-    </label>
+    </div>
   )
 }
 
@@ -307,4 +313,16 @@ function CustomSelect({
       )}
     </div>
   )
+}
+
+/** 根据 range 字段的 key 返回对应的单位后缀。 */
+function rangeUnit(key: string): string {
+  switch (key) {
+    case 'duration':
+      return 's'
+    case 'n':
+      return ' 张'
+    default:
+      return ''
+  }
 }
