@@ -1902,3 +1902,225 @@ body {
     min-height: 100vh;
   }
 }
+
+/* ============================================================
+   命令面板 (Ctrl+P)
+   ============================================================ */
+
+.profile-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(10, 10, 10, 0.72);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  gap: 14px;
+  animation: profileFadeIn 0.2s ease;
+}
+@keyframes profileFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ---- 面板卡片 ---- */
+.profile-panel {
+  background: var(--paper);
+  border: var(--border-thick);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  width: 100%;
+  max-width: 800px;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: profileSlideIn 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes profileSlideIn {
+  from { transform: scale(0.92) translateY(20px); opacity: 0; }
+  to   { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+/* ---- 标题栏 ---- */
+.profile-panel__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  border-bottom: 2px solid var(--ink);
+  flex-shrink: 0;
+}
+.profile-panel__title {
+  font-weight: 800;
+  font-size: 15px;
+  color: var(--muted-strong);
+}
+.profile-panel__close {
+  width: 32px;
+  height: 32px;
+  border: var(--border);
+  border-radius: 8px;
+  background: var(--paper);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.12s ease, transform 0.12s ease;
+}
+.profile-panel__close:hover {
+  box-shadow: var(--shadow);
+  transform: translate(-1px, -1px);
+}
+.profile-panel__close:active {
+  box-shadow: none;
+  transform: none;
+}
+
+/* ---- 双栏内容区 ---- */
+.profile-panel__body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 0;
+  overflow-y: auto;
+  flex: 1;
+}
+
+/* ---- 左侧：用户卡片（内收，不贴边） ---- */
+.profile-card {
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  border-right: 2px solid var(--ink);
+}
+
+.profile-card__avatar {
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  border: var(--border-thick);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--purple-soft);
+  font-weight: 900;
+  font-size: 26px;
+  flex-shrink: 0;
+}
+
+.profile-card__info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.profile-card__name {
+  font-weight: 900;
+  font-size: 20px;
+  letter-spacing: -0.02em;
+}
+
+.profile-card__email {
+  color: var(--muted);
+  font-size: 13px;
+  word-break: break-all;
+  margin-bottom: 4px;
+}
+
+.profile-card__foot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin-top: auto;
+}
+
+/* ---- 右侧：2×2 快捷入口按钮 ---- */
+.profile-quick {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  padding: 24px;
+  gap: 16px;
+}
+
+.profile-quick__btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  border: var(--border);
+  border-radius: var(--radius);
+  background: var(--paper);
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  padding: 28px 16px;
+  font-family: var(--font);
+  text-align: center;
+  transition: box-shadow 0.15s ease, transform 0.15s ease;
+}
+.profile-quick__btn:hover {
+  box-shadow: var(--shadow-hover);
+  transform: translate(-2px, -2px);
+}
+.profile-quick__btn:active {
+  box-shadow: none;
+  transform: none;
+}
+
+.profile-quick__label {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--ink);
+}
+
+.profile-quick__hint {
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+/* ---- 底部提示 ---- */
+.profile-hint {
+  font-size: 12px;
+  color: rgba(255,255,255,0.45);
+  text-align: center;
+  margin: 0;
+}
+
+/* ---- 响应式 ---- */
+@media (max-width: 640px) {
+  .profile-overlay {
+    padding: 12px;
+  }
+  .profile-panel__body {
+    grid-template-columns: 1fr;
+    overflow-y: auto;
+  }
+  .profile-card {
+    border-right: none;
+    border-bottom: 2px solid var(--ink);
+    padding: 32px 28px;
+  }
+  .profile-quick {
+    padding: 14px;
+    gap: 10px;
+  }
+  .profile-quick__btn {
+    padding: 20px 12px;
+  }
+  .profile-quick__label {
+    font-size: 16px;
+  }
+}

@@ -13,6 +13,7 @@ import { ToastContainer, toast } from './components/Toast'
 import { LoginPage } from './components/LoginPage'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { AuthProvider, useAuthContext } from './components/AuthContext'
+import { UserProfileModal } from './components/UserProfileModal'
 import { generateApi } from './api'
 import './App.css'
 
@@ -20,6 +21,7 @@ import './App.css'
 const SHORTCUTS: [string, string][] = [
   ['Enter', '提交生成'],
   ['?', '显示/隐藏此帮助'],
+  ['Ctrl+P', '用户信息'],
   ['Esc', '关闭浮层/弹窗'],
   ['@', '在提示词中引用素材'],
   ['↑↓', '在候选中导航'],
@@ -138,6 +140,7 @@ function Studio() {
   const [formFill, setFormFill] = useState<FormValues | null>(null)
   const [formFillVersion, setFormFillVersion] = useState(0)
   const [shortcutOpen, setShortcutOpen] = useState(false)
+  const [profileOpen, setProfileOpen] = useState(false)
   const [logoSpins, setLogoSpins] = useState(0)
 
   // 跟踪上一次任务状态，用于检测 SUCCEEDED 转换
@@ -167,13 +170,19 @@ function Studio() {
         e.preventDefault()
         setShortcutOpen((o) => !o)
       }
-      if (e.key === 'Escape' && shortcutOpen) {
-        setShortcutOpen(false)
+      // Ctrl+P / Cmd+P → 用户信息弹窗
+      if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
+        e.preventDefault()
+        setProfileOpen((o) => !o)
+      }
+      if (e.key === 'Escape') {
+        if (shortcutOpen) setShortcutOpen(false)
+        else if (profileOpen) setProfileOpen(false)
       }
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [shortcutOpen])
+  }, [shortcutOpen, profileOpen])
 
   useEffect(() => {
     if (auth.status === 'authenticated') void refresh()
@@ -272,7 +281,6 @@ function Studio() {
             devTitle={showAll ? '开发模式：显示全部记录' : '点击切换开发模式'}
           />
           {showAll && <span className="uhyc-badge uhyc-badge--dev">DEV</span>}
-          <span className="uhyc-badge">{auth.user?.username}</span>
           <button
             type="button"
             className="uhyc-btn uhyc-btn--ghost topbar__logout"
@@ -306,6 +314,14 @@ function Studio() {
       </div>
 
       <ShortcutOverlay open={shortcutOpen} onClose={() => setShortcutOpen(false)} />
+      {auth.user && (
+        <UserProfileModal
+          open={profileOpen}
+          user={auth.user}
+          onClose={() => setProfileOpen(false)}
+          onLogout={auth.logout}
+        />
+      )}
       <ToastContainer />
     </main>
   )
