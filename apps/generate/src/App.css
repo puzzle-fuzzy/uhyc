@@ -76,14 +76,13 @@ body {
   border-color: var(--danger);
 }
 
-/* online presence avatars */
-.topbar__online {
+/* online presence — 头像堆叠 */
+.topbar__avatar-stack {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
   margin-right: 8px;
 }
-.topbar__online-avatar {
+.topbar__avatar-item {
   width: 36px;
   height: 36px;
   border-radius: 50%;
@@ -96,7 +95,28 @@ body {
   font-size: 15px;
   color: #fff;
   flex-shrink: 0;
-  transition: opacity 200ms, transform 200ms;
+  position: relative;
+  margin-left: -10px;
+  transition: transform 150ms, z-index 0s;
+  cursor: default;
+}
+.topbar__avatar-item:first-child {
+  margin-left: 0;
+}
+.topbar__avatar-item:hover {
+  transform: scale(1.15);
+  z-index: 999 !important;
+}
+.topbar__avatar {
+  background: var(--purple-soft);
+}
+.topbar__avatar--dev {
+  outline: 3px solid var(--danger);
+  outline-offset: 2px;
+  cursor: pointer;
+}
+.topbar__online-avatar {
+  /* 颜色由 JS 通过 inline style 设置 */
 }
 .topbar__online-overflow {
   background: #94a3b8;

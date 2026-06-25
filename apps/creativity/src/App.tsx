@@ -16,30 +16,49 @@ const LOGO_SVG = (
   </svg>
 )
 
-/** 在线用户头像列表。最多显示 5 个，超出显示 +N */
-function OnlineAvatars({ users }: { users: PresenceUser[] }) {
+/** 头像堆叠：在线用户 + 自己，自己的头像在最上层，hover 时浮到顶层 */
+function AvatarStack({ users, selfInitial }: { users: PresenceUser[]; selfInitial: string }) {
   const visible = users.slice(0, 5)
   const overflow = users.length - 5
+
   return (
-    <div className="crea-topbar__online">
-      {visible.map((u) => (
+    <div
+      className="crea-topbar__avatar-stack"
+      onMouseLeave={(e) => {
+        const avatars = e.currentTarget.querySelectorAll<HTMLElement>('.crea-topbar__avatar-item')
+        avatars.forEach((el, i) => {
+          el.style.zIndex = String(i)
+        })
+      }}
+    >
+      {visible.map((u, i) => (
         <span
           key={u.userId}
-          className="crea-topbar__online-avatar"
-          style={{ backgroundColor: getPresenceColor(u.username) }}
+          className="crea-topbar__avatar-item crea-topbar__online-avatar"
+          style={{ backgroundColor: getPresenceColor(u.username), zIndex: i }}
           title={u.username}
+          onMouseEnter={(e) => { e.currentTarget.style.zIndex = '999' }}
         >
           {u.username.charAt(0).toUpperCase()}
         </span>
       ))}
       {overflow > 0 && (
         <span
-          className="crea-topbar__online-avatar crea-topbar__online-overflow"
+          className="crea-topbar__avatar-item crea-topbar__online-avatar crea-topbar__online-overflow"
+          style={{ zIndex: visible.length }}
           title={users.slice(5).map((u) => u.username).join(', ')}
+          onMouseEnter={(e) => { e.currentTarget.style.zIndex = '999' }}
         >
           +{overflow}
         </span>
       )}
+      <span
+        className="crea-topbar__avatar-item crea-topbar__avatar"
+        style={{ zIndex: users.length + 10 }}
+        onMouseEnter={(e) => { e.currentTarget.style.zIndex = '999' }}
+      >
+        {selfInitial}
+      </span>
     </div>
   )
 }
@@ -91,8 +110,7 @@ function App() {
           <span>uhyc · creativity</span>
         </div>
         <div className="crea-topbar__user">
-          <OnlineAvatars users={onlineUsers} />
-          <span className="crea-topbar__avatar">{initial}</span>
+          <AvatarStack users={onlineUsers} selfInitial={initial} />
           <span className="uhyc-badge">{auth.user.username}</span>
           <button
             type="button"

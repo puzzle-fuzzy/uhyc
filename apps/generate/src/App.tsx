@@ -20,30 +20,61 @@ const LOGO_SVG = (
   </svg>
 )
 
-/** 在线用户头像列表。最多显示 5 个，超出显示 +N */
-function OnlineAvatars({ users }: { users: PresenceUser[] }) {
+/** 头像堆叠：在线用户 + 自己，自己的头像在最上层，hover 时浮到顶层 */
+function AvatarStack({ users, selfInitial, showAll, onAvatarClick, devTitle }: {
+  users: PresenceUser[]
+  selfInitial: string
+  showAll: boolean
+  onAvatarClick: () => void
+  devTitle: string
+}) {
   const visible = users.slice(0, 5)
   const overflow = users.length - 5
+
   return (
-    <div className="topbar__online">
-      {visible.map((u) => (
+    <div
+      className="topbar__avatar-stack"
+      onMouseLeave={(e) => {
+        // 鼠标离开整个堆叠区域后，重置所有人的 z-index
+        const avatars = e.currentTarget.querySelectorAll<HTMLElement>('.topbar__avatar-item')
+        avatars.forEach((el, i) => {
+          el.style.zIndex = String(i)
+        })
+      }}
+    >
+      {/* 在线用户头像 */}
+      {visible.map((u, i) => (
         <span
           key={u.userId}
-          className="topbar__online-avatar"
-          style={{ backgroundColor: getPresenceColor(u.username) }}
+          className="topbar__avatar-item topbar__online-avatar"
+          style={{ backgroundColor: getPresenceColor(u.username), zIndex: i }}
           title={u.username}
+          onMouseEnter={(e) => { e.currentTarget.style.zIndex = '999' }}
         >
           {u.username.charAt(0).toUpperCase()}
         </span>
       ))}
+      {/* +N 溢出 */}
       {overflow > 0 && (
         <span
-          className="topbar__online-avatar topbar__online-overflow"
+          className="topbar__avatar-item topbar__online-avatar topbar__online-overflow"
+          style={{ zIndex: visible.length }}
           title={users.slice(5).map((u) => u.username).join(', ')}
+          onMouseEnter={(e) => { e.currentTarget.style.zIndex = '999' }}
         >
           +{overflow}
         </span>
       )}
+      {/* 自己的头像 — 最上层 */}
+      <span
+        className={`topbar__avatar-item topbar__avatar${showAll ? ' topbar__avatar--dev' : ''}`}
+        style={{ zIndex: users.length + 10 }}
+        onClick={onAvatarClick}
+        title={devTitle}
+        onMouseEnter={(e) => { e.currentTarget.style.zIndex = '999' }}
+      >
+        {selfInitial}
+      </span>
     </div>
   )
 }
@@ -207,14 +238,13 @@ function App() {
           <span>uhyc · generate</span>
         </div>
         <div className="topbar__user">
-          <OnlineAvatars users={onlineUsers} />
-          <span
-            className={`topbar__avatar${showAll ? ' topbar__avatar--dev' : ''}`}
-            onClick={handleAvatarClick}
-            title={showAll ? '开发模式：显示全部记录' : '点击切换开发模式'}
-          >
-            {initial}
-          </span>
+          <AvatarStack
+            users={onlineUsers}
+            selfInitial={initial}
+            showAll={showAll}
+            onAvatarClick={handleAvatarClick}
+            devTitle={showAll ? '开发模式：显示全部记录' : '点击切换开发模式'}
+          />
           {showAll && <span className="uhyc-badge uhyc-badge--dev">DEV</span>}
           <span className="uhyc-badge">{auth.user.username}</span>
           <button

@@ -45,30 +45,13 @@ body {
   align-items: center;
   gap: 12px;
 }
-.crea-topbar__avatar {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  border: var(--border);
-  box-shadow: var(--shadow-sm);
-  background: var(--purple-soft);
+/* online presence — 头像堆叠 */
+.crea-topbar__avatar-stack {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  font-weight: 900;
-  font-size: 16px;
-  overflow: hidden;
-  flex-shrink: 0;
-}
-
-/* online presence avatars */
-.crea-topbar__online {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
   margin-right: 8px;
 }
-.crea-topbar__online-avatar {
+.crea-topbar__avatar-item {
   width: 36px;
   height: 36px;
   border-radius: 50%;
@@ -81,7 +64,24 @@ body {
   font-size: 15px;
   color: #fff;
   flex-shrink: 0;
-  transition: opacity 200ms, transform 200ms;
+  position: relative;
+  margin-left: -10px;
+  transition: transform 150ms, z-index 0s;
+  cursor: default;
+}
+.crea-topbar__avatar-item:first-child {
+  margin-left: 0;
+}
+.crea-topbar__avatar-item:hover {
+  transform: scale(1.15);
+  z-index: 999 !important;
+}
+.crea-topbar__avatar {
+  background: var(--purple-soft);
+  font-size: 16px;
+}
+.crea-topbar__online-avatar {
+  /* 颜色由 JS 通过 inline style 设置 */
 }
 .crea-topbar__online-overflow {
   background: #94a3b8;
