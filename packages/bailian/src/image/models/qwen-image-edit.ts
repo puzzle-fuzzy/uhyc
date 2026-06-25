@@ -78,10 +78,17 @@ export const qwenImageEdit: ModelDefinition<ImageSubCategory> = {
     {
       key: 'size',
       label: '输出分辨率',
-      type: 'text',
+      type: 'select',
       group: 'parameters',
-      description:
-        '格式 宽*高。2.0系列总像素 512*512~2048*2048；edit-max/plus 系列宽高 [512,2048]。默认接近 1024*1024，宽高比与输入图最后一张相近。qwen-image-edit 不支持指定',
+      options: [
+        { label: '1:1　2048×2048', value: '2048*2048' },
+        { label: '1:1　1024×1024', value: '1024*1024' },
+        { label: '16:9　1920×1080', value: '1920*1080' },
+        { label: '9:16　1080×1920', value: '1080*1920' },
+        { label: '3:2　1536×1024', value: '1536*1024' },
+        { label: '2:3　1024×1536', value: '1024*1536' },
+      ],
+      description: '输出图像分辨率。2.0系列总像素 512*512~2048*2048；edit-max/plus系列宽高 [512,2048]。qwen-image-edit 不支持指定',
     },
     {
       key: 'prompt_extend',

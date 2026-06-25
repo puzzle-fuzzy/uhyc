@@ -31,7 +31,7 @@ export interface CreativityTask {
 
 export const STEP_LABELS = ['语音识别', '视频理解', '合并脚本']
 export const STEP_STATUS_LABEL: Record<TaskStatus, string> = {
-  PENDING: '排队中',
+  PENDING: '正在为尊贵超级VIP极速生成中',
   RUNNING: '进行中',
   SUCCEEDED: '已完成',
   FAILED: '失败',

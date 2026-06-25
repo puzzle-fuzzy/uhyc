@@ -13,7 +13,6 @@ export const qwenTextToImage: ModelDefinition<ImageSubCategory> = {
   supportedModels: [
     'qwen-image-2.0-pro',
     'qwen-image-2.0-pro-2026-04-22',
-    'qwen-image-2.0-pro-2026-03-03',
     'qwen-image-2.0',
     'qwen-image-2.0-2026-03-03',
     'qwen-image-max',
@@ -58,11 +57,18 @@ export const qwenTextToImage: ModelDefinition<ImageSubCategory> = {
     {
       key: 'size',
       label: '输出分辨率',
-      type: 'text',
+      type: 'select',
       group: 'parameters',
       defaultValue: '2048*2048',
-      description:
-        '格式为 宽*高。2.0系列：总像素512*512~2048*2048，默认2048*2048。max/plus系列: 1664*928等固定比例',
+      options: [
+        { label: '1:1　2048×2048', value: '2048*2048' },
+        { label: '1:1　1024×1024', value: '1024*1024' },
+        { label: '16:9　1920×1080', value: '1920*1080' },
+        { label: '9:16　1080×1920', value: '1080*1920' },
+        { label: '3:2　1536×1024', value: '1536*1024' },
+        { label: '2:3　1024×1536', value: '1024*1536' },
+      ],
+      description: '输出图像分辨率。2.0系列总像素 512*512~2048*2048；max/plus系列宽高 [512,2048]',
     },
     {
       key: 'n',

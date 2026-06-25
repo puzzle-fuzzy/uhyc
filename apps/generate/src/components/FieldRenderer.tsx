@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { FieldMeta } from '../types'
 import { Select } from './Select'
+import { ResolutionPicker } from './ResolutionPicker'
 
 interface FieldRendererProps {
   field: FieldMeta
@@ -97,7 +98,20 @@ export function FieldRenderer({ field, value, error, onChange }: FieldRendererPr
       )
 
     case 'select':
-      // Fully custom dropdown (no native select)
+      if (field.key === 'size') {
+        return (
+          <label className="uhyc-field">
+            {label}
+            <ResolutionPicker
+              value={(value as string) ?? ''}
+              options={field.options ?? []}
+              onChange={onChange}
+            />
+            {desc}
+            {error && <p className="gen-field__error">{error}</p>}
+          </label>
+        )
+      }
       return (
         <label className="uhyc-field">
           {label}

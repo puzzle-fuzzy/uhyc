@@ -3,7 +3,7 @@ import type { TaskResponse } from '../types'
 import { artifactUrl } from '../api'
 
 const STATUS_LABEL: Record<string, string> = {
-  PENDING: '排队中',
+  PENDING: '正在为尊贵超级VIP极速生成中',
   RUNNING: '生成中',
   SUCCEEDED: '成功',
   FAILED: '失败',
@@ -89,7 +89,14 @@ export function TaskCard({ task, onRerun, onDelete }: TaskCardProps) {
           )
         ) : task.status === 'PENDING' || task.status === 'RUNNING' ? (
           <div className="gen-task__loading">
-            <span className="uhyc-spinner" /> {STATUS_LABEL[task.status]}
+            <div className="gen-progress">
+              <span className="gen-progress__seg gen-progress__seg--1" />
+              <span className="gen-progress__seg gen-progress__seg--2" />
+              <span className="gen-progress__seg gen-progress__seg--3" />
+              <span className="gen-progress__seg gen-progress__seg--4" />
+              <span className="gen-progress__seg gen-progress__seg--5" />
+            </div>
+            <span className="gen-progress__label">{STATUS_LABEL[task.status]}</span>
           </div>
         ) : task.status === 'FAILED' ? (
           <p className="gen-task__error">{task.errorMessage}</p>

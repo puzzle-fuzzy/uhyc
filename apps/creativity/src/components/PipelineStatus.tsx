@@ -48,7 +48,7 @@ export function PipelineStatus({ task }: PipelineStatusProps) {
         {task.status === 'SUCCEEDED' ? '处理完成' :
          task.status === 'FAILED' ? `失败: ${task.errorMessage ?? ''}` :
          task.status === 'RUNNING' ? '处理中…' :
-         task.status === 'PENDING' ? '排队中…' : ''}
+         task.status === 'PENDING' ? '正在为尊贵超级VIP极速生成中…' : ''}
       </span>
     </div>
   )
