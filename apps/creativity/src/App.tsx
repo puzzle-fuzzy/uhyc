@@ -65,8 +65,8 @@ function AvatarStack({ users, selfInitial }: { users: PresenceUser[]; selfInitia
 
 function App() {
   const auth = useAuth()
-  const { onlineUsers } = usePresence()
-  const { tasks, processing, submit, refresh, setTasks } = useCreativity()
+  const { tasks, processing, submit, refresh, setTasks, onTaskUpdated, onWsDisconnect } = useCreativity()
+  const { onlineUsers } = usePresence({ onTaskUpdated, onDisconnect: onWsDisconnect })
 
   useEffect(() => {
     if (auth.status === 'unauthenticated') {

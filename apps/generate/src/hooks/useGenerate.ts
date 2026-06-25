@@ -11,46 +11,58 @@ export function useGenerate(
 ) {
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  // HTTP 轮询仅在 WS 断开时使用
   const timers = useRef<Record<string, ReturnType<typeof setTimeout>>>({})
+  const wsOnlineRef = useRef(true)
 
-  const updateTask = useCallback(
-    (id: string, patch: Partial<TaskResponse>) => {
-      setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, ...patch } : t)))
+  // ---- WS 推送处理 ----
+  const onTaskUpdated = useCallback(
+    (raw: Record<string, unknown>) => {
+      const task = raw as unknown as TaskResponse
+      setTasks((prev) => {
+        const idx = prev.findIndex((t) => t.id === task.id)
+        if (idx === -1) return prev
+        const next = [...prev]
+        next[idx] = { ...next[idx], ...task }
+        return next
+      })
     },
     [setTasks],
   )
 
-  const pollTask = useCallback(
+  // ---- WS 断开时降级到 HTTP 轮询 ----
+  const onWsDisconnect = useCallback(() => {
+    wsOnlineRef.current = false
+    // 对所有非终态的非 temp 任务启动 HTTP 轮询
+    setTasks((prev) => {
+      for (const t of prev) {
+        if (t.id.startsWith('temp-')) continue
+        if (!TERMINAL.has(t.status) && !timers.current[t.id]) {
+          timers.current[t.id] = setTimeout(() => pollHttp(t.id), POLL_INTERVAL)
+        }
+      }
+      return prev
+    })
+  }, [])
+
+  // ---- HTTP 轮询（仅降级模式） ----
+  const pollHttp = useCallback(
     async (id: string) => {
-      // 乐观 temp 记录不应被轮询
       if (id.startsWith('temp-')) return
       try {
         const { task } = await generateApi.getTask(id)
-        updateTask(id, task)
+        setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, ...task } : t)))
         if (!TERMINAL.has(task.status)) {
-          timers.current[id] = setTimeout(() => void pollTask(id), POLL_INTERVAL)
+          timers.current[id] = setTimeout(() => pollHttp(id), POLL_INTERVAL)
         }
       } catch {
-        // 单次失败则稍后重试
-        timers.current[id] = setTimeout(() => void pollTask(id), POLL_INTERVAL)
+        timers.current[id] = setTimeout(() => pollHttp(id), POLL_INTERVAL)
       }
     },
-    [updateTask],
+    [setTasks],
   )
 
-  // 对所有非终态任务启动轮询（用 status 签名触发，终态后停止）。
-  // 跳过乐观 temp 记录（它们还没有真实的 task id）。
-  useEffect(() => {
-    for (const t of tasks) {
-      if (t.id.startsWith('temp-')) continue
-      if (!TERMINAL.has(t.status) && !timers.current[t.id]) {
-        timers.current[t.id] = setTimeout(() => void pollTask(t.id), POLL_INTERVAL)
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tasks.map((t) => `${t.id}:${t.status}`).join('|')])
-
-  // 卸载时清理所有 timer
+  // 清理
   useEffect(() => {
     const owned = timers
     return () => {
@@ -71,7 +83,6 @@ export function useGenerate(
       setSubmitting(true)
       setError(null)
 
-      // 乐观添加：立即插入一条 PENDING 记录，保证右侧面板即时可见
       const tempId = `temp-${Date.now()}`
       setTasks((prev) => [
         {
@@ -94,11 +105,10 @@ export function useGenerate(
 
       try {
         const { task } = await generateApi.createTask(input)
-        // 用真实数据替换乐观记录
         setTasks((prev) => prev.map((t) => (t.id === tempId ? task : t)))
-        timers.current[task.id] = setTimeout(() => void pollTask(task.id), POLL_INTERVAL)
+        // 后端 TaskPoller 会通过 WS 推送状态，不需要前端轮询
+        // 如果 WS 断开，降级模式下会通过 onWsDisconnect 启动 HTTP 轮询
       } catch (e) {
-        // 乐观记录标记为失败
         const msg = e instanceof Error ? e.message : '提交失败'
         setTasks((prev) =>
           prev.map((t) =>
@@ -111,8 +121,8 @@ export function useGenerate(
         setSubmitting(false)
       }
     },
-    [setTasks, pollTask],
+    [setTasks],
   )
 
-  return { submit, submitting, error, setError }
+  return { submit, submitting, error, setError, onTaskUpdated, onWsDisconnect }
 }

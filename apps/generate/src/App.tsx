@@ -143,10 +143,10 @@ function parsePromptIntoTokens(
 
 function App() {
   const auth = useAuth()
-  const { onlineUsers } = usePresence()
   const { catalog } = useCatalog()
   const { tasks, setTasks, refresh, showAll, setShowAll } = useTaskHistory()
-  const { submit, submitting, error: submitError } = useGenerate(tasks, setTasks)
+  const { submit, submitting, error: submitError, onTaskUpdated, onWsDisconnect } = useGenerate(tasks, setTasks)
+  const { onlineUsers } = usePresence({ onTaskUpdated, onDisconnect: onWsDisconnect })
 
   const [formFill, setFormFill] = useState<FormValues | null>(null)
   const [formFillVersion, setFormFillVersion] = useState(0)

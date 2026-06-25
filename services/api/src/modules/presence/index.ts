@@ -4,12 +4,13 @@ import { eq } from 'drizzle-orm'
 
 import { authPlugin } from '../../plugins/jwt'
 import { presenceManager, type PresenceMessage } from './manager'
+import { taskPoller } from './task-poller'
 
 // ---------------------------------------------------------------------------
-// 在线用户 WebSocket 端点
+// 在线用户 WebSocket 端点 + 任务状态推送
 //
 // /ws/presence — 建立连接即在线，断开即离线。
-// 使用 Elysia resolve 在连接升级阶段校验 JWT，提取 userId 和 role。
+// 同时订阅 task:<userId> 频道，接收任务状态推送。
 // ---------------------------------------------------------------------------
 
 export const presenceModule = new Elysia({ name: 'presence' })
@@ -37,15 +38,25 @@ export const presenceModule = new Elysia({ name: 'presence' })
         return
       }
 
-      // 注入 broadcaster：任意已连接的 WS 都能向 presence 频道广播
-      // ws.publish(topic, data) 会发送给 topic 的所有订阅者（不包括发送者自身）
+      // 注入 presence broadcaster
       presenceManager.setBroadcaster((topic, data) => ws.publish(topic, data))
 
-      // 订阅 presence 频道以接收广播
+      // 注入 task broadcaster：向指定用户的私有频道推送任务更新
+      presenceManager.setTaskBroadcaster((userId, msg) =>
+        ws.publish(`task:${userId}`, msg),
+      )
+      taskPoller.setBroadcaster((userId, msg) =>
+        ws.publish(`task:${userId}`, msg),
+      )
+
+      // 订阅 presence 频道
       ws.subscribe('presence')
 
+      // 订阅个人任务频道
+      ws.subscribe(`task:${user.userId}`)
+
       // 查询用户名（只在首次加入时需要）
-      let username = user.userId // fallback to userId
+      let username = user.userId
       try {
         const [row] = await db
           .select({ username: table.users.username })
@@ -54,13 +65,12 @@ export const presenceModule = new Elysia({ name: 'presence' })
           .limit(1)
         if (row) username = row.username
       } catch {
-        // DB 查询失败不阻塞连接，使用 userId 作为 fallback
+        // DB 查询失败不阻塞连接
       }
 
       // 加入在线列表
       const joinMsg = presenceManager.join(user.userId, username, user.role, ws.raw)
       if (joinMsg) {
-        // 首次上线 → 广播给所有已连接的客户端（不包括自己）
         presenceManager.broadcast(joinMsg)
       }
 
@@ -77,10 +87,10 @@ export const presenceModule = new Elysia({ name: 'presence' })
       if (!user) return
 
       ws.unsubscribe('presence')
+      ws.unsubscribe(`task:${user.userId}`)
 
       const leaveMsg = presenceManager.leave(user.userId, ws.raw)
       if (leaveMsg) {
-        // 最后一个连接断开 → 广播给所有剩余的客户端
         presenceManager.broadcast(leaveMsg)
       }
     },

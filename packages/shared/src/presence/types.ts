@@ -14,6 +14,27 @@ export type PresenceMessage =
   | { type: 'user_joined'; userId: string; username: string; role: string }
   | { type: 'user_left'; userId: string }
 
+/** 任务状态推送消息 */
+export interface TaskUpdatedMessage {
+  type: 'task_updated'
+  task: {
+    id: string
+    userId: string
+    status: string
+    category: string
+    subCategory: string
+    model: string
+    errorMessage?: string | null
+    files?: Array<{ id: string; kind: string; storagePath: string; sourceUrl?: string | null; mimeType?: string | null; sizeBytes?: number | null; originalFilename?: string | null }>
+    createdAt: string
+    updatedAt: string
+    [key: string]: unknown
+  }
+}
+
+/** WebSocket 连接上所有可能的消息 */
+export type WsMessage = PresenceMessage | TaskUpdatedMessage
+
 /** 在线头像颜色调色板 */
 const PRESENCE_COLORS = [
   '#6366f1', '#8b5cf6', '#ec4899', '#f43f5e',

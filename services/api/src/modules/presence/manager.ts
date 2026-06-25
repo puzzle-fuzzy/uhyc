@@ -1,11 +1,12 @@
 import type { ServerWebSocket } from 'bun'
 
 // ---------------------------------------------------------------------------
-// 在线用户状态管理
+// 在线用户状态管理 + 任务状态推送
 //
 // - 按 userId 追踪所有 WebSocket 连接（支持多标签页）
 // - 引用计数：同一用户所有标签页关闭后才广播 user_left
-// - 广播通过 ElysiaWS.publish("presence", msg) 实现
+// - presence 广播通过 ElysiaWS.publish("presence", msg) 实现
+// - task 推送通过 ElysiaWS.publish("task:<userId>", msg) 实现
 // ---------------------------------------------------------------------------
 
 export interface PresenceUser {
@@ -29,16 +30,24 @@ interface PresenceEntry {
 }
 
 type Broadcaster = (topic: string, data: any) => void
+type TaskBroadcaster = (userId: string, msg: unknown) => void
 
 export class PresenceManager {
   /** userId → { username, role, sockets } */
   private users = new Map<string, PresenceEntry>()
 
-  /** 用于广播的方法，由 WS 路由在 open 时注入 */
+  /** presence 广播方法，由 WS 路由在 open 时注入 */
   private broadcastFn: Broadcaster | null = null
+
+  /** task 推送方法，由 WS 路由在 open 时注入 */
+  private taskBroadcastFn: TaskBroadcaster | null = null
 
   setBroadcaster(fn: Broadcaster): void {
     this.broadcastFn = fn
+  }
+
+  setTaskBroadcaster(fn: TaskBroadcaster): void {
+    this.taskBroadcastFn = fn
   }
 
   /**
@@ -95,10 +104,17 @@ export class PresenceManager {
     }))
   }
 
-  /** 通过注入的 broadcaster 向所有客户端广播消息 */
+  /** 通过注入的 broadcaster 向所有客户端广播 presence 消息 */
   broadcast(msg: PresenceMessage): void {
     if (this.broadcastFn) {
       this.broadcastFn('presence', msg)
+    }
+  }
+
+  /** 推送任务状态更新到指定用户 */
+  broadcastTask(userId: string, msg: unknown): void {
+    if (this.taskBroadcastFn) {
+      this.taskBroadcastFn(userId, msg)
     }
   }
 }

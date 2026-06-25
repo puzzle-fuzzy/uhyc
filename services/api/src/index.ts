@@ -10,6 +10,7 @@ import { generateModule } from './modules/generate'
 import { uploadModule } from './modules/upload'
 import { creativityModule } from './modules/creativity'
 import { presenceModule } from './modules/presence'
+import { taskPoller } from './modules/presence/task-poller'
 
 // ---------------------------------------------------------------------------
 // 启动时关键环境变量校验
@@ -140,6 +141,9 @@ const app = new Elysia()
     { detail: { summary: 'Serve a downloaded task artifact' } },
   )
   .listen(3000)
+
+// 服务启动后恢复所有非终态任务的轮询
+taskPoller.recoverOnStartup()
 
 console.log(
   `🦊 Elysia is running at ${app.server?.hostname}:${app.server?.port}`,

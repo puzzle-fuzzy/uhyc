@@ -4,6 +4,7 @@ import { status } from 'elysia'
 import { db, table, type CreativityTask } from '@uhyc/db'
 import type { BailianClientConfig } from '@uhyc/bailian'
 import { DEFAULT_BASE_URL } from '@uhyc/bailian'
+import { presenceManager } from '../presence/manager'
 
 const POLL_INTERVAL = 5000
 const MAX_POLLS = 60
@@ -38,6 +39,7 @@ function toTaskResponse(task: CreativityTask) {
 
 async function updateTask(
   taskId: string,
+  userId: string,
   patch: Partial<CreativityTask>,
 ): Promise<CreativityTask> {
   const [updated] = await db
@@ -45,6 +47,11 @@ async function updateTask(
     .set({ ...patch, updatedAt: new Date() })
     .where(eq(table.creativityTasks.id, taskId))
     .returning()
+
+  // 通过 WS 推送给任务创建者
+  const taskResp = toTaskResponse(updated)
+  presenceManager.broadcastTask(userId, { type: 'task_updated', task: taskResp })
+
   return updated
 }
 
@@ -265,35 +272,35 @@ ${scriptText}
 // Pipeline 编排
 // ---------------------------------------------------------------------------
 
-async function runPipeline(taskId: string, videoUrl: string) {
+async function runPipeline(taskId: string, userId: string, videoUrl: string) {
   const config = bailianConfig()
 
   try {
     // -- 步骤1: ASR --
-    await updateTask(taskId, { status: 'RUNNING', step: 0 })
+    await updateTask(taskId, userId, { status: 'RUNNING', step: 0 })
     const asrSubmitted = await submitAsr(config, videoUrl)
     const asrResult = await pollAsr(config, asrSubmitted.output.task_id, asrSubmitted.request_id)
-    await updateTask(taskId, {
+    await updateTask(taskId, userId, {
       asrResult: asrResult as unknown as Record<string, unknown>,
       step: 1,
     })
 
     // -- 步骤2: 视频理解 --
-    await updateTask(taskId, { step: 2 })
+    await updateTask(taskId, userId, { step: 2 })
     const script = await videoUnderstand(config, videoUrl)
-    await updateTask(taskId, { scriptResult: script, step: 3 })
+    await updateTask(taskId, userId, { scriptResult: script, step: 3 })
 
     // -- 步骤3: 合并 --
-    await updateTask(taskId, { step: 4 })
+    await updateTask(taskId, userId, { step: 4 })
     const merged = await mergeScript(config, asrResult.text, script)
-    await updateTask(taskId, {
+    await updateTask(taskId, userId, {
       mergedResult: merged,
       step: 5,
       status: 'SUCCEEDED',
     })
   } catch (e) {
     const msg = e instanceof Error ? e.message : '处理失败'
-    await updateTask(taskId, { status: 'FAILED', errorMessage: msg })
+    await updateTask(taskId, userId, { status: 'FAILED', errorMessage: msg })
   }
 }
 
@@ -318,7 +325,7 @@ export abstract class CreativityService {
       .returning()
 
     // 异步启动 pipeline（不阻塞响应）
-    runPipeline(row.id, body.videoUrl).catch((e) => {
+    runPipeline(row.id, userId, body.videoUrl).catch((e) => {
       console.error(`Pipeline ${row.id} failed:`, e)
     })
 

@@ -19,6 +19,7 @@ import {
 } from '@uhyc/bailian'
 import { db, table, type GenerationTask, type GenerationTaskFile } from '@uhyc/db'
 
+import { taskPoller } from '../presence/task-poller'
 import { downloadToTaskDir, extractVideoResultUrl } from './storage'
 import { generateKey, isOSSConfigured, uploadBuffer } from '../../lib/oss'
 import type { CreateTaskBody } from './model'
@@ -255,7 +256,7 @@ export abstract class GenerateService {
         return { task: toTaskResponse(updated, taskFiles) }
       }
 
-      // 异步模型：回写 task_id，后续轮询
+      // 异步模型：回写 task_id，后续由 TaskPoller 通过 WS 推送状态
       const asyncRes = res as CreateTaskResponse
       const [updated] = await db
         .update(table.generationTasks)
@@ -266,6 +267,10 @@ export abstract class GenerateService {
         })
         .where(eq(table.generationTasks.id, row.id))
         .returning()
+
+      // 注册服务端轮询（替代前端 HTTP 轮询）
+      taskPoller.register(row.id, userId)
+
       return { task: toTaskResponse(updated) }
     } catch (e) {
       const msg = e instanceof Error ? e.message : 'createTask failed'
