@@ -30,8 +30,8 @@ const BASE_FIELDS_R2V = [
     required: true,
     description: '1~7 张参考图片（Q2 Pro 额外支持 1~2 个参考视频）。支持 JPG/JPEG/PNG/WEBP，宽高比 1:4~4:1，不超过 50MB',
     mediaSlots: [
-      { type: 'reference_image' as const, label: '参考图片', accept: 'image/*', maxCount: 7, maxSizeMB: 50 },
-      { type: 'reference_video' as const, label: '参考视频', accept: 'video/*', maxCount: 2, maxSizeMB: 100 },
+      { type: 'image' as const, label: '参考图片', accept: 'image/*', maxCount: 7, maxSizeMB: 50 },
+      { type: 'video' as const, label: '参考视频', accept: 'video/*', maxCount: 2, maxSizeMB: 100 },
     ],
   },
   {

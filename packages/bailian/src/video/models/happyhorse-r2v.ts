@@ -92,7 +92,7 @@ export const happyhorseR2v: ModelDefinition<VideoSubCategory> = {
       label: '添加水印',
       type: 'boolean',
       group: 'parameters',
-      defaultValue: false,
+      defaultValue: true,
       description: '水印位于视频右下角，文案为 "Happy Horse"',
     },
     {
