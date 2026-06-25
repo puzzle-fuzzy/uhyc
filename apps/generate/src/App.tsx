@@ -1,4 +1,4 @@
-import { useAuth, buildLoginUrl } from '@uhyc/shared'
+import { useAuth, buildLoginUrl, usePresence, getPresenceColor, type PresenceUser } from '@uhyc/shared'
 import { useEffect, useState } from 'react'
 import type { TaskResponse, Catalog } from './types'
 import type { PromptToken } from './lib/promptSerializer'
@@ -19,6 +19,34 @@ const LOGO_SVG = (
     <rect x="18" y="18" width="11" height="11" rx="2" fill="#0a0a0a" />
   </svg>
 )
+
+/** 在线用户头像列表。最多显示 5 个，超出显示 +N */
+function OnlineAvatars({ users }: { users: PresenceUser[] }) {
+  const visible = users.slice(0, 5)
+  const overflow = users.length - 5
+  return (
+    <div className="topbar__online">
+      {visible.map((u) => (
+        <span
+          key={u.userId}
+          className="topbar__online-avatar"
+          style={{ backgroundColor: getPresenceColor(u.username) }}
+          title={u.username}
+        >
+          {u.username.charAt(0).toUpperCase()}
+        </span>
+      ))}
+      {overflow > 0 && (
+        <span
+          className="topbar__online-avatar topbar__online-overflow"
+          title={users.slice(5).map((u) => u.username).join(', ')}
+        >
+          +{overflow}
+        </span>
+      )}
+    </div>
+  )
+}
 
 /** 从 catalog 查找模型的 refSyntax */
 function getRefSyntax(catalog: Catalog | null, category: string, subCategory: string, model: string): string | null {
@@ -84,6 +112,7 @@ function parsePromptIntoTokens(
 
 function App() {
   const auth = useAuth()
+  const { onlineUsers } = usePresence()
   const { catalog } = useCatalog()
   const { tasks, setTasks, refresh, showAll, setShowAll } = useTaskHistory()
   const { submit, submitting, error: submitError } = useGenerate(tasks, setTasks)
@@ -178,6 +207,7 @@ function App() {
           <span>uhyc · generate</span>
         </div>
         <div className="topbar__user">
+          <OnlineAvatars users={onlineUsers} />
           <span
             className={`topbar__avatar${showAll ? ' topbar__avatar--dev' : ''}`}
             onClick={handleAvatarClick}

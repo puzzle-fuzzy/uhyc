@@ -2,3 +2,5 @@
 export * from './auth/api'
 export * from './auth/config'
 export * from './auth/useAuth'
+export * from './presence/types'
+export * from './presence/usePresence'

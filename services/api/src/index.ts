@@ -9,6 +9,7 @@ import { authModule } from './modules/auth'
 import { generateModule } from './modules/generate'
 import { uploadModule } from './modules/upload'
 import { creativityModule } from './modules/creativity'
+import { presenceModule } from './modules/presence'
 
 // ---------------------------------------------------------------------------
 // 启动时关键环境变量校验
@@ -116,6 +117,7 @@ const app = new Elysia()
   )
   .get('/', () => 'Hello Elysia')
   .use(authModule)
+  .use(presenceModule)
   .use(generateModule)
   .use(uploadModule)
   .use(creativityModule)

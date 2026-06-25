@@ -75,6 +75,33 @@ body {
   color: #fff;
   border-color: var(--danger);
 }
+
+/* online presence avatars */
+.topbar__online {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-right: 8px;
+}
+.topbar__online-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: var(--border);
+  box-shadow: var(--shadow-sm);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  font-size: 15px;
+  color: #fff;
+  flex-shrink: 0;
+  transition: opacity 200ms, transform 200ms;
+}
+.topbar__online-overflow {
+  background: #94a3b8;
+  font-size: 12px;
+}
 .topbar__logout {
   width: auto;
   padding: 8px 16px;

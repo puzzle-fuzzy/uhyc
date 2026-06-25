@@ -1,4 +1,4 @@
-import { useAuth, buildLoginUrl } from '@uhyc/shared'
+import { useAuth, buildLoginUrl, usePresence, getPresenceColor, type PresenceUser } from '@uhyc/shared'
 import { useEffect } from 'react'
 import { useCreativity } from './hooks/useCreativity'
 import { VideoUpload, clearPendingVideo } from './components/VideoUpload'
@@ -16,8 +16,37 @@ const LOGO_SVG = (
   </svg>
 )
 
+/** 在线用户头像列表。最多显示 5 个，超出显示 +N */
+function OnlineAvatars({ users }: { users: PresenceUser[] }) {
+  const visible = users.slice(0, 5)
+  const overflow = users.length - 5
+  return (
+    <div className="crea-topbar__online">
+      {visible.map((u) => (
+        <span
+          key={u.userId}
+          className="crea-topbar__online-avatar"
+          style={{ backgroundColor: getPresenceColor(u.username) }}
+          title={u.username}
+        >
+          {u.username.charAt(0).toUpperCase()}
+        </span>
+      ))}
+      {overflow > 0 && (
+        <span
+          className="crea-topbar__online-avatar crea-topbar__online-overflow"
+          title={users.slice(5).map((u) => u.username).join(', ')}
+        >
+          +{overflow}
+        </span>
+      )}
+    </div>
+  )
+}
+
 function App() {
   const auth = useAuth()
+  const { onlineUsers } = usePresence()
   const { tasks, processing, submit, refresh, setTasks } = useCreativity()
 
   useEffect(() => {
@@ -62,6 +91,7 @@ function App() {
           <span>uhyc · creativity</span>
         </div>
         <div className="crea-topbar__user">
+          <OnlineAvatars users={onlineUsers} />
           <span className="crea-topbar__avatar">{initial}</span>
           <span className="uhyc-badge">{auth.user.username}</span>
           <button
