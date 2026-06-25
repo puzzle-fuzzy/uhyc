@@ -2,7 +2,7 @@
 
 html,
 body {
-  
+  overflow: hidden;
   margin: 0;
   min-height: 100vh;
 }
@@ -14,11 +14,11 @@ body {
   background-position: -11px -11px;
 }
 #root {
-  min-height: 100vh;
+  height: 100vh;
 }
 
 .gen-app {
-  min-height: 100vh;
+  height: 100vh;
   display: flex;
   flex-direction: column;
 }
@@ -140,20 +140,22 @@ body {
   margin: 0 auto;
 }
 .gen-layout__left {
-  position: sticky;
-  top: 24px;
-  align-self: start;
-  max-height: calc(100vh - 120px);
+  /* grid placeholder only — actual panel is position:fixed */
 }
 .gen-layout__right {
-  min-height: 0;
+  height: calc(100vh - 68px - 48px);  /* viewport - topbar - layout padding */
+  overflow: hidden;
 }
 
-/* 左栏生成器卡片 */
+/* 左栏生成器卡片 — fixed to viewport */
 .gen-panel {
+  position: fixed;
+  top: 92px;                                        /* topbar(~68px) + layout-padding(24px) */
+  left: max(24px, calc((100vw - 1400px) / 2));      /* aligned to centered grid left edge */
+  width: clamp(420px, calc(420px + (100vw - 960px) * 0.318), 560px);
+  max-height: calc(100vh - 116px);                   /* 100vh - top(92px) - bottom-gap(24px) */
   display: flex;
   flex-direction: column;
-  max-height: calc(100vh - 120px);
 }
 .gen-panel__head {
   padding: 20px 20px 0;
@@ -215,12 +217,6 @@ body {
   font-size: 12px;
   color: var(--danger);
   margin: 4px 0 0;
-}
-.gen-field--inline {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-direction: row;
 }
 .gen-textarea {
   min-height: 200px;
@@ -442,7 +438,7 @@ body {
   position: absolute;
   top: 0;
   left: 0;
-  height: 0;
+  height: 100%;             /* fill the track interior */
   background: var(--purple);
   border-radius: 999px;
   pointer-events: none;
@@ -533,7 +529,7 @@ body {
 .gen-history {
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 120px);
+  height: 100%;            /* fill .gen-layout__right */
 }
 .gen-history__title {
   font-weight: 900;
@@ -811,6 +807,12 @@ body {
 
 /* 响应式 */
 @media (max-width: 960px) {
+  html, body {
+    overflow: auto;               /* restore native scrolling */
+  }
+  .gen-app {
+    height: auto;                 /* restore */
+  }
   .gen-layout {
     grid-template-columns: 1fr;
   }
@@ -818,12 +820,21 @@ body {
     position: static;
     max-height: none;
   }
+  .gen-layout__right {
+    height: auto;
+    overflow: visible;
+  }
+  .gen-panel {
+    position: static;             /* back into document flow */
+    max-height: none;
+    width: auto;
+  }
   .gen-history {
     height: auto;
   }
   .gen-scroll {
-  flex: 1;
-  min-height: 0;
+    flex: 1;
+    min-height: 0;
     height: auto;
     max-height: 70vh;
   }

@@ -87,7 +87,8 @@ export function FieldRenderer({ field, value, error, onChange }: FieldRendererPr
     case 'boolean':
       // Custom toggle switch (neo-brutalist)
       return (
-        <div className="uhyc-field uhyc-field--inline">
+        <label className="uhyc-field">
+          {label}
           <button
             type="button"
             role="switch"
@@ -97,11 +98,8 @@ export function FieldRenderer({ field, value, error, onChange }: FieldRendererPr
           >
             <span className="gen-toggle__thumb" />
           </button>
-          <div>
-            {label}
-            {desc}
-          </div>
-        </div>
+          {desc}
+        </label>
       )
 
     case 'select':
