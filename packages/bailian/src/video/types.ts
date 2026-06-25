@@ -41,6 +41,8 @@ export type FieldGroup = 'input' | 'parameters'
 export interface FieldMeta {
   /** API 参数名，如 "resolution"、"ratio" */
   key: string
+  /** 发送到 API 的参数名，当与 key 不同时使用（如 key='resolution' 但 API 期望 'size'） */
+  apiKey?: string
   /** 前端表单 label */
   label: string
   /** 补充说明，以 tooltip 形式展示 */

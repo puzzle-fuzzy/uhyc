@@ -28,10 +28,12 @@ function buildRequestBody(
     const value = params[field.key]
     if (value === undefined || value === null || value === '') continue
 
+    const paramKey = field.apiKey ?? field.key
+
     if (field.group === 'input') {
-      input[field.key] = value
+      input[paramKey] = value
     } else {
-      parameters[field.key] = value
+      parameters[paramKey] = value
     }
   }
 

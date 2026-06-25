@@ -11,7 +11,13 @@
       "Bash(git commit -m 'feat\\(bailian\\): add remaining video + image generation models *)",
       "Bash(git commit -m 'feat\\(bailian\\): add pricing metadata to all models *)",
       "Bash(PGPASSWORD=uhyc_dev psql -h localhost -U uhyc -d uhyc -c \"DELETE FROM users WHERE username IN \\('alice_test', 'bob_test'\\);\")",
-      "Bash(git commit -m 'chore: update lockfile and settings *)"
+      "Bash(git commit -m 'chore: update lockfile and settings *)",
+      "Bash(node .agents/skills/impeccable/scripts/context.mjs)",
+      "Read(//Users/yxswy/.claude/skills/impeccable/reference/**)",
+      "Read(//Users/yxswy/.agents/skills/impeccable/reference/**)",
+      "Bash(ls /Users/yxswy/.claude/skills/impeccable/scripts/ 2>/dev/null && echo \"---FOUND_GLOBAL---\" ; ls /Users/yxswy/Documents/uhyc/.agents/ 2>/dev/null || echo \"NO_PROJECT_AGENTS_DIR\")",
+      "Read(//Users/yxswy/.agents/skills/impeccable/scripts/**)",
+      "Bash(node /Users/yxswy/.claude/skills/impeccable/scripts/context.mjs)"
     ]
   }
 }

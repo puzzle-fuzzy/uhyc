@@ -286,15 +286,14 @@ export abstract class GenerateService {
       ? await db
           .select()
           .from(table.generationTasks)
-          .orderBy(desc(table.generationTasks.createdAt))
           .where(isNull(table.generationTasks.deletedAt))
+          .orderBy(desc(table.generationTasks.createdAt))
           .limit(limit)
       : await db
           .select()
           .from(table.generationTasks)
-          .where(eq(table.generationTasks.userId, userId))
-          .orderBy(desc(table.generationTasks.createdAt))
           .where(and(eq(table.generationTasks.userId, userId), isNull(table.generationTasks.deletedAt)))
+          .orderBy(desc(table.generationTasks.createdAt))
           .limit(limit)
 
     // 批量加载所有任务的 files，按 taskId 分组

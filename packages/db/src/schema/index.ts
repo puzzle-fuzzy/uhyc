@@ -76,9 +76,9 @@ export const generationTasks = pgTable(
       .defaultNow()
       .notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' })
-    deletedAt: timestamp('deleted_at', { withTimezone: true, mode: 'date' }),
       .defaultNow()
       .notNull(),
+    deletedAt: timestamp('deleted_at', { withTimezone: true, mode: 'date' }),
   },
   (t) => ({
     userIdCreatedIdx: index('gen_tasks_user_created_idx').on(t.userId, t.createdAt),
@@ -127,9 +127,9 @@ export const creativityTasks = pgTable('creativity_tasks', {
     .defaultNow()
     .notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' })
-    deletedAt: timestamp('deleted_at', { withTimezone: true, mode: 'date' }),
     .defaultNow()
     .notNull(),
+  deletedAt: timestamp('deleted_at', { withTimezone: true, mode: 'date' }),
 })
 
 export type CreativityTask = typeof creativityTasks.$inferSelect
