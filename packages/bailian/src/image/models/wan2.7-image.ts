@@ -46,8 +46,8 @@ const COMMON_FIELDS = [
     label: '思考模式',
     type: 'boolean' as const,
     group: 'parameters' as const,
-    defaultValue: true,
-    description: '开启后增强推理以提升出图质量，但增加耗时。仅文生图且非组图时生效',
+    defaultValue: false,
+    description: '开启后增强推理以提升出图质量，但增加耗时。开启时生成张数（n）固定为 1',
   },
   {
     key: 'watermark',
