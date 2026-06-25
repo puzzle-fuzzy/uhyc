@@ -14,6 +14,31 @@ import { formatBailianError } from './errors'
 // ---------------------------------------------------------------------------
 
 /**
+ * 将前端 MediaItem[] 序列化为百炼 API 所需的 media[] 格式。
+ * 剔除前端专用字段（id、label、thumbnail），并将 referenceVoice 映射为 reference_voice。
+ */
+function serializeMediaItems(value: unknown): unknown {
+  if (!Array.isArray(value)) return value
+  return value.map((item: Record<string, unknown>) => {
+    const result: Record<string, unknown> = {}
+    // 保留 type 和 url（API 必需字段）
+    if (item.type !== undefined) result.type = item.type
+    if (item.url !== undefined) result.url = item.url
+    // referenceVoice → reference_voice（API 字段名）
+    if (item.referenceVoice !== undefined) {
+      result.reference_voice = item.referenceVoice
+    } else if (item.reference_voice !== undefined) {
+      result.reference_voice = item.reference_voice
+    }
+    // 保留可能存在的其他 API 字段
+    if (item.keep_original_sound !== undefined) {
+      result.keep_original_sound = item.keep_original_sound
+    }
+    return result
+  })
+}
+
+/**
  * 将用户参数按 group 拆分为 `input` 和 `parameters`，
  * 构建百炼 API 请求体。
  */
@@ -25,10 +50,23 @@ function buildRequestBody(
   const parameters: Record<string, unknown> = {}
 
   for (const field of definition.fields) {
-    const value = params[field.key]
+    let value = params[field.key]
     if (value === undefined || value === null || value === '') continue
 
     const paramKey = field.apiKey ?? field.key
+
+    // 对 media 类型字段进行序列化，剔除前端专用字段
+    if (field.type === 'media') {
+      value = serializeMediaItems(value)
+    }
+
+    // 对 color-palette 类型字段进行序列化，ratio 格式化为百分比字符串
+    if (field.type === 'color-palette' && Array.isArray(value)) {
+      value = (value as Array<{ hex: string; ratio: number }>).map((stop) => ({
+        hex: stop.hex,
+        ratio: `${stop.ratio.toFixed(2)}%`,
+      }))
+    }
 
     if (field.group === 'input') {
       input[paramKey] = value

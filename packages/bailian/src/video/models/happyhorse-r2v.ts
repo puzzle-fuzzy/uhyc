@@ -44,6 +44,9 @@ export const happyhorseR2v: ModelDefinition<VideoSubCategory> = {
       required: true,
       description:
         '参考图像列表，1~9张。格式：JPEG/JPG/PNG/WEBP，短边≥400px，≤20MB。数组顺序对应 prompt 中 [Image n] 的索引',
+      mediaSlots: [
+        { type: 'reference_image' as const, label: '参考图片', accept: 'image/*', maxCount: 9, maxSizeMB: 20 },
+      ],
     },
     {
       key: 'resolution',

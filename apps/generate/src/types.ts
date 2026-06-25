@@ -6,6 +6,8 @@ export type FieldType =
   | 'select'
   | 'range'
   | 'media'
+  | 'color-palette'
+  | 'shot-list'
 export type FieldGroup = 'input' | 'parameters'
 
 export interface FieldMeta {
@@ -20,6 +22,32 @@ export interface FieldMeta {
   min?: number
   max?: number
   maxLength?: number
+  /** media 字段接受的媒体类型列表。未设置时默认为单图片上传 */
+  mediaSlots?: MediaSlotConfig[]
+}
+
+/** 百炼 API media[] 中每个元素的 type 值 */
+export type MediaSlotType =
+  | 'reference_image'
+  | 'reference_video'
+  | 'first_frame'
+  | 'last_frame'
+  | 'driving_audio'
+  | 'reference_voice'
+  | 'video'
+  | 'first_clip'
+  | 'refer'
+  | 'base'
+  | 'feature'
+
+/** media 字段的槽位配置 */
+export interface MediaSlotConfig {
+  type: MediaSlotType
+  label: string
+  accept: string
+  maxCount?: number
+  maxSizeMB?: number
+  maxDurationSec?: number
 }
 
 export interface ModelDefinition {
@@ -77,14 +105,16 @@ export type RefSyntax = 'bracket-en' | 'cn-prefixed'
 export interface MediaItem {
   /** 前端临时 id */
   id: string
-  /** bailian 类型 */
-  type: 'reference_image' | 'reference_video' | 'first_frame'
+  /** bailian 媒体类型 */
+  type: MediaSlotType
   /** 上传后的 URL（现阶段本地 blob，OSS 后接） */
   url: string
   /** 显示编号，如 "图1" / "视频1" / "[Image 1]"（按 refSyntax 生成） */
   label: string
-  /** 本地预览缩略图 URL（视频用占位） */
+  /** 本地预览缩略图 URL（视频/音频用占位） */
   thumbnail?: string
+  /** 音频的参考音色 URL（仅 reference_image / reference_video 可附带） */
+  referenceVoice?: string
 }
 
 // prompt 编辑期的 token 结构（提交时序列化为字符串）。来自 lib/promptSerializer。

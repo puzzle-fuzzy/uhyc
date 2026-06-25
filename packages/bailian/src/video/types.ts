@@ -32,7 +32,50 @@ export interface ModelPricing {
 // ---------------------------------------------------------------------------
 
 /** 表单控件类型 */
-export type FieldType = 'text' | 'number' | 'boolean' | 'select' | 'range' | 'media' | 'multi-text'
+export type FieldType =
+  | 'text'
+  | 'number'
+  | 'boolean'
+  | 'select'
+  | 'range'
+  | 'media'
+  | 'multi-text'
+  | 'color-palette'
+  | 'shot-list'
+
+// ---------------------------------------------------------------------------
+// 媒体素材类型 & 配置
+// ---------------------------------------------------------------------------
+
+/** 百炼 API media[] 中每个元素的 type 值 */
+export type MediaSlotType =
+  | 'reference_image'
+  | 'reference_video'
+  | 'first_frame'
+  | 'last_frame'
+  | 'driving_audio'
+  | 'reference_voice'
+  | 'video'
+  | 'first_clip'
+  | 'refer'
+  | 'base'
+  | 'feature'
+
+/** media 字段的槽位配置：描述该字段接受哪些类型的媒体文件 */
+export interface MediaSlotConfig {
+  /** API type 值，如 'first_frame'、'reference_video' */
+  type: MediaSlotType
+  /** 上传按钮文案 */
+  label: string
+  /** HTML accept 属性 */
+  accept: string
+  /** 该类型最多上传数量。undefined = 不限（受 field 整体约束） */
+  maxCount?: number
+  /** 文件大小上限提示（MB），仅用于 UI 展示 */
+  maxSizeMB?: number
+  /** 文件时长限制提示（秒），用于视频/音频，仅 UI 展示 */
+  maxDurationSec?: number
+}
 
 /** 请求体中该字段所属的分组 */
 export type FieldGroup = 'input' | 'parameters'
@@ -66,6 +109,11 @@ export interface FieldMeta {
 
   // --- text 专有 ---
   maxLength?: number
+
+  // --- media 专有 ---
+  /** 该字段接受的媒体类型列表。前端据此渲染对应的上传入口。
+   *  未设置时默认为单图片上传（向后兼容）。 */
+  mediaSlots?: MediaSlotConfig[]
 }
 
 // ---------------------------------------------------------------------------

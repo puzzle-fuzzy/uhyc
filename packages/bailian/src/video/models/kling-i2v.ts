@@ -29,6 +29,9 @@ const BASE_FIELDS_KLING_I2V = [
     group: 'input' as const,
     required: true,
     description: '作为视频首帧的参考图片。支持 JPEG/JPG/PNG（无透明通道），300~8000px，宽高比 1:2.5~2.5:1，不超过 10MB',
+    mediaSlots: [
+      { type: 'first_frame' as const, label: '首帧图片', accept: 'image/*', maxCount: 1, maxSizeMB: 10 },
+    ],
   },
   {
     key: 'mode',
@@ -133,6 +136,10 @@ const KEYFRAME_MEDIA_FIELD = {
   group: 'input' as const,
   required: true,
   description: '2 张图片：第1张为首帧(first_frame)，第2张为尾帧(last_frame)。支持 JPEG/JPG/PNG（无透明通道），300~8000px，不超过 10MB',
+  mediaSlots: [
+    { type: 'first_frame' as const, label: '首帧图片', accept: 'image/*', maxCount: 1, maxSizeMB: 10 },
+    { type: 'last_frame' as const, label: '尾帧图片', accept: 'image/*', maxCount: 1, maxSizeMB: 10 },
+  ],
 }
 
 export const klingV3I2vKF: ModelDefinition<VideoSubCategory> = {

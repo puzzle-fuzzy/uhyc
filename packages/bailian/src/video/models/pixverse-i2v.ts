@@ -35,6 +35,9 @@ const BASE_FIELDS_PV_I2V = [
     group: 'input' as const,
     required: true,
     description: '作为视频首帧的参考图片。支持 JPG/PNG/WEBP，各维度不超过10000px，不超过 20MB',
+    mediaSlots: [
+      { type: 'first_frame' as const, label: '首帧图片', accept: 'image/*', maxCount: 1, maxSizeMB: 20 },
+    ],
   },
   {
     key: 'resolution',

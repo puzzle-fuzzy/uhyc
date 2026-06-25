@@ -44,7 +44,10 @@
       "Bash(bun x *)",
       "Bash(git commit -m 'fix: add unique id to ModelDefinition, prevent duplicate dropdown selection *)",
       "Bash(git commit -m 'feat: auto-scroll dropdown to selected option on open *)",
-      "Bash(git commit -m 'fix: auto-select first model with id, fix panel height *)"
+      "Bash(git commit -m 'fix: auto-select first model with id, fix panel height *)",
+      "Bash(python3 -)",
+      "Bash(bunx tsc *)",
+      "Bash(git commit -m 'feat: redesign empty state with single kaomoji blob, add color/width per emoji, playful swap animations *)"
     ]
   }
 }

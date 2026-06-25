@@ -43,6 +43,10 @@ export const happyhorseVideoEdit: ModelDefinition<VideoSubCategory> = {
       required: true,
       description:
         '必传1个视频（MP4/MOV，3~60s，≤100MB）+ 可选0~5张参考图像（JPEG/JPG/PNG/WEBP，≤20MB）。输出视频3~15秒',
+      mediaSlots: [
+        { type: 'video' as const, label: '待编辑视频', accept: 'video/*', maxCount: 1, maxSizeMB: 100 },
+        { type: 'reference_image' as const, label: '参考图片', accept: 'image/*', maxCount: 5, maxSizeMB: 20 },
+      ],
     },
     {
       key: 'resolution',

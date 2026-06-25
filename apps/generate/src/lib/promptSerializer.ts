@@ -18,15 +18,29 @@ export function computeLabels(
   let vidIdx = 0
   return items.map((it) => {
     let label: string
+
+    // 只有参考类型的素材需要编号（用于 prompt 引用）
+    // 其他类型（first_frame、driving_audio 等）不参与 prompt 引用编号
     if (it.type === 'reference_video') {
       vidIdx += 1
-      label = refSyntax === 'cn-prefixed' ? `视频${vidIdx}` : it.label
-    } else {
+      label = refSyntax === 'cn-prefixed' ? `视频${vidIdx}` : `Video ${vidIdx}`
+    } else if (
+      it.type === 'reference_image' ||
+      it.type === 'refer' ||
+      it.type === 'first_frame' ||
+      it.type === 'last_frame'
+    ) {
+      // reference_image / refer：在 prompt 中通过图N 引用
+      // first_frame / last_frame：按 API 约定也按图编号（用于 r2v 首帧联合控制）
       imgIdx += 1
       label =
         refSyntax === 'cn-prefixed'
           ? `图${imgIdx}`
           : `[Image ${imgIdx}]`
+    } else {
+      // 音频（driving_audio, reference_voice）、视频编辑的 video/base/feature 等
+      // 不参与 prompt 引用编号，保持空 label
+      label = ''
     }
     return { ...it, label }
   })

@@ -33,6 +33,9 @@ export const happyhorseI2v: ModelDefinition<VideoSubCategory> = {
       required: true,
       description:
         '输入首帧图像（有且仅有1张）。格式：JPEG/JPG/PNG/WEBP，分辨率宽高≥300px，宽高比 1:2.5~2.5:1，≤20MB。支持公网URL或Base64',
+      mediaSlots: [
+        { type: 'first_frame' as const, label: '首帧图片', accept: 'image/*', maxCount: 1, maxSizeMB: 20 },
+      ],
     },
     {
       key: 'prompt',

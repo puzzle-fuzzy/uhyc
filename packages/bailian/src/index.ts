@@ -25,6 +25,8 @@ export type {
   PriceTier,
   ModelPricing,
   RefSyntax,
+  MediaSlotType,
+  MediaSlotConfig,
 } from './video/types'
 export type { VideoSubCategory } from './video/types'
 export type { ImageSubCategory } from './image'

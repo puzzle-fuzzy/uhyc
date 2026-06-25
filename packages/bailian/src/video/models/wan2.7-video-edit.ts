@@ -50,6 +50,23 @@ export const wan27VideoEdit: ModelDefinition<VideoSubCategory> = {
       required: true,
       description:
         '必传1个视频（mp4/mov，2-10s，240-4096px，≤100MB）+ 可选0~4张参考图像（JPEG/PNG/BMP/WEBP，240-8000px，≤20MB）',
+      mediaSlots: [
+        {
+          type: 'video',
+          label: '待编辑视频',
+          accept: 'video/*',
+          maxCount: 1,
+          maxSizeMB: 100,
+          maxDurationSec: 10,
+        },
+        {
+          type: 'reference_image',
+          label: '参考图片',
+          accept: 'image/*',
+          maxCount: 4,
+          maxSizeMB: 20,
+        },
+      ],
     },
     {
       key: 'resolution',

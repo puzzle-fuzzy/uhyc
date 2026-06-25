@@ -52,6 +52,35 @@ export const wan27R2v: ModelDefinition<VideoSubCategory> = {
       required: true,
       description:
         '参考图像+参考视频+可选首帧。参考图像/视频 ≤5个，至少传1个。支持 reference_image（图片）、reference_video（视频，1-30s）、first_frame（首帧，最多1张）。每个素材可附带 reference_voice 音频（wav/mp3，1-10s）指定音色',
+      mediaSlots: [
+        {
+          type: 'reference_image',
+          label: '参考图片',
+          accept: 'image/*',
+          maxSizeMB: 20,
+        },
+        {
+          type: 'reference_video',
+          label: '参考视频',
+          accept: 'video/*',
+          maxSizeMB: 100,
+          maxDurationSec: 30,
+        },
+        {
+          type: 'first_frame',
+          label: '首帧图片',
+          accept: 'image/*',
+          maxCount: 1,
+          maxSizeMB: 20,
+        },
+        {
+          type: 'reference_voice',
+          label: '参考音色',
+          accept: 'audio/*',
+          maxSizeMB: 15,
+          maxDurationSec: 10,
+        },
+      ],
     },
     {
       key: 'resolution',

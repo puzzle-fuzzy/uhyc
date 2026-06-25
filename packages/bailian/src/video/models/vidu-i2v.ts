@@ -28,6 +28,9 @@ const BASE_FIELDS_I2V = [
     group: 'input' as const,
     required: true,
     description: '作为视频首帧的参考图片。支持 JPG/JPEG/PNG/WEBP，宽高比 1:4~4:1，不超过 50MB',
+    mediaSlots: [
+      { type: 'first_frame' as const, label: '首帧图片', accept: 'image/*', maxCount: 1, maxSizeMB: 50 },
+    ],
   },
   {
     key: 'resolution',

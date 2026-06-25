@@ -50,6 +50,21 @@ const COMMON_FIELDS = [
     description: '开启后增强推理以提升出图质量，但增加耗时。开启时生成张数（n）固定为 1',
   },
   {
+    key: 'enable_sequential',
+    label: '组图模式',
+    type: 'boolean' as const,
+    group: 'parameters' as const,
+    defaultValue: false,
+    description: '开启后生成系列连贯图像（故事板）。启用时生成张数（n）最大 12 张',
+  },
+  {
+    key: 'color_palette',
+    label: '色彩主题',
+    type: 'color-palette' as const,
+    group: 'parameters' as const,
+    description: '自定义颜色主题，3~10 种颜色（推荐 8 种），所有占比之和需等于 100%。仅在关闭组图模式时可用',
+  },
+  {
     key: 'watermark',
     label: '添加水印',
     type: 'boolean' as const,

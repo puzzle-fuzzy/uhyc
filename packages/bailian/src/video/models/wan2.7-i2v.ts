@@ -49,6 +49,38 @@ export const wan27I2v: ModelDefinition<VideoSubCategory> = {
       required: true,
       description:
         '支持三种模式：①首帧生视频（first_frame + 可选 driving_audio）②首尾帧生视频（first_frame + last_frame + 可选 driving_audio）③视频续写（first_clip + 可选 last_frame）。图像格式：JPEG/PNG/BMP/WEBP，240-8000px；音频：wav/mp3，2-30s，≤15MB；视频：mp4/mov，2-10s，≤100MB',
+      mediaSlots: [
+        {
+          type: 'first_frame',
+          label: '首帧图片',
+          accept: 'image/*',
+          maxCount: 1,
+          maxSizeMB: 20,
+        },
+        {
+          type: 'last_frame',
+          label: '尾帧图片',
+          accept: 'image/*',
+          maxCount: 1,
+          maxSizeMB: 20,
+        },
+        {
+          type: 'driving_audio',
+          label: '驱动音频',
+          accept: 'audio/*',
+          maxCount: 1,
+          maxSizeMB: 15,
+          maxDurationSec: 30,
+        },
+        {
+          type: 'first_clip',
+          label: '首段视频（续写）',
+          accept: 'video/*',
+          maxCount: 1,
+          maxSizeMB: 100,
+          maxDurationSec: 10,
+        },
+      ],
     },
     {
       key: 'resolution',

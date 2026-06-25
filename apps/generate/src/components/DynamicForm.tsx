@@ -127,6 +127,13 @@ function ReferenceComposite({
           items={items}
           refSyntax={refSyntax}
           allowVideo={refSyntax === 'cn-prefixed'}
+          allowVoice={
+            refSyntax === 'cn-prefixed' &&
+            (mediaField.mediaSlots?.some((s) => s.type === 'reference_voice') ?? false)
+          }
+          allowFirstFrame={
+            mediaField.mediaSlots?.some((s) => s.type === 'first_frame') ?? false
+          }
           onChange={(next) => onChange(mediaField.key, next)}
         />
         {mediaField.description && (

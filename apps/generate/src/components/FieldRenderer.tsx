@@ -1,7 +1,10 @@
 import { useRef } from 'react'
-import type { FieldMeta } from '../types'
+import type { FieldMeta, MediaSlotConfig } from '../types'
 import { Select } from './Select'
 import { ResolutionPicker } from './ResolutionPicker'
+import { MediaSlots } from './MediaSlots'
+import { ColorPaletteEditor, type ColorStop } from './ColorPaletteEditor'
+import { ShotListEditor, type ShotItem } from './ShotListEditor'
 
 interface FieldRendererProps {
   field: FieldMeta
@@ -29,7 +32,11 @@ export function FieldRenderer({ field, value, error, onChange }: FieldRendererPr
   switch (field.type) {
     case 'media':
       return (
-        <MediaUpload field={field} value={value} onChange={onChange} />
+        <MediaField
+          field={field}
+          value={value}
+          onChange={onChange}
+        />
       )
 
     case 'text':
@@ -160,17 +167,98 @@ export function FieldRenderer({ field, value, error, onChange }: FieldRendererPr
       )
     }
 
+    case 'color-palette': {
+      const paletteValue = Array.isArray(value) && value.length > 0
+        ? (value as ColorStop[])
+        : undefined
+      return (
+        <label className="uhyc-field">
+          {label}
+          <ColorPaletteEditor
+            value={paletteValue ?? []}
+            minColors={3}
+            maxColors={10}
+            onChange={(stops) => onChange(stops)}
+          />
+          {desc}
+          {error && <p id={errorId(field.key)} className="gen-field__error">{error}</p>}
+        </label>
+      )
+    }
+
+    case 'shot-list': {
+      const shotValue = Array.isArray(value) ? (value as ShotItem[]) : []
+      return (
+        <label className="uhyc-field">
+          {label}
+          <ShotListEditor
+            value={shotValue}
+            minShots={1}
+            maxShots={6}
+            maxDuration={field.max ?? 15}
+            minDuration={field.min ?? 1}
+            onChange={(shots) => onChange(shots)}
+          />
+          {desc}
+          {error && <p id={errorId(field.key)} className="gen-field__error">{error}</p>}
+        </label>
+      )
+    }
+
     default:
       return null
   }
 }
 
 /**
- * Image upload area (UI only — OSS upload comes later).
- * Accepts a file, previews it locally, and stores a placeholder URL string.
- * The backend will later provide a real URL after OSS upload.
+ * Media field — dispatches to:
+ * - MediaSlots (多类型媒体，当 field.mediaSlots 已配置时)
+ * - Legacy single-image upload (向后兼容)
  */
-function MediaUpload({
+function MediaField({
+  field,
+  value,
+  onChange,
+}: {
+  field: FieldMeta
+  value: unknown
+  onChange: (value: unknown) => void
+}) {
+  const items = Array.isArray(value) ? (value as import('../types').MediaItem[]) : []
+  const slots = field.mediaSlots
+
+  if (slots && slots.length > 0) {
+    return (
+      <div className="uhyc-field">
+        <span className="uhyc-field__label">
+          {field.label}
+          {field.required ? ' *' : ''}
+        </span>
+        <MediaSlots
+          slots={slots}
+          items={items}
+          allowVoice={slots.some(
+            (s) => s.type === 'reference_image' || s.type === 'reference_video',
+          )}
+          onChange={(next) => onChange(next)}
+        />
+        {field.description && <p className="gen-field__desc">{field.description}</p>}
+      </div>
+    )
+  }
+
+  // Backward compat: single image upload
+  return (
+    <LegacyMediaUpload
+      field={field}
+      value={value}
+      onChange={onChange}
+    />
+  )
+}
+
+/** Legacy single-image upload (models without mediaSlots configured) */
+function LegacyMediaUpload({
   field,
   value,
   onChange,
@@ -184,7 +272,6 @@ function MediaUpload({
 
   function handleFile(file: File | undefined) {
     if (!file) return
-    // Local preview only; real OSS URL comes from backend later.
     const url = URL.createObjectURL(file)
     onChange(url)
   }
