@@ -11,8 +11,11 @@ interface TaskHistoryProps {
 
 export function TaskHistory({ tasks, onRerun, onDelete }: TaskHistoryProps) {
   return (
-    <div className="gen-history">
-      <h2 className="gen-history__title">生成记录</h2>
+    <div className="uhyc-card gen-history">
+      <div className="gen-history__head">
+        <h2 className="gen-history__title">生成记录</h2>
+      </div>
+
       <ScrollArea.Root className="gen-scroll">
         <ScrollArea.Viewport className="gen-scroll__viewport">
           {tasks.length === 0 ? (
@@ -32,6 +35,12 @@ export function TaskHistory({ tasks, onRerun, onDelete }: TaskHistoryProps) {
           <ScrollArea.Thumb className="gen-scroll__thumb" />
         </ScrollArea.Scrollbar>
       </ScrollArea.Root>
+
+      <div className="gen-history__foot">
+        <span className="gen-history__foot-text">
+          {tasks.length === 0 ? '暂无记录' : `共 ${tasks.length} 条记录`}
+        </span>
+      </div>
     </div>
   )
 }

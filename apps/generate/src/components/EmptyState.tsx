@@ -76,9 +76,9 @@ export function EmptyState() {
           </span>
         </div>
 
-        <p className="gen-empty-scene__text" key={msgIdx}>
-          {MESSAGES[msgIdx]}
-        </p>
+        <div className="gen-empty-scene__hint" key={msgIdx}>
+          <p className="gen-empty-scene__text">{MESSAGES[msgIdx]}</p>
+        </div>
       </div>
     </div>
   )

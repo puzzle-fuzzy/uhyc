@@ -72,37 +72,33 @@ body {
   max-width: 1400px;
   width: 100%;
   margin: 0 auto;
+  height: calc(100vh - 68px);      /* viewport - topbar, fill remaining */
 }
 .gen-layout__left {
-  /* grid placeholder only — actual panel is position:fixed */
+  min-height: 0;                   /* allow card to shrink within grid */
 }
 .gen-layout__right {
-  height: calc(100vh - 68px - 48px);  /* viewport - topbar - layout padding */
-  overflow: hidden;
+  min-height: 0;                   /* allow card to shrink within grid */
 }
 
-/* 左栏生成器卡片 — fixed to viewport */
+/* 左栏生成器卡片 — 填满所在列 */
 .gen-panel {
-  position: fixed;
-  top: 92px;                                        /* topbar(~68px) + layout-padding(24px) */
-  left: max(24px, calc((100vw - 1400px) / 2));      /* aligned to centered grid left edge */
-  width: clamp(420px, calc(420px + (100vw - 960px) * 0.318), 560px);
-  height: calc(100vh - 116px);                       /* 100vh - top(92px) - bottom-gap(24px) */
+  height: 100%;                    /* fill .gen-layout__left */
   display: flex;
   flex-direction: column;
 }
 .gen-panel__head {
   padding: 20px 20px 0;
   border-bottom: 2px solid var(--ink);
+  flex-shrink: 0;
 }
 .gen-panel__body {
   padding: 20px;
-  overflow-y: auto;
-  flex: 1;
 }
 .gen-panel__foot {
   padding: 16px 20px;
   border-top: 2px solid var(--ink);
+  flex-shrink: 0;
 }
 .gen-panel__foot-row {
   display: flex;
@@ -867,21 +863,38 @@ body {
 }
 
 /* 右栏历史 */
+/* 右侧面板 — 与左侧 gen-panel 一致的卡片风格 */
 .gen-history {
   display: flex;
   flex-direction: column;
   height: 100%;            /* fill .gen-layout__right */
 }
+.gen-history__head {
+  padding: 20px 20px 0;
+  border-bottom: 2px solid var(--ink);
+  flex-shrink: 0;
+}
 .gen-history__title {
   font-weight: 900;
-  font-size: 20px;
+  font-size: 24px;
+  letter-spacing: -0.02em;
   margin: 0 0 16px;
 }
 .gen-history__list {
-  padding-right: 4px;
+  padding: 20px;
   display: flex;
   flex-direction: column;
   gap: 16px;
+}
+.gen-history__foot {
+  padding: 12px 20px;
+  border-top: 2px solid var(--ink);
+  flex-shrink: 0;
+}
+.gen-history__foot-text {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--muted);
 }
 .gen-empty {
   color: var(--muted-strong);
@@ -1160,19 +1173,15 @@ body {
   }
   .gen-layout {
     grid-template-columns: 1fr;
-  }
-  .gen-layout__left {
-    position: static;
-    max-height: none;
-  }
-  .gen-layout__right {
     height: auto;
-    overflow: visible;
+  }
+  .gen-layout__left,
+  .gen-layout__right {
+    min-height: auto;
   }
   .gen-panel {
-    position: static;             /* back into document flow */
-    max-height: none;
-    width: auto;
+    height: auto;
+    max-height: 70vh;
   }
   .gen-history {
     height: auto;
@@ -1635,6 +1644,7 @@ body {
   align-items: center;
   justify-content: center;
   height: 100%;
+  padding: 20px;
   user-select: none;
 }
 
@@ -1734,14 +1744,21 @@ body {
   cursor: pointer;
 }
 
-/* ---- 滚动文案（位于色块正下方） ---- */
+/* ---- 滚动文案（色块正下方的卡片式提示） ---- */
+.gen-empty-scene__hint {
+  border: 2px solid var(--ink);
+  border-radius: 10px;
+  background: var(--paper);
+  padding: 10px 18px;
+  box-shadow: var(--shadow-sm);
+  animation: genTextCycle 0.4s ease;
+}
 .gen-empty-scene__text {
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 700;
   color: var(--muted-strong);
   margin: 0;
   text-align: center;
-  animation: genTextCycle 0.4s ease;
 }
 @keyframes genTextCycle {
   from { opacity: 0; transform: translateY(8px); }

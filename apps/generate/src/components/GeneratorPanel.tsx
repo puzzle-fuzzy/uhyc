@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import * as ScrollArea from '@radix-ui/react-scroll-area'
 import type { Catalog, ModelDefinition, MediaItem, PromptToken } from '../types'
 import { serializePrompt } from '../lib/promptSerializer'
 import { uploadFile } from '../api'
@@ -217,27 +218,37 @@ export function GeneratorPanel({
         />
       </div>
 
-      <form
-        id="gen-form"
-        className="gen-panel__body"
-        onSubmit={(e) => {
-          e.preventDefault()
-          handleSubmit()
-        }}
-      >
-        <ModelSelect models={models} value={modelName} onChange={setModelName} />
-        <DynamicForm
-          model={model}
-          params={params}
-          errors={errors}
-          onChange={setParam}
-        />
-        {submitError && (
-          <div className="uhyc-alert uhyc-alert--error" role="alert">
-            {submitError}
-          </div>
-        )}
-      </form>
+      <ScrollArea.Root className="gen-scroll">
+        <ScrollArea.Viewport className="gen-scroll__viewport">
+          <form
+            id="gen-form"
+            className="gen-panel__body"
+            onSubmit={(e) => {
+              e.preventDefault()
+              handleSubmit()
+            }}
+          >
+            <ModelSelect models={models} value={modelName} onChange={setModelName} />
+            <DynamicForm
+              model={model}
+              params={params}
+              errors={errors}
+              onChange={setParam}
+            />
+            {submitError && (
+              <div className="uhyc-alert uhyc-alert--error" role="alert">
+                {submitError}
+              </div>
+            )}
+          </form>
+        </ScrollArea.Viewport>
+        <ScrollArea.Scrollbar
+          orientation="vertical"
+          className="gen-scroll__bar"
+        >
+          <ScrollArea.Thumb className="gen-scroll__thumb" />
+        </ScrollArea.Scrollbar>
+      </ScrollArea.Root>
 
       <div className="gen-panel__foot">
         <div className="gen-panel__foot-row">
