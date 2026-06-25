@@ -62,12 +62,27 @@ function App() {
   }
 
   function handleRerun(task: TaskResponse) {
-    setFormFill({
-      category: task.category,
-      subCategory: task.subCategory,
-      model: task.model,
-      params: task.params as Record<string, unknown>,
-    })
+    const rawParams = task.params as Record<string, unknown>
+    const params: Record<string, unknown> = { ...rawParams }
+
+    // 转换 prompt 字符串 → PromptToken[]（PromptEditor 所需）
+    if (typeof params.prompt === 'string') {
+      params.prompt = [{ kind: 'text' as const, text: params.prompt }]
+    }
+
+    // 转换 media 数组 → MediaItem[]（ReferenceAssets 所需）
+    const media = params.media
+    if (Array.isArray(media) && media.length > 0) {
+      params.media = media.map((m: Record<string, unknown>, idx: number) => ({
+        id: (m.id as string) || `rerun-${Date.now()}-${idx}`,
+        type: (m.type as string) || 'reference_image',
+        url: (m.url as string) || '',
+        label: (m.label as string) || '',
+        thumbnail: m.thumbnail as string | undefined,
+      }))
+    }
+
+    setFormFill({ category: task.category, subCategory: task.subCategory, model: task.model, params })
     setFormFillVersion((v) => v + 1)
   }
 
