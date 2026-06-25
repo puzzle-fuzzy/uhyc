@@ -10,7 +10,91 @@ import { generateModule } from './modules/generate'
 import { uploadModule } from './modules/upload'
 import { creativityModule } from './modules/creativity'
 
+// ---------------------------------------------------------------------------
+// 启动时关键环境变量校验
+// ---------------------------------------------------------------------------
+
+function validateEnv(): void {
+  const checks: { key: string; defaults: string[] }[] = [
+    { key: 'JWT_SECRET', defaults: ['dev-secret-change-me', 'change-me-in-prod'] },
+    { key: 'BAILIAN_API_KEY', defaults: ['replace-with-real-key'] },
+  ]
+
+  const warnings: string[] = []
+  const errors: string[] = []
+
+  for (const { key, defaults } of checks) {
+    const v = process.env[key]
+    if (!v) {
+      errors.push(`${key} 未设置`)
+    } else if (defaults.includes(v)) {
+      if (process.env.NODE_ENV === 'production') {
+        errors.push(`${key} 仍在使用默认值 "${v}"，请替换为真实值`)
+      } else {
+        warnings.push(`${key} 仍在使用默认值 "${v}"`)
+      }
+    }
+  }
+
+  if (warnings.length > 0) {
+    console.warn('[uhyc] ⚠ 环境变量警告（开发环境可忽略）：')
+    for (const w of warnings) console.warn(`  ⚠ ${w}`)
+  }
+
+  if (errors.length > 0) {
+    console.error('[uhyc] 环境变量校验失败：')
+    for (const e of errors) console.error(`  ✗ ${e}`)
+    console.error('[uhyc] 请在 .env 文件中配置后再启动。')
+    process.exit(1)
+  }
+
+  console.log('[uhyc] 环境变量校验通过')
+}
+
+validateEnv()
+
+// ---------------------------------------------------------------------------
+// 安全响应头
+// ---------------------------------------------------------------------------
+
+/**
+ * 添加安全相关 HTTP 响应头。
+ *
+ * CSP 允许加载来自任意域名的媒体资源（图片/视频/音频），
+ * 因为百炼返回的任务结果 URL 域名不固定。
+ */
+const SECURITY_HEADERS: Record<string, string> = {
+  'X-Content-Type-Options': 'nosniff',
+  'X-Frame-Options': 'DENY',
+  'X-XSS-Protection': '1; mode=block',
+  'Referrer-Policy': 'strict-origin-when-cross-origin',
+  'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',
+  'Content-Security-Policy': [
+    "default-src 'self'",
+    "img-src * data: blob:",
+    "media-src * blob:",
+    "script-src 'self' 'unsafe-inline'",
+    "style-src 'self' 'unsafe-inline'",
+    "connect-src 'self'",
+    "frame-src 'none'",
+    "object-src 'none'",
+  ].join('; '),
+}
+
+const securityHeaders = new Elysia({ name: 'security-headers' }).onRequest(
+  ({ set }) => {
+    for (const [key, value] of Object.entries(SECURITY_HEADERS)) {
+      set.headers[key] = value
+    }
+  },
+)
+
+// ---------------------------------------------------------------------------
+// App
+// ---------------------------------------------------------------------------
+
 const app = new Elysia()
+  .use(securityHeaders)
   // `credentials: true` lets browsers send the auth cookie cross-origin.
   // Tighten `origin` to your frontend URL(s) in production.
   .use(
