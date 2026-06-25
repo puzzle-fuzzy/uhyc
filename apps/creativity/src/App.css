@@ -1,32 +1,21 @@
-html, body {
-  margin: 0;
-  min-height: 100vh;
-}
-body {
-  background-color: var(--bg);
-  background-image: radial-gradient(var(--ink) 1px, transparent 1.4px);
-  background-size: 22px 22px;
-  background-position: -11px -11px;
-}
-#root {
-  min-height: 100vh;
-}
+/* Creativity app layout + component styles. */
 
 .crea-app {
-  min-height: 100vh;
+  height: 100vh;
   display: flex;
   flex-direction: column;
 }
 
-/* topbar */
+/* ---- topbar ---- */
 .crea-topbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
   padding: 16px 24px;
-  border-bottom: 2px solid var(--ink);
+  border-bottom: var(--border);
   background: var(--paper);
+  box-shadow: var(--shadow);
 }
 .crea-topbar__brand {
   display: inline-flex;
@@ -45,50 +34,8 @@ body {
   align-items: center;
   gap: 12px;
 }
-/* online presence — 头像堆叠 */
-.crea-topbar__avatar-stack {
-  display: inline-flex;
-  align-items: center;
-  margin-right: 8px;
-}
-.crea-topbar__avatar-item {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  border: var(--border);
-  box-shadow: var(--shadow-sm);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 900;
-  font-size: 15px;
-  color: #fff;
-  flex-shrink: 0;
-  position: relative;
-  margin-left: -10px;
-  transition: transform 150ms, z-index 0s;
-  cursor: default;
-}
-.crea-topbar__avatar-item:first-child {
-  margin-left: 0;
-}
-.crea-topbar__avatar-item:hover {
-  transform: scale(1.15);
-  z-index: 999 !important;
-}
-.crea-topbar__avatar {
-  background: var(--purple-soft);
-  font-size: 16px;
-}
-.crea-topbar__online-avatar {
-  /* 颜色由 JS 通过 inline style 设置 */
-}
-.crea-topbar__online-overflow {
-  background: #94a3b8;
-  font-size: 12px;
-}
 
-/* layout */
+/* ---- layout ---- */
 .crea-layout {
   flex: 1;
   display: grid;
@@ -108,15 +55,17 @@ body {
   display: flex;
   flex-direction: column;
   gap: 20px;
+  overflow-y: auto;
 }
 .crea-layout__right {
-  min-height: 0;
+  height: calc(100vh - 68px - 48px);
+  overflow: hidden;
 }
 .crea-left__actions {
   margin-top: 8px;
 }
 
-/* video upload */
+/* ---- video upload ---- */
 .crea-upload__input {
   display: none;
 }
@@ -128,11 +77,11 @@ body {
   gap: 12px;
   padding: 48px 24px;
   border: 2px dashed var(--ink);
-  border-radius: 8px;
+  border-radius: 10px;
   background: var(--paper);
   cursor: pointer;
   font-weight: 600;
-  color: var(--muted);
+  color: var(--muted-strong);
   transition: box-shadow 0.12s ease, transform 0.12s ease;
 }
 .crea-upload__placeholder:hover {
@@ -151,7 +100,7 @@ body {
 }
 .crea-upload__status {
   font-size: 13px;
-  color: var(--muted);
+  color: var(--muted-strong);
   margin: 4px 0 0;
 }
 .crea-upload__bar {
@@ -160,15 +109,16 @@ body {
   margin-top: 12px;
 }
 
-/* pipeline status */
+/* ---- pipeline status ---- */
 .crea-pipeline {
   background: var(--paper);
   border: var(--border);
-  border-radius: 8px;
+  border-radius: 10px;
+  box-shadow: var(--shadow);
   padding: 16px;
 }
 .crea-pipeline__empty {
-  color: var(--muted);
+  color: var(--muted-strong);
   font-size: 14px;
   margin: 0;
   text-align: center;
@@ -201,7 +151,7 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: 2px solid currentColor;
+  border: var(--border);
   border-radius: 50%;
   font-size: 12px;
   font-weight: 800;
@@ -214,30 +164,31 @@ body {
   display: block;
   margin-top: 12px;
   font-size: 13px;
-  color: var(--muted);
+  color: var(--muted-strong);
 }
 .crea-pipeline__status--err {
   color: var(--danger);
 }
 
-/* results panel */
+/* ---- results panel ---- */
 .crea-results {
   display: flex;
   flex-direction: column;
   gap: 16px;
 }
 .crea-empty {
-  color: var(--muted);
+  color: var(--muted-strong);
   font-size: 14px;
   text-align: center;
   padding: 40px;
 }
 
-/* task card */
+/* ---- task card ---- */
 .crea-task {
   background: var(--paper);
   border: var(--border);
-  border-radius: 8px;
+  border-radius: 10px;
+  box-shadow: var(--shadow);
   padding: 16px;
 }
 .crea-task__head {
@@ -252,7 +203,7 @@ body {
 }
 .crea-task__time {
   font-size: 12px;
-  color: var(--muted);
+  color: var(--muted-strong);
   margin-bottom: 12px;
 }
 .crea-task__actions {
@@ -261,10 +212,10 @@ body {
   margin-top: 12px;
 }
 
-/* result cards (inside a task) */
+/* ---- result content ---- */
 .crea-result {
   margin-top: 12px;
-  border-top: 1px solid var(--ink);
+  border-top: var(--border);
   padding-top: 12px;
 }
 .crea-result__head {
@@ -279,7 +230,7 @@ body {
   align-items: center;
   gap: 8px;
   font-size: 13px;
-  color: var(--muted);
+  color: var(--muted-strong);
 }
 .crea-result__content {
   background: var(--bg);
@@ -301,26 +252,47 @@ body {
   margin-top: 8px;
 }
 
-/* badge */
+/* ---- status badges ---- */
 .crea-badge {
   display: inline-block;
   padding: 2px 10px;
   border-radius: 999px;
   font-size: 12px;
   font-weight: 700;
-  border: 2px solid var(--ink);
+  border: var(--border);
   background: var(--paper);
 }
 .crea-badge--succeeded {
-  background: var(--purple-soft);
+  background: var(--cyan);
 }
 .crea-badge--failed {
   background: var(--red-soft);
   color: var(--danger);
 }
 .crea-badge--running {
-  background: var(--paper);
+  background: var(--purple);
 }
 .crea-badge--pending {
-  background: var(--paper);
+  background: var(--purple-soft);
+}
+
+/* ---- responsive ---- */
+@media (max-width: 960px) {
+  .crea-layout {
+    grid-template-columns: 1fr;
+  }
+  .crea-layout__left {
+    position: static;
+    max-height: none;
+  }
+  .crea-layout__right {
+    height: auto;
+    max-height: 70vh;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .crea-upload__placeholder {
+    transition: none;
+  }
 }

@@ -16,7 +16,7 @@ function generateUrl(): string {
 export function Welcome({ user, onLogout }: WelcomeProps) {
   const initial = user.username.charAt(0).toUpperCase()
   const last = user.lastLoginAt
-    ? new Date(user.lastLoginAt).toLocaleString()
+    ? new Date(user.lastLoginAt).toLocaleString('zh-CN')
     : '首次登录'
 
   return (

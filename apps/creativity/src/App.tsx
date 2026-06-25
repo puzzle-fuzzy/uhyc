@@ -1,4 +1,4 @@
-import { useAuth, buildLoginUrl, usePresence, getPresenceColor, type PresenceUser } from '@uhyc/shared'
+import { useAuth, buildLoginUrl, usePresence, AvatarStack } from '@uhyc/shared'
 import { useEffect } from 'react'
 import { useCreativity } from './hooks/useCreativity'
 import { VideoUpload, clearPendingVideo } from './components/VideoUpload'
@@ -15,53 +15,6 @@ const LOGO_SVG = (
     <rect x="18" y="18" width="11" height="11" rx="2" fill="#0a0a0a" />
   </svg>
 )
-
-/** 头像堆叠：在线用户 + 自己，自己的头像在最上层，hover 时浮到顶层 */
-function AvatarStack({ users, selfInitial }: { users: PresenceUser[]; selfInitial: string }) {
-  const visible = users.slice(0, 5)
-  const overflow = users.length - 5
-
-  return (
-    <div
-      className="crea-topbar__avatar-stack"
-      onMouseLeave={(e) => {
-        const avatars = e.currentTarget.querySelectorAll<HTMLElement>('.crea-topbar__avatar-item')
-        avatars.forEach((el, i) => {
-          el.style.zIndex = String(i)
-        })
-      }}
-    >
-      {visible.map((u, i) => (
-        <span
-          key={u.userId}
-          className="crea-topbar__avatar-item crea-topbar__online-avatar"
-          style={{ backgroundColor: getPresenceColor(u.username), zIndex: i }}
-          title={u.username}
-          onMouseEnter={(e) => { e.currentTarget.style.zIndex = '999' }}
-        >
-          {u.username.charAt(0).toUpperCase()}
-        </span>
-      ))}
-      {overflow > 0 && (
-        <span
-          className="crea-topbar__avatar-item crea-topbar__online-avatar crea-topbar__online-overflow"
-          style={{ zIndex: visible.length }}
-          title={users.slice(5).map((u) => u.username).join(', ')}
-          onMouseEnter={(e) => { e.currentTarget.style.zIndex = '999' }}
-        >
-          +{overflow}
-        </span>
-      )}
-      <span
-        className="crea-topbar__avatar-item crea-topbar__avatar"
-        style={{ zIndex: users.length + 10 }}
-        onMouseEnter={(e) => { e.currentTarget.style.zIndex = '999' }}
-      >
-        {selfInitial}
-      </span>
-    </div>
-  )
-}
 
 function App() {
   const auth = useAuth()

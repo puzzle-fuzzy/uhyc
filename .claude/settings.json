@@ -36,7 +36,15 @@
       "Bash(git commit -m 'docs: fixed left panel + unified scroll design spec *)",
       "Bash(curl -s http://localhost:5174)",
       "Bash(lsof -ti:5173,5174,5175)",
-      "Bash(git commit -m 'feat: fixed left panel + unified scroll, plus UI polish *)"
+      "Bash(git commit -m 'feat: fixed left panel + unified scroll, plus UI polish *)",
+      "Bash(cat)",
+      "Bash(chmod +x /tmp/add_ids.sh)",
+      "Bash(bash /tmp/add_ids.sh)",
+      "Bash(turbo run *)",
+      "Bash(bun x *)",
+      "Bash(git commit -m 'fix: add unique id to ModelDefinition, prevent duplicate dropdown selection *)",
+      "Bash(git commit -m 'feat: auto-scroll dropdown to selected option on open *)",
+      "Bash(git commit -m 'fix: auto-select first model with id, fix panel height *)"
     ]
   }
 }

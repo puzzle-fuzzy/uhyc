@@ -194,6 +194,11 @@ body {
   box-shadow: var(--shadow);
 }
 
+.uhyc-btn--small {
+  font-size: 13px;
+  padding: 8px 14px;
+}
+
 /* ---------- Alerts ---------- */
 .uhyc-alert {
   border: var(--border);
@@ -241,4 +246,64 @@ body {
   border-radius: 999px;
   padding: 4px 12px;
   box-shadow: var(--shadow-sm);
+}
+
+/* ---------- Avatar Stack ---------- */
+.uhyc-avatar-stack {
+  display: inline-flex;
+  align-items: center;
+  margin-right: 8px;
+}
+
+.uhyc-avatar-item {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: var(--border);
+  box-shadow: var(--shadow-sm);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  font-size: 15px;
+  color: #fff;
+  flex-shrink: 0;
+  position: relative;
+  margin-left: -10px;
+  transition: transform 150ms, z-index 0s;
+  cursor: default;
+}
+
+.uhyc-avatar-item:first-child {
+  margin-left: 0;
+}
+
+.uhyc-avatar-item:hover {
+  transform: scale(1.15);
+  z-index: 999 !important;
+}
+
+.uhyc-avatar-self {
+  background: var(--purple-soft);
+  color: var(--ink);
+  font-size: 16px;
+}
+
+.uhyc-avatar-self:hover {
+  cursor: default;
+}
+
+.uhyc-avatar-self--dev {
+  outline: 3px solid var(--danger);
+  outline-offset: 2px;
+  cursor: pointer;
+}
+
+.uhyc-avatar-online {
+  /* color set via inline style from getPresenceColor() */
+}
+
+.uhyc-avatar-overflow {
+  background: var(--muted-strong);
+  font-size: 12px;
 }

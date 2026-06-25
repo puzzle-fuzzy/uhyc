@@ -1,5 +1,5 @@
 import type { CreativityTask } from '../types'
-import { STEP_LABELS } from '../types'
+import { STEP_LABELS, STEP_STATUS_LABEL } from '../types'
 
 interface PipelineStatusProps {
   task: CreativityTask | null
@@ -33,22 +33,25 @@ export function PipelineStatus({ task }: PipelineStatusProps) {
 
   return (
     <div className="crea-pipeline">
-      <div className="crea-pipeline__steps">
-        {STEP_LABELS.map((label, idx) => (
-          <div
-            key={label}
-            className={`crea-pipeline__step ${stepClass(idx, task)}`}
-          >
-            <span className="crea-pipeline__icon">{stepIcon(idx, task)}</span>
-            <span className="crea-pipeline__label">{label}</span>
-          </div>
-        ))}
+      <div className="crea-pipeline__steps" role="list">
+        {STEP_LABELS.map((label, idx) => {
+          const cls = stepClass(idx, task)
+          return (
+            <div
+              key={label}
+              role="listitem"
+              className={`crea-pipeline__step ${cls}`}
+              aria-current={cls.includes('active') ? 'step' : undefined}
+              aria-label={`${label}: ${cls.includes('done') ? '已完成' : cls.includes('active') ? '进行中' : cls.includes('fail') ? '失败' : '等待中'}`}
+            >
+              <span className="crea-pipeline__icon" aria-hidden="true">{stepIcon(idx, task)}</span>
+              <span className="crea-pipeline__label">{label}</span>
+            </div>
+          )
+        })}
       </div>
       <span className={`crea-pipeline__status ${task.status === 'FAILED' ? 'crea-pipeline__status--err' : ''}`}>
-        {task.status === 'SUCCEEDED' ? '处理完成' :
-         task.status === 'FAILED' ? `失败: ${task.errorMessage ?? ''}` :
-         task.status === 'RUNNING' ? '处理中…' :
-         task.status === 'PENDING' ? '正在为尊贵超级VIP极速生成中…' : ''}
+        {STEP_STATUS_LABEL[task.status] ?? task.status}
       </span>
     </div>
   )

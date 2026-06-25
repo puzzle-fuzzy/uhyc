@@ -60,7 +60,7 @@ export function VideoUpload({ onProcess, processing }: VideoUploadProps) {
     <div className="crea-upload">
       {previewSrc ? (
         <>
-          <video key={previewSrc} src={previewSrc} controls className="crea-upload__preview" />
+          <video key={previewSrc} src={previewSrc} controls preload="metadata" className="crea-upload__preview" />
           <div className="crea-upload__bar">
             <button
               type="button"
@@ -105,6 +105,7 @@ export function VideoUpload({ onProcess, processing }: VideoUploadProps) {
         type="file"
         accept="video/*"
         className="crea-upload__input"
+        aria-label="上传视频文件"
         onChange={(e) => {
           handleFile(e.target.files?.[0])
           e.target.value = ''

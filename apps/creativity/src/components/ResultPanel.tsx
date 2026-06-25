@@ -1,5 +1,5 @@
 import type { CreativityTask } from '../types'
-import { STEP_LABELS } from '../types'
+import { STEP_LABELS, STEP_STATUS_LABEL } from '../types'
 
 interface ResultPanelProps {
   tasks: CreativityTask[]
@@ -88,7 +88,7 @@ function ResultCard({
   )
 }
 
-export function ResultPanel({ tasks, onDelete, onRerun }: ResultPanelProps) {
+export function ResultPanel({ tasks, onDelete }: ResultPanelProps) {
   if (tasks.length === 0) {
     return (
       <div className="crea-results">
@@ -106,10 +106,7 @@ export function ResultPanel({ tasks, onDelete, onRerun }: ResultPanelProps) {
               {task.status === 'SUCCEEDED' ? '✅' : task.status === 'FAILED' ? '❌' : '⏳'} 处理任务
             </span>
             <span className={`crea-badge crea-badge--${task.status.toLowerCase()}`}>
-              {task.status === 'PENDING' ? '正在为尊贵超级VIP极速生成中' :
-               task.status === 'RUNNING' ? '处理中' :
-               task.status === 'SUCCEEDED' ? '已完成' :
-               task.status === 'FAILED' ? '失败' : task.status}
+              {STEP_STATUS_LABEL[task.status] ?? task.status}
             </span>
           </div>
 
