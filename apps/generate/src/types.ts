@@ -117,5 +117,39 @@ export interface MediaItem {
   referenceVoice?: string
 }
 
+// ---- creativity module (视频转剧本) ----
+export interface CreativityTask {
+  id: string
+  userId: string
+  videoUrl: string
+  status: TaskStatus
+  step: number
+  asrResult?: {
+    text: string
+    srt: string
+    sentences: Array<{
+      begin_time: number
+      end_time: number
+      text: string
+      sentence_id: number
+    }>
+  } | null
+  scriptResult?: string | null
+  mergedResult?: string | null
+  errorMessage: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+export const STEP_LABELS = ['语音识别', '视频理解', '合并脚本']
+export const STEP_STATUS_LABEL: Record<TaskStatus, string> = {
+  PENDING: '正在为尊贵超级VIP极速生成中',
+  RUNNING: '进行中',
+  SUCCEEDED: '已完成',
+  FAILED: '失败',
+  CANCELED: '已取消',
+  UNKNOWN: '未知',
+}
+
 // prompt 编辑期的 token 结构（提交时序列化为字符串）。来自 lib/promptSerializer。
 export type { PromptToken } from './lib/promptSerializer'

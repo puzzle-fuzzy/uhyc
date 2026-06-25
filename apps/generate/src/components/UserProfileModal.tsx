@@ -1,4 +1,5 @@
 import { useEffect, useCallback } from 'react'
+import { useNavigate } from 'react-router-dom'
 import type { User } from '@uhyc/shared'
 
 interface UserProfileModalProps {
@@ -18,16 +19,18 @@ interface QuickAction {
 
 /** Ctrl+P / Cmd+P 命令面板 */
 export function UserProfileModal({ open, user, onClose, onLogout }: UserProfileModalProps) {
+  const navigate = useNavigate()
   const initial = user.username.charAt(0).toUpperCase()
   const lastLogin = user.lastLoginAt
     ? new Date(user.lastLoginAt).toLocaleString('zh-CN')
     : '首次登录'
 
   const quickActions: QuickAction[] = [
-    { label: '工作室', hint: 'AI 生成中心', color: 'var(--purple)',  dark: false, onClick: onClose },
-    { label: '消耗',   hint: '费用 & 用量',  color: 'var(--cyan)',   dark: false, onClick: () => {} },
-    { label: '资产',   hint: '我的文件',     color: 'var(--pink)',   dark: false, onClick: () => {} },
-    { label: '设置',   hint: '偏好 & 账户',  color: 'var(--ink)',    dark: true,  onClick: () => {} },
+    { label: '工作室',     hint: 'AI 生成中心',    color: 'var(--purple)',  dark: false, onClick: () => { onClose(); navigate('/') } },
+    { label: '消耗',       hint: '费用 & 用量',     color: 'var(--cyan)',   dark: false, onClick: () => {} },
+    { label: '资产',       hint: '我的文件',        color: 'var(--pink)',   dark: false, onClick: () => {} },
+    { label: '设置',       hint: '偏好 & 账户',     color: 'var(--ink)',    dark: true,  onClick: () => {} },
+    { label: '视频转剧本', hint: 'AI 视频分析',     color: 'var(--purple-soft)', dark: false, onClick: () => { onClose(); navigate('/creativity') } },
   ]
 
   // Esc 关闭
@@ -88,7 +91,7 @@ export function UserProfileModal({ open, user, onClose, onLogout }: UserProfileM
             </div>
           </div>
 
-          {/* 右侧：快捷入口 2×2 */}
+          {/* 右侧：快捷入口 3×2 */}
           <div className="profile-quick">
             {quickActions.map((action) => (
               <button
@@ -109,6 +112,10 @@ export function UserProfileModal({ open, user, onClose, onLogout }: UserProfileM
                 </span>
               </button>
             ))}
+            {/* 占位：后续扩展 */}
+            <div className="profile-quick__placeholder">
+              <span className="profile-quick__label">敬请期待</span>
+            </div>
           </div>
         </div>
       </div>

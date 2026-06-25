@@ -1,4 +1,4 @@
-import type { Catalog, TaskResponse } from './types'
+import type { Catalog, TaskResponse, CreativityTask } from './types'
 
 const BASE = '/api'
 const CREDS: RequestInit = { credentials: 'include' }
@@ -108,4 +108,15 @@ export function artifactUrl(storagePath: string): string {
   }
   // storagePath 形如 "storage/<taskId>/<file>"
   return `${BASE}/generate/${storagePath.replace(/^storage\//, 'storage/')}`
+}
+
+// ---- creativity API ----
+export const creativityApi = {
+  createTask: (videoUrl: string) =>
+    post<{ task: CreativityTask }>('/creativity/tasks', { videoUrl }),
+  listTasks: () =>
+    get<{ items: CreativityTask[]; total: number }>('/creativity/tasks'),
+  getTask: (id: string) =>
+    get<{ task: CreativityTask }>(`/creativity/tasks/${id}`),
+  deleteTask: (id: string) => del<{ ok: boolean }>(`/creativity/tasks/${id}`),
 }

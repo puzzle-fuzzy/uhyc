@@ -1,4 +1,4 @@
-import { usePresence, AvatarStack } from '@uhyc/shared'
+import { usePresence } from '@uhyc/shared'
 import { useEffect, useRef, useState } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import type { TaskResponse, Catalog } from './types'
@@ -13,7 +13,9 @@ import { ToastContainer, toast } from './components/Toast'
 import { LoginPage } from './components/LoginPage'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { AuthProvider, useAuthContext } from './components/AuthContext'
-import { UserProfileModal } from './components/UserProfileModal'
+import { GlobalCommandModal } from './components/GlobalCommandModal'
+import { AppLayout } from './components/AppLayout'
+import { CreativityPage } from './components/creativity/CreativityPage'
 import { generateApi } from './api'
 import './App.css'
 
@@ -57,15 +59,6 @@ function ShortcutOverlay({ open, onClose }: { open: boolean; onClose: () => void
     </div>
   )
 }
-
-const LOGO_SVG = (
-  <svg viewBox="0 0 32 32" fill="none" aria-hidden="true">
-    <rect x="3" y="3" width="11" height="11" rx="2" fill="#cba0ff" stroke="#0a0a0a" strokeWidth="2.5" />
-    <rect x="18" y="3" width="11" height="11" rx="2" fill="#93ecff" stroke="#0a0a0a" strokeWidth="2.5" />
-    <rect x="3" y="18" width="11" height="11" rx="2" fill="#ffaef3" stroke="#0a0a0a" strokeWidth="2.5" />
-    <rect x="18" y="18" width="11" height="11" rx="2" fill="#0a0a0a" />
-  </svg>
-)
 
 /** 从 catalog 查找模型的 refSyntax */
 function getRefSyntax(catalog: Catalog | null, category: string, subCategory: string, model: string): string | null {
@@ -133,15 +126,13 @@ function parsePromptIntoTokens(
 function Studio() {
   const auth = useAuthContext()
   const { catalog } = useCatalog()
-  const { tasks, setTasks, refresh, showAll, setShowAll } = useTaskHistory()
+  const { tasks, setTasks, refresh } = useTaskHistory()
   const { submit, submitting, error: submitError, onTaskUpdated, onWsDisconnect } = useGenerate(tasks, setTasks)
-  const { onlineUsers } = usePresence({ onTaskUpdated, onDisconnect: onWsDisconnect })
+  usePresence({ onTaskUpdated, onDisconnect: onWsDisconnect })
 
   const [formFill, setFormFill] = useState<FormValues | null>(null)
   const [formFillVersion, setFormFillVersion] = useState(0)
   const [shortcutOpen, setShortcutOpen] = useState(false)
-  const [profileOpen, setProfileOpen] = useState(false)
-  const [logoSpins, setLogoSpins] = useState(0)
 
   // 跟踪上一次任务状态，用于检测 SUCCEEDED 转换
   const prevStatusRef = useRef<Map<string, string>>(new Map())
@@ -170,38 +161,17 @@ function Studio() {
         e.preventDefault()
         setShortcutOpen((o) => !o)
       }
-      // Ctrl+P / Cmd+P → 用户信息弹窗
-      if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
-        e.preventDefault()
-        setProfileOpen((o) => !o)
-      }
-      if (e.key === 'Escape') {
-        if (shortcutOpen) setShortcutOpen(false)
-        else if (profileOpen) setProfileOpen(false)
+      if (e.key === 'Escape' && shortcutOpen) {
+        setShortcutOpen(false)
       }
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [shortcutOpen, profileOpen])
+  }, [shortcutOpen])
 
   useEffect(() => {
     if (auth.status === 'authenticated') void refresh()
   }, [auth.status, refresh])
-
-  // Auth is per-route: ProtectedRoute handles /, LoginPage handles /login
-  const initial = (auth.user?.username ?? '?').charAt(0).toUpperCase()
-
-  function handleAvatarClick() {
-    setShowAll(!showAll)
-  }
-
-  /** Logo 双击彩蛋：旋转递增 */
-  function handleLogoDblClick() {
-    setLogoSpins((n) => n + 1)
-    if (logoSpins >= 5) {
-      toast('🎠 别转了，再转头都晕了', 'info')
-    }
-  }
 
   async function handleDelete(task: TaskResponse) {
     try {
@@ -259,38 +229,7 @@ function Studio() {
   }
 
   return (
-    <main className="gen-app">
-      <header className="topbar">
-        <div className="topbar__brand">
-          <span
-            className="gen-logo"
-            style={{ transform: `rotate(${logoSpins * 360}deg)`, transition: 'transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)' }}
-            onDoubleClick={handleLogoDblClick}
-            title="双击有惊喜"
-          >
-            {LOGO_SVG}
-          </span>
-          <span>uhyc · generate</span>
-        </div>
-        <div className="topbar__user">
-          <AvatarStack
-            users={onlineUsers}
-            selfInitial={initial}
-            showAll={showAll}
-            onAvatarClick={handleAvatarClick}
-            devTitle={showAll ? '开发模式：显示全部记录' : '点击切换开发模式'}
-          />
-          {showAll && <span className="uhyc-badge uhyc-badge--dev">DEV</span>}
-          <button
-            type="button"
-            className="uhyc-btn uhyc-btn--ghost topbar__logout"
-            onClick={auth.logout}
-          >
-            登出
-          </button>
-        </div>
-      </header>
-
+    <>
       <div className="gen-layout">
         <section className="gen-layout__left">
           {catalog && (
@@ -314,16 +253,8 @@ function Studio() {
       </div>
 
       <ShortcutOverlay open={shortcutOpen} onClose={() => setShortcutOpen(false)} />
-      {auth.user && (
-        <UserProfileModal
-          open={profileOpen}
-          user={auth.user}
-          onClose={() => setProfileOpen(false)}
-          onLogout={auth.logout}
-        />
-      )}
       <ToastContainer />
-    </main>
+    </>
   )
 }
 
@@ -334,15 +265,12 @@ export default function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
-          <Route
-            path="/"
-            element={
-              <ProtectedRoute>
-                <Studio />
-              </ProtectedRoute>
-            }
-          />
+          <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
+            <Route path="/" element={<Studio />} />
+            <Route path="/creativity" element={<CreativityPage />} />
+          </Route>
         </Routes>
+        <GlobalCommandModal />
       </BrowserRouter>
     </AuthProvider>
   )
