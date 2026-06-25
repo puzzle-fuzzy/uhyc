@@ -9,6 +9,7 @@ import type { VideoSubCategory } from '../types'
 //
 // C1 / V6 / V5.6 三个模型变体。
 // media 使用 first_frame 和 last_frame 类型（2 张图片）。
+// API 使用 resolution 参数（非 size），值为分辨率档位标签。
 // prompt 为必填。
 // ---------------------------------------------------------------------------
 
@@ -42,11 +43,10 @@ const BASE_FIELDS_PV_KF = [
     label: '分辨率',
     type: 'select' as const,
     group: 'parameters' as const,
-    apiKey: 'size',
     required: true,
     defaultValue: '720P',
     options: RESOLUTION_OPTIONS_KF,
-    description: '选择分辨率后将自动映射为对应的 size 参数（默认 16:9 画幅）',
+    description: '生成视频的分辨率档位。API 参数名为 resolution',
   },
   {
     key: 'duration',

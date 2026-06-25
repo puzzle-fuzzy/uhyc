@@ -112,12 +112,12 @@ export const pixverseC1R2v: ModelDefinition<VideoSubCategory> = {
     unit: 'per_second',
     quantityKey: 'duration',
     region: 'cn-beijing',
-    // PixVerse R2V pricing: simplified to be conditioned on resolution tier via size
+    // R2V 使用 size 参数（像素值），条件匹配 16:9 默认值
     tiers: [
-      { condition: { resolution: '360P' }, price: 0.18 },
-      { condition: { resolution: '540P' }, price: 0.24 },
-      { condition: { resolution: '720P' }, price: 0.3 },
-      { condition: { resolution: '1080P' }, price: 0.56 },
+      { condition: { size: '640*360' }, price: 0.18 },
+      { condition: { size: '1024*576' }, price: 0.24 },
+      { condition: { size: '1280*720' }, price: 0.3 },
+      { condition: { size: '1920*1080' }, price: 0.56 },
     ],
   },
   fields: BASE_FIELDS_PV_R2V,
@@ -137,10 +137,10 @@ export const pixverseV6R2v: ModelDefinition<VideoSubCategory> = {
     quantityKey: 'duration',
     region: 'cn-beijing',
     tiers: [
-      { condition: { resolution: '360P' }, price: 0.15 },
-      { condition: { resolution: '540P' }, price: 0.21 },
-      { condition: { resolution: '720P' }, price: 0.27 },
-      { condition: { resolution: '1080P' }, price: 0.53 },
+      { condition: { size: '640*360' }, price: 0.15 },
+      { condition: { size: '1024*576' }, price: 0.21 },
+      { condition: { size: '1280*720' }, price: 0.27 },
+      { condition: { size: '1920*1080' }, price: 0.53 },
     ],
   },
   fields: [
@@ -168,10 +168,10 @@ export const pixverseV56R2v: ModelDefinition<VideoSubCategory> = {
     quantityKey: 'duration',
     region: 'cn-beijing',
     tiers: [
-      { condition: { resolution: '360P' }, price: 0.21 },
-      { condition: { resolution: '540P' }, price: 0.21 },
-      { condition: { resolution: '720P' }, price: 0.27 },
-      { condition: { resolution: '1080P' }, price: 0.44 },
+      { condition: { size: '640*360' }, price: 0.21 },
+      { condition: { size: '1024*576' }, price: 0.21 },
+      { condition: { size: '1280*720' }, price: 0.27 },
+      { condition: { size: '1920*1080' }, price: 0.44 },
     ],
   },
   fields: [

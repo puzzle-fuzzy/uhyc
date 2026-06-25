@@ -30,6 +30,10 @@ function serializeMediaItems(value: unknown): unknown {
     } else if (item.reference_voice !== undefined) {
       result.reference_voice = item.reference_voice
     }
+    // ref_name：PixVerse R2V 引用图片主体名称，用于 prompt 中的 @ref_name 语法
+    if (item.ref_name !== undefined) {
+      result.ref_name = item.ref_name
+    }
     // 保留可能存在的其他 API 字段
     if (item.keep_original_sound !== undefined) {
       result.keep_original_sound = item.keep_original_sound

@@ -7,24 +7,30 @@ import type { VideoSubCategory } from '../types'
 // 对应文档: docs/bailian/爱诗/爱诗-文生视频.md
 // API 端点: POST /api/v1/services/aigc/video-generation/video-synthesis
 //
-// 使用 apiKey: 'size' 将前端的 resolution 字段映射为 API 的 size 参数。
+// 使用 apiKey: 'size' 将前端的 resolution 字段映射为 API 的 size 参数，
+// 值使用像素尺寸（如 1280*720），与 API 文档一致。
 // C1 / V6 / V5.6 三个模型变体。V6 支持 shot_type（多镜头）。
 // ---------------------------------------------------------------------------
 
-const RESOLUTION_OPTIONS = [
-  { label: '360P (640*360)', value: '360P' },
-  { label: '540P (1024*576)', value: '540P' },
-  { label: '720P (1280*720)', value: '720P' },
-  { label: '1080P (1920*1080)', value: '1080P' },
+/** 分辨率选项：每档分辨率 × 常用宽高比 → API size 像素值 */
+const SIZE_OPTIONS_T2V = [
+  // 360P
+  { label: '360P 16:9 (640*360)', value: '640*360' },
+  { label: '360P 9:16 (360*640)', value: '360*640' },
+  { label: '360P 1:1 (640*640)', value: '640*640' },
+  // 540P
+  { label: '540P 16:9 (1024*576)', value: '1024*576' },
+  { label: '540P 9:16 (576*1024)', value: '576*1024' },
+  { label: '540P 1:1 (1024*1024)', value: '1024*1024' },
+  // 720P
+  { label: '720P 16:9 (1280*720)', value: '1280*720' },
+  { label: '720P 9:16 (720*1280)', value: '720*1280' },
+  { label: '720P 1:1 (960*960)', value: '960*960' },
+  // 1080P
+  { label: '1080P 16:9 (1920*1080)', value: '1920*1080' },
+  { label: '1080P 9:16 (1080*1920)', value: '1080*1920' },
+  { label: '1080P 1:1 (1440*1440)', value: '1440*1440' },
 ]
-
-/** resolution → size 映射（默认 16:9） */
-const RESOLUTION_TO_SIZE: Record<string, string> = {
-  '360P': '640*360',
-  '540P': '1024*576',
-  '720P': '1280*720',
-  '1080P': '1920*1080',
-}
 
 const BASE_FIELDS_PV_T2V = [
   {
@@ -38,14 +44,14 @@ const BASE_FIELDS_PV_T2V = [
   },
   {
     key: 'resolution',
-    label: '分辨率',
+    label: '输出尺寸',
     type: 'select' as const,
     group: 'parameters' as const,
     apiKey: 'size',
     required: true,
-    defaultValue: '720P',
-    options: RESOLUTION_OPTIONS,
-    description: '选择分辨率后将自动映射为对应的 size 参数（默认 16:9 画幅）',
+    defaultValue: '1280*720',
+    options: SIZE_OPTIONS_T2V,
+    description: '选择输出视频的像素尺寸与宽高比。映射为 API 的 size 参数',
   },
   {
     key: 'duration',
@@ -98,11 +104,12 @@ export const pixverseC1T2v: ModelDefinition<VideoSubCategory> = {
     unit: 'per_second',
     quantityKey: 'duration',
     region: 'cn-beijing',
+    // 条件匹配 16:9 默认像素值；非默认画幅按首个 tier 计价
     tiers: [
-      { condition: { resolution: '360P' }, price: 0.18 },
-      { condition: { resolution: '540P' }, price: 0.24 },
-      { condition: { resolution: '720P' }, price: 0.3 },
-      { condition: { resolution: '1080P' }, price: 0.56 },
+      { condition: { resolution: '640*360' }, price: 0.18 },
+      { condition: { resolution: '1024*576' }, price: 0.24 },
+      { condition: { resolution: '1280*720' }, price: 0.3 },
+      { condition: { resolution: '1920*1080' }, price: 0.56 },
     ],
   },
   fields: BASE_FIELDS_PV_T2V,
@@ -122,10 +129,10 @@ export const pixverseV6T2v: ModelDefinition<VideoSubCategory> = {
     quantityKey: 'duration',
     region: 'cn-beijing',
     tiers: [
-      { condition: { resolution: '360P' }, price: 0.15 },
-      { condition: { resolution: '540P' }, price: 0.21 },
-      { condition: { resolution: '720P' }, price: 0.27 },
-      { condition: { resolution: '1080P' }, price: 0.53 },
+      { condition: { resolution: '640*360' }, price: 0.15 },
+      { condition: { resolution: '1024*576' }, price: 0.21 },
+      { condition: { resolution: '1280*720' }, price: 0.27 },
+      { condition: { resolution: '1920*1080' }, price: 0.53 },
     ],
   },
   fields: [
@@ -159,10 +166,10 @@ export const pixverseV56T2v: ModelDefinition<VideoSubCategory> = {
     quantityKey: 'duration',
     region: 'cn-beijing',
     tiers: [
-      { condition: { resolution: '360P' }, price: 0.21 },
-      { condition: { resolution: '540P' }, price: 0.21 },
-      { condition: { resolution: '720P' }, price: 0.27 },
-      { condition: { resolution: '1080P' }, price: 0.44 },
+      { condition: { resolution: '640*360' }, price: 0.21 },
+      { condition: { resolution: '1024*576' }, price: 0.21 },
+      { condition: { resolution: '1280*720' }, price: 0.27 },
+      { condition: { resolution: '1920*1080' }, price: 0.44 },
     ],
   },
   fields: [

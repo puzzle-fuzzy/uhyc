@@ -8,15 +8,15 @@ import type { VideoSubCategory } from '../types'
 // API 端点: POST /api/v1/services/aigc/video-generation/video-synthesis
 //
 // C1 / V6 / V5.6 三个模型变体。
-// 使用 apiKey: 'size' 将前端的 resolution 映射为 API 的 size 参数。
-// media type 为 image_url（非 image）。
+// API 使用 resolution 参数（非 size），值为分辨率档位标签。
+// media type 为 image_url（文档要求，非 first_frame）。
 // ---------------------------------------------------------------------------
 
 const RESOLUTION_OPTIONS_I2V = [
-  { label: '360P (640*360)', value: '360P' },
-  { label: '540P (1024*576)', value: '540P' },
-  { label: '720P (1280*720)', value: '720P' },
-  { label: '1080P (1920*1080)', value: '1080P' },
+  { label: '360P', value: '360P' },
+  { label: '540P', value: '540P' },
+  { label: '720P', value: '720P' },
+  { label: '1080P', value: '1080P' },
 ]
 
 const BASE_FIELDS_PV_I2V = [
@@ -36,7 +36,7 @@ const BASE_FIELDS_PV_I2V = [
     required: true,
     description: '作为视频首帧的参考图片。支持 JPG/PNG/WEBP，各维度不超过10000px，不超过 20MB',
     mediaSlots: [
-      { type: 'first_frame' as const, label: '首帧图片', accept: 'image/*', maxCount: 1, maxSizeMB: 20 },
+      { type: 'image_url' as const, label: '首帧图片', accept: 'image/*', maxCount: 1, maxSizeMB: 20 },
     ],
   },
   {
@@ -44,11 +44,10 @@ const BASE_FIELDS_PV_I2V = [
     label: '分辨率',
     type: 'select' as const,
     group: 'parameters' as const,
-    apiKey: 'size',
     required: true,
     defaultValue: '720P',
     options: RESOLUTION_OPTIONS_I2V,
-    description: '选择分辨率后将自动映射为对应的 size 参数（默认 16:9 画幅）',
+    description: '生成视频的分辨率档位。API 参数名为 resolution',
   },
   {
     key: 'duration',

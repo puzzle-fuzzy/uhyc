@@ -52,7 +52,10 @@
       "Bash(bun add *)",
       "Bash(git commit -m 'feat: add react-router to generate, migrate auth app into generate *)",
       "Bash(git commit -m 'feat: add Ctrl+P command panel with user card + 4-color quick actions *)",
-      "Bash(./node_modules/.bin/tsc --noEmit)"
+      "Bash(./node_modules/.bin/tsc --noEmit)",
+      "Bash(git commit -m 'feat: migrate creativity app into generate, add global Ctrl+P command panel, unify topbar *)",
+      "Bash(git push *)",
+      "Bash(git commit -m 'fix: align PixVerse & Kling model definitions with Bailian API docs *)"
     ]
   }
 }

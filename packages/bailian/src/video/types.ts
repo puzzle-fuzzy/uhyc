@@ -60,6 +60,7 @@ export type MediaSlotType =
   | 'refer'
   | 'base'
   | 'feature'
+  | 'image_url'
 
 /** media 字段的槽位配置：描述该字段接受哪些类型的媒体文件 */
 export interface MediaSlotConfig {

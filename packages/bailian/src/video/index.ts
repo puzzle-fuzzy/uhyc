@@ -26,6 +26,8 @@ import { pixverseC1R2v, pixverseV6R2v, pixverseV56R2v } from './models/pixverse-
 // 可灵 (Kling)
 import { klingV3T2v, klingV3OmniT2v } from './models/kling-t2v'
 import { klingV3I2v, klingV3OmniI2v, klingV3I2vKF, klingV3OmniI2vKF } from './models/kling-i2v'
+import { klingV3OmniR2v } from './models/kling-r2v'
+import { klingV3OmniVideoEdit } from './models/kling-video-edit'
 
 import type { VideoModelRegistry } from './types'
 
@@ -94,10 +96,14 @@ export const videoModels: VideoModelRegistry = {
     pixverseC1R2v,
     pixverseV6R2v,
     pixverseV56R2v,
+    // 可灵
+    klingV3OmniR2v,
   ],
   'video-editing': [
     happyhorseVideoEdit,
     wan27VideoEdit,
+    // 可灵
+    klingV3OmniVideoEdit,
   ],
 }
 
@@ -129,6 +135,8 @@ export { pixverseC1R2v, pixverseV6R2v, pixverseV56R2v } from './models/pixverse-
 // ---- 可灵 ----
 export { klingV3T2v, klingV3OmniT2v } from './models/kling-t2v'
 export { klingV3I2v, klingV3OmniI2v, klingV3I2vKF, klingV3OmniI2vKF } from './models/kling-i2v'
+export { klingV3OmniR2v } from './models/kling-r2v'
+export { klingV3OmniVideoEdit } from './models/kling-video-edit'
 
 // ---- 类型 ----
 export type {
