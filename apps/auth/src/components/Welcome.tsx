@@ -1,4 +1,5 @@
 import type { User } from '@uhyc/shared'
+import { GENERATE_URL } from '@uhyc/shared'
 
 interface WelcomeProps {
   user: User
@@ -19,6 +20,12 @@ export function Welcome({ user, onLogout }: WelcomeProps) {
         <p className="welcome__email">{user.email}</p>
         <span className="uhyc-badge">Last active · {last}</span>
         <div className="welcome__actions">
+          <a
+            href={GENERATE_URL}
+            className="uhyc-btn uhyc-btn--accent"
+          >
+            去创作
+          </a>
           <button
             type="button"
             className="uhyc-btn uhyc-btn--ghost"
