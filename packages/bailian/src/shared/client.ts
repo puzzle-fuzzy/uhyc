@@ -130,8 +130,13 @@ function queryHeaders(apiKey: string): Record<string, string> {
  * @returns  包含 task_id 的响应
  */
 /** 多模态生成端点使用 Chat 格式，其余使用直接参数格式。 */
+/** 多模态生成和图像生成端点使用 Chat 格式，其余使用直接参数格式。 */
 function chooseBodyBuilder(definition: ModelDefinition): typeof buildRequestBody {
-  return definition.endpoint === '/services/aigc/multimodal-generation/generation'
+  const chatEndpoints = [
+    '/services/aigc/multimodal-generation/generation',
+    '/services/aigc/image-generation/generation',
+  ]
+  return chatEndpoints.includes(definition.endpoint)
     ? buildMultimodalBody
     : buildRequestBody
 }
