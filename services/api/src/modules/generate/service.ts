@@ -308,12 +308,29 @@ export abstract class GenerateService {
       const taskStatus = out?.task_status as string | undefined
 
       if (taskStatus === 'SUCCEEDED') {
-        await downloadResultFiles(row.id, row.category, out)
+        // 先标记成功，再尝试下载（下载失败不阻塞状态更新）
         const [updated] = await db
           .update(table.generationTasks)
           .set({ status: 'SUCCEEDED', updatedAt: new Date() })
           .where(eq(table.generationTasks.id, row.id))
           .returning()
+
+        try {
+          await downloadResultFiles(row.id, row.category, out)
+        } catch (e) {
+          // 下载失败时，至少将百炼的原始 URL 存为 sourceUrl
+          const bailianUrl = extractVideoResultUrl(out)
+          if (bailianUrl) {
+            await db.insert(table.generationTaskFiles).values({
+              taskId: row.id,
+              kind: 'primary',
+              sourceUrl: bailianUrl,
+              storagePath: bailianUrl,
+              mimeType: 'video/mp4',
+            }).catch(() => {})
+          }
+        }
+
         const files = await db
           .select()
           .from(table.generationTaskFiles)
