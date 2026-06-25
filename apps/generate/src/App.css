@@ -153,7 +153,7 @@ body {
   top: 92px;                                        /* topbar(~68px) + layout-padding(24px) */
   left: max(24px, calc((100vw - 1400px) / 2));      /* aligned to centered grid left edge */
   width: clamp(420px, calc(420px + (100vw - 960px) * 0.318), 560px);
-  max-height: calc(100vh - 116px);                   /* 100vh - top(92px) - bottom-gap(24px) */
+  height: calc(100vh - 116px);                       /* 100vh - top(92px) - bottom-gap(24px) */
   display: flex;
   flex-direction: column;
 }

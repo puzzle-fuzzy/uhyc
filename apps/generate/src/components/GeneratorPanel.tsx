@@ -79,7 +79,7 @@ export function GeneratorPanel({
   useEffect(() => {
     if (skipCascade.current) return
     const ms = catalog[category]?.[subCategory] ?? []
-    setModelName(ms[0]?.model ?? null)
+    setModelName(ms[0]?.id ?? null)
   }, [catalog, category, subCategory])
 
   // 模型变了：重置 params 为默认值
