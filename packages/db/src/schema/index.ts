@@ -106,9 +106,37 @@ export type GenerationTask = typeof generationTasks.$inferSelect
 export type NewGenerationTask = typeof generationTasks.$inferInsert
 export type GenerationTaskFile = typeof generationTaskFiles.$inferSelect
 
+// ---------------------------------------------------------------------------
+// 创造力任务（Creativity）
+// ---------------------------------------------------------------------------
+
+export const creativityTasks = pgTable('creativity_tasks', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  userId: uuid('user_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  videoUrl: text('video_url').notNull(),
+  status: taskStatus('status').notNull().default('PENDING'),
+  step: integer('step').notNull().default(0),
+  asrResult: jsonb('asr_result'),
+  scriptResult: text('script_result'),
+  mergedResult: text('merged_result'),
+  errorMessage: text('error_message'),
+  createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' })
+    .defaultNow()
+    .notNull(),
+})
+
+export type CreativityTask = typeof creativityTasks.$inferSelect
+export type NewCreativityTask = typeof creativityTasks.$inferInsert
+
 /** Aggregated table map for convenient imports / drizzle-typebox utilities. */
 export const table = {
   users,
   generationTasks,
   generationTaskFiles,
+  creativityTasks,
 } as const

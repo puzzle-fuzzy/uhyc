@@ -9,6 +9,7 @@ export default defineConfig({
     babel({ presets: [reactCompilerPreset()] }),
   ],
   server: {
+    strictPort: true,
     port: 5173,
     // Proxy `/api/*` to the Elysia backend so the browser sends the auth
     // cookie same-origin (credentials: 'include').

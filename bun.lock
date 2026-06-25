@@ -31,6 +31,28 @@
         "vite": "^8.1.0",
       },
     },
+    "apps/creativity": {
+      "name": "creativity",
+      "version": "0.0.0",
+      "dependencies": {
+        "@uhyc/shared": "workspace:*",
+        "react": "^19.2.7",
+        "react-dom": "^19.2.7",
+      },
+      "devDependencies": {
+        "@babel/core": "^7.29.7",
+        "@rolldown/plugin-babel": "^0.2.3",
+        "@types/babel__core": "^7.20.5",
+        "@types/node": "^24.13.2",
+        "@types/react": "^19.2.17",
+        "@types/react-dom": "^19.2.3",
+        "@vitejs/plugin-react": "^6.0.2",
+        "babel-plugin-react-compiler": "^1.0.0",
+        "oxlint": "^1.69.0",
+        "typescript": "~6.0.2",
+        "vite": "^8.1.0",
+      },
+    },
     "apps/generate": {
       "name": "generate",
       "version": "0.0.0",
@@ -412,6 +434,8 @@
 
     "core-util-is": ["core-util-is@1.0.3", "https://registry.npmmirror.com/core-util-is/-/core-util-is-1.0.3.tgz", {}, "sha512-ZQBvi1DcpJ4GDqanjucZ2Hj3wEO5pZDS89BWbkcrvdxksJorwUDDZamX9ldFkp9aw2lmBDLgkObEA4DWNJ9FYQ=="],
 
+    "creativity": ["creativity@workspace:apps/creativity"],
+
     "csstype": ["csstype@3.2.3", "https://registry.npmmirror.com/csstype/-/csstype-3.2.3.tgz", {}, "sha512-z1HGKcYy2xA8AGQfwrn0PAy+PB7X/GSj3UVJW9qKyn43xWa+gl5nXmU4qqLMRzWVLFC8KusUX8T/0kCiOYpAIQ=="],
 
     "dateformat": ["dateformat@2.2.0", "https://registry.npmmirror.com/dateformat/-/dateformat-2.2.0.tgz", {}, "sha512-GODcnWq3YGoTnygPfi02ygEiRxqUxpJwuRHjdhJYuxpcZmDq4rjBiXYmbCCzStxo176ixfLT6i4NPwQooRySnw=="],
@@ -725,6 +749,8 @@
     "auth/typescript": ["typescript@6.0.3", "https://registry.npmmirror.com/typescript/-/typescript-6.0.3.tgz", { "bin": { "tsc": "bin/tsc", "tsserver": "bin/tsserver" } }, "sha512-y2TvuxSZPDyQakkFRPZHKFm+KKVqIisdg9/CZwm9ftvKXLP8NRWj38/ODjNbr43SsoXqNuAisEf1GdCxqWcdBw=="],
 
     "bun-types/@types/node": ["@types/node@26.0.0", "https://registry.npmmirror.com/@types/node/-/node-26.0.0.tgz", { "dependencies": { "undici-types": "~8.3.0" } }, "sha512-vf2YFi1iY9lHGwNJMs01biZFbKJkrZR1T6/MlzjhJLPdntOHLhTrDSnSVcdtvjihi4VQNlrFRIxLsDBlQpAipA=="],
+
+    "creativity/typescript": ["typescript@6.0.3", "https://registry.npmmirror.com/typescript/-/typescript-6.0.3.tgz", { "bin": { "tsc": "bin/tsc", "tsserver": "bin/tsserver" } }, "sha512-y2TvuxSZPDyQakkFRPZHKFm+KKVqIisdg9/CZwm9ftvKXLP8NRWj38/ODjNbr43SsoXqNuAisEf1GdCxqWcdBw=="],
 
     "generate/typescript": ["typescript@6.0.3", "https://registry.npmmirror.com/typescript/-/typescript-6.0.3.tgz", { "bin": { "tsc": "bin/tsc", "tsserver": "bin/tsserver" } }, "sha512-y2TvuxSZPDyQakkFRPZHKFm+KKVqIisdg9/CZwm9ftvKXLP8NRWj38/ODjNbr43SsoXqNuAisEf1GdCxqWcdBw=="],
 

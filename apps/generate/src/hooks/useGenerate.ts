@@ -22,6 +22,8 @@ export function useGenerate(
 
   const pollTask = useCallback(
     async (id: string) => {
+      // 乐观 temp 记录不应被轮询
+      if (id.startsWith('temp-')) return
       try {
         const { task } = await generateApi.getTask(id)
         updateTask(id, task)
@@ -36,9 +38,11 @@ export function useGenerate(
     [updateTask],
   )
 
-  // 对所有非终态任务启动轮询（用 status 签名触发，终态后停止）
+  // 对所有非终态任务启动轮询（用 status 签名触发，终态后停止）。
+  // 跳过乐观 temp 记录（它们还没有真实的 task id）。
   useEffect(() => {
     for (const t of tasks) {
+      if (t.id.startsWith('temp-')) continue
       if (!TERMINAL.has(t.status) && !timers.current[t.id]) {
         timers.current[t.id] = setTimeout(() => void pollTask(t.id), POLL_INTERVAL)
       }

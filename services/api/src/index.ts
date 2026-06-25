@@ -8,6 +8,7 @@ import { openapi } from '@elysia/openapi'
 import { authModule } from './modules/auth'
 import { generateModule } from './modules/generate'
 import { uploadModule } from './modules/upload'
+import { creativityModule } from './modules/creativity'
 
 const app = new Elysia()
   // `credentials: true` lets browsers send the auth cookie cross-origin.
@@ -33,6 +34,7 @@ const app = new Elysia()
   .use(authModule)
   .use(generateModule)
   .use(uploadModule)
+  .use(creativityModule)
   .get(
     '/generate/storage/:taskId/:filename',
     async ({ params, set }) => {
