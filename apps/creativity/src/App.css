@@ -56,6 +56,9 @@ body {
   align-items: center;
   justify-content: center;
   font-weight: 900;
+  font-size: 16px;
+  overflow: hidden;
+  flex-shrink: 0;
 }
 
 /* layout */
@@ -123,6 +126,11 @@ body {
   font-size: 13px;
   color: var(--muted);
   margin: 4px 0 0;
+}
+.crea-upload__bar {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
 }
 
 /* pipeline status */

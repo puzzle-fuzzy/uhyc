@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import type { Catalog, ModelDefinition, MediaItem, PromptToken } from '../types'
 import { serializePrompt } from '../lib/promptSerializer'
 import { uploadFile } from '../api'
@@ -6,6 +6,13 @@ import { CategorySelect } from './CategorySelect'
 import { SubCategoryTabs } from './SubCategoryTabs'
 import { ModelSelect } from './ModelSelect'
 import { DynamicForm } from './DynamicForm'
+
+export interface FormValues {
+  category: string
+  subCategory: string
+  model: string
+  params: Record<string, unknown>
+}
 
 interface GeneratorPanelProps {
   catalog: Catalog
@@ -17,6 +24,9 @@ interface GeneratorPanelProps {
     model: string
     params: Record<string, unknown>
   }) => Promise<void>
+  /** 填充表单（重新生成用） */
+  formFill?: FormValues | null
+  formFillVersion?: number
 }
 
 function defaultsFor(model: ModelDefinition | null): Record<string, unknown> {
@@ -33,6 +43,8 @@ export function GeneratorPanel({
   submitting,
   submitError,
   onSubmit,
+  formFill,
+  formFillVersion = 0,
 }: GeneratorPanelProps) {
   const categories = useMemo(() => Object.keys(catalog), [catalog])
   const [category, setCategory] = useState(categories[0] ?? '')
@@ -54,23 +66,44 @@ export function GeneratorPanel({
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [uploading, setUploading] = useState(false)
 
+  // 表单填充时跳过级联
+  const skipCascade = useRef(false)
+
   // category 变了：取第一个 subCategory
   useEffect(() => {
+    if (skipCascade.current) return
     const subs = Object.keys(catalog[category] ?? {})
     setSubCategory(subs[0] ?? '')
   }, [catalog, category])
 
   // subCategory 变了：取第一个模型
   useEffect(() => {
+    if (skipCascade.current) return
     const ms = catalog[category]?.[subCategory] ?? []
     setModelName(ms[0]?.model ?? null)
   }, [catalog, category, subCategory])
 
   // 模型变了：重置 params 为默认值
   useEffect(() => {
+    if (skipCascade.current) return
     setParams(defaultsFor(model))
     setErrors({})
   }, [model])
+
+  // 填充表单（重新生成）
+  const prevFillVer = useRef(0)
+  useEffect(() => {
+    if (formFillVersion === 0 || !formFill || formFillVersion === prevFillVer.current) return
+    prevFillVer.current = formFillVersion
+
+    skipCascade.current = true
+    setCategory(formFill.category)
+    setSubCategory(formFill.subCategory)
+    setModelName(formFill.model)
+    setParams(formFill.params)
+    setErrors({})
+    queueMicrotask(() => { skipCascade.current = false })
+  }, [formFillVersion, formFill])
 
   function setParam(key: string, value: unknown) {
     setParams((p) => ({ ...p, [key]: value }))
@@ -91,7 +124,6 @@ export function GeneratorPanel({
       if (!value) continue
 
       if (Array.isArray(value)) {
-        // refSyntax 风格：MediaItem[] 数组，每个 item 有 id/url/type
         const items = value as MediaItem[]
         const blobItems = items.filter((m) => m.url.startsWith('blob:'))
         if (blobItems.length === 0) continue
@@ -122,7 +154,6 @@ export function GeneratorPanel({
           setUploading(false)
         }
       } else if (typeof value === 'string' && value.startsWith('blob:')) {
-        // 单值风格：MediaUpload 存储的 blob URL
         setUploading(true)
         try {
           const blob = await fetch(value).then((r) => r.blob())
@@ -166,6 +197,12 @@ export function GeneratorPanel({
     }
   }
 
+  function handleClear() {
+    skipCascade.current = true
+    setCategory(categories[0] ?? '')
+    queueMicrotask(() => { skipCascade.current = false })
+  }
+
   return (
     <div className="uhyc-card gen-panel">
       <div className="gen-panel__head">
@@ -197,14 +234,24 @@ export function GeneratorPanel({
       </div>
 
       <div className="gen-panel__foot">
-        <button
-          type="button"
-          className="uhyc-btn uhyc-btn--accent"
-          disabled={!model || uploading}
-          onClick={handleSubmit}
-        >
-          {uploading ? '上传素材中…' : '生成'}
-        </button>
+        <div className="gen-panel__foot-row">
+          <button
+            type="button"
+            className="uhyc-btn uhyc-btn--accent"
+            disabled={!model || uploading}
+            onClick={handleSubmit}
+          >
+            {uploading ? '上传素材中…' : '生成'}
+          </button>
+          <button
+            type="button"
+            className="gen-panel__clear"
+            onClick={handleClear}
+            title="清空表单"
+          >
+            ✕
+          </button>
+        </div>
       </div>
     </div>
   )

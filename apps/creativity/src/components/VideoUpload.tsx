@@ -1,32 +1,85 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+
+const STORAGE_KEY = 'creativity-pending-video'
 
 interface VideoUploadProps {
-  onUpload: (url: string) => void
+  onProcess: (url: string) => void
+  processing: boolean
 }
 
-export function VideoUpload({ onUpload }: VideoUploadProps) {
+/** 从 localStorage 恢复上次未处理的视频 URL */
+export function getPendingVideo(): string | null {
+  return localStorage.getItem(STORAGE_KEY)
+}
+
+/** 清除未处理状态 */
+export function clearPendingVideo() {
+  localStorage.removeItem(STORAGE_KEY)
+}
+
+export function VideoUpload({ onProcess, processing }: VideoUploadProps) {
   const inputRef = useRef<HTMLInputElement>(null)
-  const [preview, setPreview] = useState<string | null>(null)
+  const [ossUrl, setOssUrl] = useState<string | null>(getPendingVideo())
   const [uploading, setUploading] = useState(false)
+
+  // 恢复上次的预览 blob（仅内存，OSS URL 持久化）
+  const [previewBlob, setPreviewBlob] = useState<string | null>(null)
+
+  useEffect(() => {
+    return () => {
+      if (previewBlob) URL.revokeObjectURL(previewBlob)
+    }
+  }, [previewBlob])
 
   async function handleFile(file: File | undefined) {
     if (!file) return
-    setPreview(URL.createObjectURL(file))
+    const blob = URL.createObjectURL(file)
+    setPreviewBlob(blob)
     setUploading(true)
     try {
       const { url } = await import('../api').then((m) => m.uploadFile(file))
-      onUpload(url)
+      setOssUrl(url)
+      localStorage.setItem(STORAGE_KEY, url)
     } catch {
-      setPreview(null)
+      setPreviewBlob(null)
+      setOssUrl(null)
     } finally {
       setUploading(false)
     }
   }
 
+  function handleClear() {
+    setOssUrl(null)
+    setPreviewBlob(null)
+    clearPendingVideo()
+  }
+
+  const previewSrc = previewBlob || (ossUrl ? ossUrl : null)
+
   return (
     <div className="crea-upload">
-      {preview ? (
-        <video src={preview} controls className="crea-upload__preview" />
+      {previewSrc ? (
+        <>
+          <video key={previewSrc} src={previewSrc} controls className="crea-upload__preview" />
+          <div className="crea-upload__bar">
+            <button
+              type="button"
+              className="uhyc-btn uhyc-btn--accent"
+              disabled={processing}
+              onClick={() => ossUrl && onProcess(ossUrl)}
+            >
+              {processing ? '处理中…' : '开始处理'}
+            </button>
+            <button
+              type="button"
+              className="uhyc-btn uhyc-btn--ghost"
+              onClick={handleClear}
+              disabled={processing}
+            >
+              更换视频
+            </button>
+          </div>
+        </>
       ) : (
         <div
           className="crea-upload__placeholder"

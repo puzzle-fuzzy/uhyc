@@ -37,7 +37,7 @@ export const generateModule = new Elysia({ prefix: '/generate' })
   )
   .get(
     '/tasks',
-    ({ currentUser }) => GenerateService.list(currentUser.id),
+    ({ currentUser, query }) => GenerateService.list(currentUser.id, 50, query.all === 'true'),
     {
       isAuth: true,
       response: { 200: TaskListResponse },

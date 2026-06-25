@@ -1,7 +1,7 @@
 import { useAuth, buildLoginUrl } from '@uhyc/shared'
 import { useEffect } from 'react'
 import { useCreativity } from './hooks/useCreativity'
-import { VideoUpload } from './components/VideoUpload'
+import { VideoUpload, clearPendingVideo } from './components/VideoUpload'
 import { PipelineStatus } from './components/PipelineStatus'
 import { ResultPanel } from './components/ResultPanel'
 import { creativityApi } from './api'
@@ -32,7 +32,8 @@ function App() {
 
   const latestTask = tasks[0] ?? null
 
-  async function handleUpload(url: string) {
+  async function handleProcess(url: string) {
+    clearPendingVideo()
     await submit(url)
   }
 
@@ -75,8 +76,7 @@ function App() {
 
       <div className="crea-layout">
         <section className="crea-layout__left">
-          <VideoUpload onUpload={handleUpload} />
-          {processing && <p className="crea-upload__status">提交中…</p>}
+          <VideoUpload onProcess={handleProcess} processing={processing} />
           <PipelineStatus task={latestTask} />
           {latestTask?.status === 'FAILED' && (
             <div className="crea-left__actions">

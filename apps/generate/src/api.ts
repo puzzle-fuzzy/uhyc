@@ -70,8 +70,8 @@ export const generateApi = {
   catalog: () => get<Catalog>('/generate/catalog'),
   createTask: (body: CreateTaskInput) =>
     post<{ task: TaskResponse }>('/generate/tasks', body),
-  listTasks: () =>
-    get<{ items: TaskResponse[]; total: number }>('/generate/tasks'),
+  listTasks: (all?: boolean) =>
+    get<{ items: TaskResponse[]; total: number }>(`/generate/tasks${all ? '?all=true' : ''}`),
   getTask: (id: string) => get<{ task: TaskResponse }>(`/generate/tasks/${id}`),
   deleteTask: (id: string) => del<{ ok: boolean }>(`/generate/tasks/${id}`),
 }

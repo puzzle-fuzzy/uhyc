@@ -1,6 +1,7 @@
 import { useRef } from 'react'
 import type { MediaItem, RefSyntax } from '../types'
 import { computeLabels } from '../lib/promptSerializer'
+import { uploadFile } from '../api'
 
 interface ReferenceAssetsProps {
   /** 当前素材列表（即 params.media） */
@@ -28,17 +29,28 @@ export function ReferenceAssets({
 
   const labeled = computeLabels(items, refSyntax)
 
-  function addFiles(files: FileList | null, type: MediaItem['type']) {
+  async function addFiles(files: FileList | null, type: MediaItem['type']) {
     if (!files) return
     const added: MediaItem[] = []
     for (const f of Array.from(files)) {
-      const url = URL.createObjectURL(f)
+      const blobUrl = URL.createObjectURL(f)
+      let url = blobUrl
+      let thumbnail: string | undefined = type === 'reference_video' ? undefined : blobUrl
+
+      try {
+        const result = await uploadFile(f)
+        url = result.url
+        thumbnail = result.thumbnail || url
+      } catch {
+        // 上传失败则保留 blob URL，提交时会重试
+      }
+
       added.push({
         id: nextId(),
         type,
         url,
         label: '',
-        thumbnail: type === 'reference_video' ? undefined : url,
+        thumbnail,
       })
     }
     onChange([...items, ...added])

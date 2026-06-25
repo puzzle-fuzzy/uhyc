@@ -1,9 +1,11 @@
 import { useAuth, buildLoginUrl } from '@uhyc/shared'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
+import type { TaskResponse } from './types'
 import { useCatalog } from './hooks/useCatalog'
 import { useTaskHistory } from './hooks/useTaskHistory'
 import { useGenerate } from './hooks/useGenerate'
 import { GeneratorPanel } from './components/GeneratorPanel'
+import type { FormValues } from './components/GeneratorPanel'
 import { TaskHistory } from './components/TaskHistory'
 import { generateApi } from './api'
 import './App.css'
@@ -20,8 +22,11 @@ const LOGO_SVG = (
 function App() {
   const auth = useAuth()
   const { catalog } = useCatalog()
-  const { tasks, setTasks, refresh } = useTaskHistory()
+  const { tasks, setTasks, refresh, showAll, setShowAll } = useTaskHistory()
   const { submit, submitting, error: submitError } = useGenerate(tasks, setTasks)
+
+  const [formFill, setFormFill] = useState<FormValues | null>(null)
+  const [formFillVersion, setFormFillVersion] = useState(0)
 
   useEffect(() => {
     if (auth.status === 'unauthenticated') {
@@ -43,6 +48,10 @@ function App() {
 
   const initial = auth.user.username.charAt(0).toUpperCase()
 
+  function handleAvatarClick() {
+    setShowAll(!showAll)
+  }
+
   async function handleDelete(task: TaskResponse) {
     try {
       await generateApi.deleteTask(task.id)
@@ -50,6 +59,16 @@ function App() {
     } catch {
       // 删除失败静默处理，下次刷新会同步
     }
+  }
+
+  function handleRerun(task: TaskResponse) {
+    setFormFill({
+      category: task.category,
+      subCategory: task.subCategory,
+      model: task.model,
+      params: task.params as Record<string, unknown>,
+    })
+    setFormFillVersion((v) => v + 1)
   }
 
   return (
@@ -60,7 +79,14 @@ function App() {
           <span>uhyc · generate</span>
         </div>
         <div className="topbar__user">
-          <span className="topbar__avatar">{initial}</span>
+          <span
+            className={`topbar__avatar${showAll ? ' topbar__avatar--dev' : ''}`}
+            onClick={handleAvatarClick}
+            title={showAll ? '开发模式：显示全部记录' : '点击切换开发模式'}
+          >
+            {initial}
+          </span>
+          {showAll && <span className="uhyc-badge uhyc-badge--dev">DEV</span>}
           <span className="uhyc-badge">{auth.user.username}</span>
           <button
             type="button"
@@ -80,15 +106,15 @@ function App() {
               submitting={submitting}
               submitError={submitError}
               onSubmit={submit}
+              formFill={formFill}
+              formFillVersion={formFillVersion}
             />
           )}
         </section>
         <section className="gen-layout__right">
           <TaskHistory
             tasks={tasks}
-            onRerun={({ category, subCategory, model, params }) =>
-              submit({ category, subCategory, model, params })
-            }
+            onRerun={handleRerun}
             onDelete={handleDelete}
           />
         </section>

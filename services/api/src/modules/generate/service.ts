@@ -243,13 +243,21 @@ export abstract class GenerateService {
   }
 
   /** 列出当前用户历史记录（最新在前），附带文件信息。 */
-  static async list(userId: string, limit = 50) {
-    const rows = await db
-      .select()
-      .from(table.generationTasks)
-      .where(eq(table.generationTasks.userId, userId))
-      .orderBy(desc(table.generationTasks.createdAt))
-      .limit(limit)
+  /** 列出当前用户历史记录（最新在前），附带文件信息。
+   *  当 all=true 时返回所有用户的记录（开发调试用）。 */
+  static async list(userId: string, limit = 50, all = false) {
+    const rows = all
+      ? await db
+          .select()
+          .from(table.generationTasks)
+          .orderBy(desc(table.generationTasks.createdAt))
+          .limit(limit)
+      : await db
+          .select()
+          .from(table.generationTasks)
+          .where(eq(table.generationTasks.userId, userId))
+          .orderBy(desc(table.generationTasks.createdAt))
+          .limit(limit)
 
     // 批量加载所有任务的 files，按 taskId 分组
     const taskIds = rows.map((r) => r.id)

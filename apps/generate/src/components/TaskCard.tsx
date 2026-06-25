@@ -48,6 +48,7 @@ function downloadAll(files: TaskResponse['files']) {
 
 export function TaskCard({ task, onRerun, onDelete }: TaskCardProps) {
   const [expanded, setExpanded] = useState(false)
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const files = task.files?.filter((f) => f.kind === 'primary') ?? []
   const file = files[0]
 
@@ -71,19 +72,18 @@ export function TaskCard({ task, onRerun, onDelete }: TaskCardProps) {
           ) : (
             <div className="gen-task__image-grid">
               {files.map((f, idx) => (
-                <a
+                <button
                   key={f.id}
-                  href={artifactUrl(f.storagePath)}
-                  className="gen-task__image-link"
-                  target="_blank"
-                  rel="noreferrer"
+                  type="button"
+                  className="gen-task__image-btn"
+                  onClick={() => setPreviewUrl(artifactUrl(f.storagePath))}
                 >
                   <img
                     src={artifactUrl(f.storagePath)}
                     alt={`生成结果 ${idx + 1}`}
                     className="gen-task__image"
                   />
-                </a>
+                </button>
               ))}
             </div>
           )
@@ -142,6 +142,29 @@ export function TaskCard({ task, onRerun, onDelete }: TaskCardProps) {
         <pre className="gen-task__params">
           {JSON.stringify(task, null, 2)}
         </pre>
+      )}
+
+      {/* 全屏图片预览 */}
+      {previewUrl && (
+        <div
+          className="gen-overlay"
+          onClick={() => setPreviewUrl(null)}
+        >
+          <button
+            type="button"
+            className="gen-overlay__close"
+            onClick={() => setPreviewUrl(null)}
+            aria-label="关闭"
+          >
+            ✕
+          </button>
+          <img
+            src={previewUrl}
+            alt="预览"
+            className="gen-overlay__image"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
       )}
     </div>
   )

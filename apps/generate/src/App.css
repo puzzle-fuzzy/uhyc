@@ -60,6 +60,19 @@ body {
   justify-content: center;
   font-weight: 900;
 }
+.topbar__avatar {
+  cursor: default;
+}
+.topbar__avatar--dev {
+  outline: 3px solid var(--danger);
+  outline-offset: 2px;
+  cursor: pointer;
+}
+.uhyc-badge--dev {
+  background: var(--danger);
+  color: #fff;
+  border-color: var(--danger);
+}
 .topbar__logout {
   width: auto;
   padding: 8px 16px;
@@ -105,6 +118,32 @@ body {
 .gen-panel__foot {
   padding: 16px 20px;
   border-top: 2px solid var(--ink);
+}
+.gen-panel__foot-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.gen-panel__clear {
+  width: 36px;
+  height: 36px;
+  border: var(--border);
+  border-radius: 8px;
+  background: var(--paper);
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: box-shadow 0.12s ease, transform 0.12s ease;
+}
+.gen-panel__clear:hover {
+  box-shadow: var(--shadow-sm);
+  transform: translate(-1px, -1px);
+  color: var(--danger);
 }
 
 .gen-form__group {
@@ -497,6 +536,63 @@ body {
   object-fit: cover;
   border-radius: 8px;
   border: var(--border);
+  display: block;
+}
+.gen-task__image-btn {
+  display: block;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  line-height: 0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.gen-task__image-btn:hover .gen-task__image {
+  box-shadow: var(--shadow-sm);
+  transform: translate(-1px, -1px);
+  transition: box-shadow 0.12s ease, transform 0.12s ease;
+}
+
+/* 全屏图片遮罩 */
+.gen-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.gen-overlay__image {
+  max-width: 90vw;
+  max-height: 90vh;
+  border-radius: 8px;
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
+  cursor: default;
+}
+.gen-overlay__close {
+  position: absolute;
+  top: 20px;
+  right: 24px;
+  width: 40px;
+  height: 40px;
+  border: var(--border);
+  border-radius: 50%;
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 18px;
+  font-weight: 800;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: box-shadow 0.12s ease, transform 0.12s ease;
+}
+.gen-overlay__close:hover {
+  box-shadow: var(--shadow-sm);
+  transform: translate(-1px, -1px);
 }
 .gen-task__foot {
   display: flex;
