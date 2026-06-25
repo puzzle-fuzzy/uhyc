@@ -1,5 +1,6 @@
-import { useAuth, buildLoginUrl, usePresence, AvatarStack } from '@uhyc/shared'
+import { usePresence, AvatarStack } from '@uhyc/shared'
 import { useEffect, useRef, useState } from 'react'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import type { TaskResponse, Catalog } from './types'
 import type { PromptToken } from './lib/promptSerializer'
 import { useCatalog } from './hooks/useCatalog'
@@ -9,40 +10,11 @@ import { GeneratorPanel } from './components/GeneratorPanel'
 import type { FormValues } from './components/GeneratorPanel'
 import { TaskHistory } from './components/TaskHistory'
 import { ToastContainer, toast } from './components/Toast'
+import { LoginPage } from './components/LoginPage'
+import { ProtectedRoute } from './components/ProtectedRoute'
+import { AuthProvider, useAuthContext } from './components/AuthContext'
 import { generateApi } from './api'
 import './App.css'
-
-/** 加载中的随机趣味文案 */
-const LOADING_MESSAGES = [
-  '正在唤醒尊贵VIP通道…',
-  '正在和百炼服务器握手…',
-  '正在调校炼丹炉参数…',
-  '正在擦拭镜头…',
-  '正在调色…',
-  '正在给模型喂数据…',
-  'Loading… 好吧，其实是中文加载中',
-  '正在连接生成引擎…',
-  '一切准备就绪… 还差一点',
-]
-
-/** 登录加载界面 — 带随机文案 */
-function LoadingScreen() {
-  const [msg, setMsg] = useState(() => LOADING_MESSAGES[Math.floor(Math.random() * LOADING_MESSAGES.length)])
-  useEffect(() => {
-    const t = setInterval(() => {
-      setMsg(LOADING_MESSAGES[Math.floor(Math.random() * LOADING_MESSAGES.length)])
-    }, 2000)
-    return () => clearInterval(t)
-  }, [])
-  return (
-    <main className="center-screen">
-      <div className="gen-loading">
-        <span className="uhyc-spinner" />
-        <p className="gen-loading__msg">{msg}</p>
-      </div>
-    </main>
-  )
-}
 
 /** 快捷键帮助浮层 */
 const SHORTCUTS: [string, string][] = [
@@ -155,8 +127,9 @@ function parsePromptIntoTokens(
   return tokens.length > 0 ? tokens : [{ kind: 'text' as const, text: prompt }]
 }
 
-function App() {
-  const auth = useAuth()
+/** 工作室主界面（有顶栏、左右两栏）——必须在 AuthProvider 内部 */
+function Studio() {
+  const auth = useAuthContext()
   const { catalog } = useCatalog()
   const { tasks, setTasks, refresh, showAll, setShowAll } = useTaskHistory()
   const { submit, submitting, error: submitError, onTaskUpdated, onWsDisconnect } = useGenerate(tasks, setTasks)
@@ -203,20 +176,11 @@ function App() {
   }, [shortcutOpen])
 
   useEffect(() => {
-    if (auth.status === 'unauthenticated') {
-      window.location.replace(buildLoginUrl(window.location.href))
-    }
-  }, [auth.status])
-
-  useEffect(() => {
     if (auth.status === 'authenticated') void refresh()
   }, [auth.status, refresh])
 
-  if (auth.status !== 'authenticated' || !auth.user) {
-    return <LoadingScreen />
-  }
-
-  const initial = auth.user.username.charAt(0).toUpperCase()
+  // Auth is per-route: ProtectedRoute handles /, LoginPage handles /login
+  const initial = (auth.user?.username ?? '?').charAt(0).toUpperCase()
 
   function handleAvatarClick() {
     setShowAll(!showAll)
@@ -308,7 +272,7 @@ function App() {
             devTitle={showAll ? '开发模式：显示全部记录' : '点击切换开发模式'}
           />
           {showAll && <span className="uhyc-badge uhyc-badge--dev">DEV</span>}
-          <span className="uhyc-badge">{auth.user.username}</span>
+          <span className="uhyc-badge">{auth.user?.username}</span>
           <button
             type="button"
             className="uhyc-btn uhyc-btn--ghost topbar__logout"
@@ -347,4 +311,23 @@ function App() {
   )
 }
 
-export default App
+/** 顶层路由容器：提供 AuthProvider 和 BrowserRouter */
+export default function App() {
+  return (
+    <AuthProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/login" element={<LoginPage />} />
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute>
+                <Studio />
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
+  )
+}

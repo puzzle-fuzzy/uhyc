@@ -48,7 +48,9 @@
       "Bash(python3 -)",
       "Bash(bunx tsc *)",
       "Bash(git commit -m 'feat: redesign empty state with single kaomoji blob, add color/width per emoji, playful swap animations *)",
-      "Bash(git commit -m 'refactor: convert left panel to pure grid layout, unify custom scrollbars *)"
+      "Bash(git commit -m 'refactor: convert left panel to pure grid layout, unify custom scrollbars *)",
+      "Bash(bun add *)",
+      "Bash(git commit -m 'feat: add react-router to generate, migrate auth app into generate *)"
     ]
   }
 }

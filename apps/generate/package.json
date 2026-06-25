@@ -13,7 +13,8 @@
     "@radix-ui/react-scroll-area": "^1.2.12",
     "@uhyc/shared": "workspace:*",
     "react": "^19.2.7",
-    "react-dom": "^19.2.7"
+    "react-dom": "^19.2.7",
+    "react-router-dom": "^7.18.0"
   },
   "devDependencies": {
     "@babel/core": "^7.29.7",
