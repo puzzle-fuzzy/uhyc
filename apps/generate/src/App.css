@@ -1027,6 +1027,23 @@ body {
 }
 .gen-task__image-btn:hover .gen-task__image {
   box-shadow: var(--shadow-sm);
+}
+.gen-task__audio-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+.gen-task__audio-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.gen-task__audio-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted-strong);
+}
   transform: translate(-1px, -1px);
   transition: box-shadow 0.12s ease, transform 0.12s ease;
 }

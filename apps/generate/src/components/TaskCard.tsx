@@ -100,6 +100,21 @@ export function TaskCard({ task, onRerun, onDelete }: TaskCardProps) {
               controls
               className="gen-media"
             />
+          ) : task.category === 'music' ? (
+            <div className="gen-task__audio-list">
+              {files.map((f, idx) => (
+                <div key={f.id} className="gen-task__audio-wrapper">
+                  <span className="gen-task__audio-label">
+                    音频 {idx + 1}
+                  </span>
+                  <audio
+                    src={artifactUrl(f.storagePath)}
+                    controls
+                    className="gen-media"
+                  />
+                </div>
+              ))}
+            </div>
           ) : (
             <div className="gen-task__image-grid">
               {files.map((f, idx) => (

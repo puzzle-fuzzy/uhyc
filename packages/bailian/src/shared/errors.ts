@@ -30,6 +30,7 @@ const ERROR_MAP: Record<string, string> = {
   'InvalidImage.Resolution': '图片分辨率不符合要求',
   'InvalidImage.FileFormat': '图片格式不支持',
   'NOT AUTHORIZED': '无权访问该工作空间，请检查 API Key 和接入地址配置',
+  'CLIENT_ERROR': '请求被拒绝：输入内容或参数不符合模型要求',
 }
 
 /**
@@ -49,6 +50,9 @@ const MESSAGE_PATTERNS: [RegExp, string][] = [
   [/rate.*limit/i, '请求频率超限，请稍后重试'],
   [/timeout/i, '请求超时，请检查网络连接后重试'],
   [/content.*inappropriate/i, '输入内容包含疑似敏感信息，已被内容安全拦截'],
+  [/lyrics content is illegal/i, '歌词内容不合规，已被内容安全拦截，请修改歌词后重试'],
+  [/prompt content is illegal/i, '提示词内容不合规，已被内容安全拦截，请修改提示词后重试'],
+  [/content.*illegal/i, '输入内容不合规，已被内容安全拦截，请修改后重试'],
 ]
 
 /**
