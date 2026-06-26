@@ -5,6 +5,7 @@ import { Elysia } from 'elysia'
 import { cors } from '@elysia/cors'
 import { openapi } from '@elysia/openapi'
 
+import { logger } from './lib/logger'
 import { authModule } from './modules/auth'
 import { generateModule } from './modules/generate'
 import { uploadModule } from './modules/upload'
@@ -91,6 +92,9 @@ const securityHeaders = new Elysia({ name: 'security-headers' }).onRequest(
   },
 )
 
+// 用 WeakMap 存请求开始时间（避免污染 Request 对象）
+const startTimes = new WeakMap<Request, number>()
+
 // ---------------------------------------------------------------------------
 // App
 // ---------------------------------------------------------------------------
@@ -105,6 +109,27 @@ const app = new Elysia()
       origin: process.env.CORS_ORIGIN?.split(',') ?? true,
     }),
   )
+  // ---- 请求日志（在所有路由之前注册，覆盖所有请求） ----
+  .onRequest(({ request }) => {
+    startTimes.set(request, Date.now())
+  })
+  .onAfterHandle(({ request, set }) => {
+    const start = startTimes.get(request)
+    if (!start) return
+    const duration = Date.now() - start
+    const url = new URL(request.url)
+    if (url.pathname.startsWith('/ws/') || url.pathname === '/') return
+    logger.http(request.method, url.pathname, Number(set.status) || 200, duration)
+  })
+  .onError(({ request, set, error }) => {
+    const start = startTimes.get(request)
+    const duration = start ? Date.now() - start : 0
+    const url = new URL(request.url)
+    if (url.pathname.startsWith('/ws/') || url.pathname === '/') return
+    logger.http(request.method, url.pathname, Number(set.status) || 500, duration, {
+      error: (error as Error)?.message ?? String(error),
+    })
+  })
   .use(
     openapi({
       documentation: {

@@ -36,3 +36,6 @@ bun.lockb
 .cache/
 .turbo/
 /services/api/storage/
+
+# Brainstorming visual companion
+.superpowers/

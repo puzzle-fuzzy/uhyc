@@ -1,9 +1,10 @@
-import { desc, eq, isNull } from 'drizzle-orm'
+import { and, desc, eq, isNull } from 'drizzle-orm'
 import { status } from 'elysia'
 
 import { db, table, type CreativityTask } from '@uhyc/db'
 import type { BailianClientConfig } from '@uhyc/bailian'
 import { DEFAULT_BASE_URL } from '@uhyc/bailian'
+import { logger } from '../../lib/logger'
 import { presenceManager } from '../presence/manager'
 
 const POLL_INTERVAL = 5000
@@ -51,6 +52,15 @@ async function updateTask(
   // 通过 WS 推送给任务创建者
   const taskResp = toTaskResponse(updated)
   presenceManager.broadcastTask(userId, { type: 'task_updated', task: taskResp })
+
+  // 记录任务状态变更
+  logger.task(updated.id, userId, 'pipeline_step', {
+    step: updated.step,
+    status: updated.status,
+    hasAsr: !!updated.asrResult,
+    hasScript: !!updated.scriptResult,
+    hasMerged: !!updated.mergedResult,
+  })
 
   return updated
 }
@@ -300,6 +310,7 @@ async function runPipeline(taskId: string, userId: string, videoUrl: string) {
     })
   } catch (e) {
     const msg = e instanceof Error ? e.message : '处理失败'
+    logger.error('task', 'pipeline_failed', { taskId, userId, error: msg })
     await updateTask(taskId, userId, { status: 'FAILED', errorMessage: msg })
   }
 }
@@ -325,8 +336,13 @@ export abstract class CreativityService {
       .returning()
 
     // 异步启动 pipeline（不阻塞响应）
+    logger.task(row.id, userId, 'pipeline_start', { videoUrl: body.videoUrl })
     runPipeline(row.id, userId, body.videoUrl).catch((e) => {
-      console.error(`Pipeline ${row.id} failed:`, e)
+      logger.error('task', `Pipeline ${row.id} failed`, {
+        taskId: row.id,
+        userId,
+        error: e instanceof Error ? e.message : String(e),
+      })
     })
 
     return { task: toTaskResponse(row) }
