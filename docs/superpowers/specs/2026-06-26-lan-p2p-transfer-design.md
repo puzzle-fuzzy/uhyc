@@ -1,0 +1,486 @@
+# LAN P2P File Transfer — Design Spec
+
+## Overview
+
+Add peer-to-peer file transfer to the generate app over LAN. Two capabilities:
+
+1. **Share generated assets** — each completed task in the history panel has a share button (⊕). Clicking it opens the online user picker; selecting a peer sends the file via P2P.
+2. **Pure file transfer** — drag any file from the desktop into the app, pick an online recipient, and transfer directly without server intermediate storage
+
+The server handles only signaling (WebSocket relay of WebRTC handshake messages). File data never passes through the server.
+
+## Decisions
+
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| Transport | WebRTC DataChannel | Native browser P2P, works on LAN without TURN |
+| Signaling | Extend existing `/ws/presence` | Single connection multiplexes presence + task push + signaling |
+| Connection model | One RTCPeerConnection per transfer | State isolation, no cascading failures |
+| Chunk size | 64 KB | Below 256 KB browser limit, above 16 KB header overhead |
+| ICE | STUN only (no TURN) | All users on same LAN, host candidates suffice |
+| File storage | Never written to server | Transferred file exists only in recipient's browser memory → download |
+| Auth | Same JWT cookie | Existing presence auth reused as-is |
+| Transfer scope | LAN only | No WAN relay, no TURN server |
+
+## Architecture
+
+```
+┌── Browser A (sender) ──────────────────┐    ┌── Server ───────────────────────┐    ┌── Browser B (recipient) ────────────────┐
+│                                         │    │                                  │    │                                          │
+│  drag file → UserPickerPopup            │    │  Elysia WS (/ws/presence)        │    │  toast notification                      │
+│       │                                 │    │                                  │    │       ▲                                  │
+│       │ WS: transfer-offer ─────────────┼───>│  message handler: relay by to   ─┼───>│  transfer-offer                          │
+│       │                                 │    │                                  │    │       │                                  │
+│       │<─────────────────────────────── transfer-answer ────── WS ──│     │       │                                  │
+│       │                                 │    │                                  │    │       │                                  │
+│  create RTCPeerConnection               │    │                                  │    │  create RTCPeerConnection               │
+│  create DataChannel                     │    │                                  │    │  bind DataChannel.onopen                │
+│  create offer → setLocalDescription     │    │                                  │    │  setRemoteDescription(offer)             │
+│       │                                 │    │                                  │    │       │                                  │
+│       │ WS: signal(offer) ──────────────┼───>│  relay by to                     ┼───>│  signal(offer)                          │
+│       │                                 │    │                                  │    │  create answer → setLocalDescription     │
+│       │<─────────────────────────────── signal(answer) ───── WS ──│     │       │                                  │
+│  setRemoteDescription(answer)           │    │                                  │    │       │                                  │
+│       │                                 │    │                                  │    │       │                                  │
+│       │══════ ICE candidates (WS relay) ═══>│  relay                          ═══>│  ICE candidates                         │
+│       │                                 │    │                                  │    │       │                                  │
+│       │══════════════════ WebRTC DataChannel (LAN) ════════════════════════════════>│       │                                  │
+│  send file chunks                       │    │                                  │    │  receive → reassemble → Blob → download │
+│                                         │    │                                  │    │                                          │
+└─────────────────────────────────────────┘    └──────────────────────────────────┘    └──────────────────────────────────────────┘
+```
+
+## 1. WebSocket Signaling Protocol
+
+Extended on the existing `/ws/presence` connection. Three new message types, server relays by `to` field without parsing payload.
+
+### New Message Types
+
+```typescript
+// ── Transfer offer (sender → server → recipient) ──
+interface TransferOffer {
+  type: 'transfer-offer'
+  transferId: string         // uuid, generated by sender
+  to: string                 // recipient userId
+  fileName: string
+  fileSize: number
+  mimeType: string
+}
+
+// ── Transfer answer (recipient → server → sender) ──
+// Auto-generated by the recipient's PeerConnectionManager when it receives
+// a transfer-offer. Always accepted=true (no manual accept/decline UI).
+// If the recipient is offline, the server silently drops the offer and
+// the sender times out — there is no explicit reject.
+interface TransferAnswer {
+  type: 'transfer-answer'
+  transferId: string
+  to: string                 // original sender userId
+  accepted: true
+}
+
+// ── WebRTC signaling (bidirectional, relayed) ──
+interface SignalPayload {
+  type: 'signal'
+  transferId: string
+  to: string
+  sdp?: string               // RTCSessionDescription.sdp
+  candidate?: string          // ICE candidate
+  label: 'offer' | 'answer' | 'ice'
+}
+```
+
+### Relay Flow
+
+```
+Sender                  Server                  Recipient
+  │                       │                       │
+  │── transfer-offer ────>│                       │
+  │                       │── transfer-offer ────>│
+  │                       │                       │
+  │                       │<── transfer-answer ───│
+  │<── transfer-answer ───│                       │
+  │                       │                       │
+  │── signal(offer) ─────>│                       │
+  │                       │── signal(offer) ─────>│
+  │                       │<── signal(answer) ────│
+  │<── signal(answer) ────│                       │
+  │                       │                       │
+  │── signal(ice) ───────>│ (may be multiple)     │
+  │                       │── signal(ice) ───────>│
+  │<── signal(ice) ───────│<── signal(ice) ───────│
+  │                       │                       │
+  │══════ WebRTC DataChannel ════════════════════│
+```
+
+Server adds `from: senderUserId` to every relayed message so the recipient knows who sent it.
+
+## 2. WebRTC PeerConnectionManager
+
+Core non-UI module. One instance per app session, manages all transfers.
+
+### Interface
+
+```typescript
+interface TransferHandle {
+  transferId: string
+  fileName: string
+  fileSize: number
+  peerUserId: string
+  peerName: string
+  direction: 'send' | 'receive'
+  status: 'connecting' | 'transferring' | 'done' | 'failed'
+  progress: number  // 0-1
+  abort: () => void
+}
+
+class PeerConnectionManager {
+  constructor(signalRelay: (msg: SignalPayload) => void)
+
+  // Sender side
+  initiateTransfer(peerUserId: string, file: File): Promise<TransferHandle>
+
+  // Signaling entry — called when WS receives a signal/offer/answer message
+  handleSignal(msg: SignalPayload): void
+
+  // Events
+  onIncomingRequest: ((from: TransferOffer) => void) | null
+  onProgress: ((transferId: string, bytesDone: number, total: number) => void) | null
+  onComplete: ((transferId: string, blob: Blob, fileName: string) => void) | null
+  onError: ((transferId: string, error: string) => void) | null
+
+  // State query
+  getTransfers(): TransferHandle[]
+
+  dispose(): void
+}
+```
+
+### ICE Configuration
+
+```typescript
+const RTC_CONFIG = {
+  iceServers: [
+    { urls: 'stun:stun.l.google.com:19302' },
+    { urls: 'stun:stun1.l.google.com:19302' },
+  ],
+}
+```
+
+No TURN — LAN connectivity makes host candidates sufficient.
+
+### Connection Lifecycle
+
+**Per transfer = one RTCPeerConnection + one DataChannel.** This isolates failures and keeps the state machine simple. The DataChannel uses `negotiated: false` (default) so the browser handles automatic negotiation.
+
+**Sender path:**
+1. Generate `transferId = crypto.randomUUID()`
+2. Create `RTCPeerConnection(RTC_CONFIG)`
+3. Create `DataChannel('file-transfer')`
+4. Bind `dc.onopen` → start chunked send
+5. Create offer → `setLocalDescription(offer)` → relay via WS
+6. On ICE candidates → relay via WS
+7. On remote answer → `setRemoteDescription(answer)`
+8. DataChannel opens → begin file transfer
+
+**Recipient path:**
+1. Receive `signal(offer)` via WS from `PeerConnectionManager.handleSignal`
+2. Create `RTCPeerConnection(RTC_CONFIG)`
+3. `setRemoteDescription(offer)`
+4. Bind `dc.onopen` → ready to receive chunks
+5. Create answer → `setLocalDescription(answer)` → relay via WS
+6. On ICE candidates → relay via WS
+
+## 3. DataChannel Protocol
+
+Each message: **1 byte type + payload**.
+
+### Message Format
+
+```
+┌──────┬──────────────────────────────────────┐
+│ type │              payload                 │
+│ 1 B  │              variable                │
+└──────┴──────────────────────────────────────┘
+```
+
+### Message Types
+
+| Type byte | Direction | Payload | Description |
+|-----------|-----------|---------|-------------|
+| `0x01` | sender → recipient | JSON `{ transferId, fileName, fileSize, mimeType, chunkCount }` | Metadata — sent first |
+| `0x02` | sender → recipient | `4B (chunkIndex Uint32 BE) + binary` | File chunk (64 KB) |
+| `0x03` | sender → recipient | JSON `{ transferId }` | Transfer complete signal |
+| `0x04` | recipient → sender | JSON `{ transferId, receivedBytes }` | Progress acknowledgment (optional) |
+
+### Chunk Size: 64 KB (65,536 bytes)
+
+Rationale:
+- Below browser DataChannel message limit (~256 KB)
+- Minimizes header overhead vs 16 KB chunks
+- Stays within comfortable memory for in-browser reassembly
+
+### Sender Algorithm
+
+```text
+1. Read file metadata, send 0x01 message
+2. For i = 0..chunkCount-1:
+   a. slice file[i*64KB, min((i+1)*64KB, fileSize)] → ArrayBuffer
+   b. Prepend 4-byte big-endian chunkIndex + 0x02 header byte
+   c. dc.send(combinedBuffer)
+   d. If dc.bufferedAmount > 1MB, await dc.onbufferedamountlow
+3. Send 0x03 completion message
+```
+
+### Recipient Algorithm
+
+```text
+1. Receives 0x01 → allocates chunks[chunkCount], sets mimeType
+2. For each 0x02:
+   a. Read chunkIndex from first 4 bytes
+   b. Store remaining bytes in chunks[chunkIndex]
+   c. Increment receivedBytes counter
+3. Receives 0x03 → new Blob(chunks, { type }) → trigger download
+```
+
+### Post-Receive Handling
+
+```typescript
+// In browser memory — never written to server
+const url = URL.createObjectURL(blob)
+const a = document.createElement('a')
+a.href = url
+a.download = fileName
+a.click()
+URL.revokeObjectURL(url)
+```
+
+## 4. UI Layer
+
+### 4a. FileDropZone
+
+A transparent overlay on `main.gen-app` that activates on `dragenter`:
+
+- Shows a centered hint: "📄 松手传输文件" + file name and size
+- Hidden on `dragleave` or `drop`
+- Prevents browser default behavior on dragover/drop
+
+```
+┌──────────────────────────────────────────────┐
+│  [logo] uhyc·generate     [A][B] [DEV] 登出   │
+│                                              │
+│  ┌─── (drag enter) ───────────────────────┐  │
+│  │                                         │  │
+│  │          📄 松手传输文件                 │  │
+│  │          report.pdf · 2.4 MB            │  │
+│  │                                         │  │
+│  └─────────────────────────────────────────┘  │
+│       (normal page content underneath)        │
+└──────────────────────────────────────────────┘
+```
+
+### 4b. UserPickerPopup
+
+Modal shown after drop. Lists online users from the existing presence system.
+
+```
+┌────────────────────────────┐
+│  传输文件: report.pdf       │
+│                            │
+│  选择接收人                 │
+│                            │
+│  [🟣A] Alice  · 在线       │  ← 点击即发
+│  [🟢B] Bob    · 在线       │
+│  [🔵C] Charlie · 在线      │
+│  [+1] Dave    · 在线       │
+│                            │
+│  [取消]                    │
+└────────────────────────────┘
+```
+
+Clicking a user:
+1. Closes the picker
+2. Initiates WebRTC connection
+3. Shows progress indicator in the topbar area
+
+### 4c. Transfer Progress Indicators
+
+**Sender:** Inline in `topbar__user` area, shown as a compact chip:
+
+```
+┌──────────────────────────────────────────────┐
+│  [logo] uhyc·generate  [A][B][C] 📤72%  登出  │
+└──────────────────────────────────────────────┘
+```
+
+**Recipient:** Toast notification with progress bar:
+
+```
+┌──────────────────────────────┐
+│ 📥 Alice 正在发文件           │
+│ report.pdf                   │
+│ ████████████████░░░ 68%     │
+│                              │
+│ 完成后自动开始下载            │
+└──────────────────────────────┘
+```
+
+On completion, the recipient's browser triggers an automatic download. The toast auto-dismisses after download starts.
+
+### 4d. React Hook: `useFileTransfer`
+
+Exposed via PresenceBridge context:
+
+```typescript
+function useFileTransfer() {
+  return {
+    startTransfer: (peerUserId: string, file: File) => Promise<void>
+    outgoing: Map<string, TransferStatus>
+    incoming: Map<string, TransferStatus>
+  }
+}
+
+interface TransferStatus {
+  peerUserId: string
+  peerName: string
+  fileName: string
+  fileSize: number
+  progress: number  // 0-1
+  status: 'connecting' | 'transferring' | 'done' | 'failed'
+}
+```
+
+### 4f. Share from Task History
+
+In `TaskHistory.tsx`, each completed task (status `SUCCEEDED`) gets a share button:
+
+```
+┌─────────────────────────────────────┐
+│ 🎬 My cool video              📤   │  ← share button
+│ Generated 2 min ago · 24 MB        │
+│ [预览缩略图]                        │
+└─────────────────────────────────────┘
+```
+
+Clicking share opens the same `UserPickerPopup` (same as drag-drop flow). On recipient selection, `PeerConnectionManager.initiateTransfer(peerUserId, file)` fetches the file from the server first (it's stored on server/OSS), then transmits via P2P. This means:
+
+1. The sender's browser downloads the file from server storage (local disk or OSS URL) via HTTP
+2. `PeerConnectionManager` receives the `File` object and proceeds with the standard WebRTC flow
+3. The file data still never touches the server a second time
+
+For large files, the initial fetch from server storage is unavoidable—the server already has the file from the Bailian generation step.
+
+### 4g. Component Tree
+
+```
+AppLayout (inside PresenceBridge)
+  ├─ Topbar
+  │   ├─ AvatarStack (online users)
+  │   ├─ DEV badge
+  │   ├─ TransferProgressChip (sender progress)
+  │   └─ logout button
+  ├─ FileDropZone (app-level drag target)
+  │   ├─ UserPickerPopup (modal)
+  │   └─ drag overlay
+  ├─ ToastContainer
+  │   └─ IncomingTransferToast (recipient progress)
+  └─ Outlet
+      └─ Studio / CreativityPage
+```
+
+## 5. Backend Changes
+
+### Modified: `services/api/src/modules/presence/index.ts`
+
+Add a `message` handler to the existing WebSocket route:
+
+```typescript
+.ws('/ws/presence', {
+  // ... existing open / close handlers unchanged ...
+
+  message(ws, data) {
+    const msg = typeof data === 'string' ? JSON.parse(data) : data
+    const user = ws.data.presenceUser
+    if (!user) return
+
+    switch (msg.type) {
+      case 'transfer-offer':
+      case 'transfer-answer':
+      case 'signal': {
+        const to = msg.to as string
+        if (!to) return
+        ws.publish(`user:${to}`, { ...msg, from: user.userId })
+        break
+      }
+    }
+  },
+})
+```
+
+The `open` handler also needs a private channel subscription for signaling. This coexists with the existing `task:<userId>` channel:
+
+```typescript
+// In ws.open handler:
+ws.subscribe(`user:${user.userId}`)     // NEW: signaling relay (transfer-offer, signal, etc.)
+ws.subscribe(`task:${user.userId}`)     // EXISTING: task status push (unchanged)
+```
+
+They stay separate to avoid mixing concerns — a future refactor may merge them into one `user:<id>` channel, but for now they coexist without conflict.
+
+### Files Changed
+
+| File | Change |
+|------|--------|
+| `services/api/src/modules/presence/index.ts` | Add `message` handler for `transfer-offer`, `transfer-answer`, `signal` relay; add `user:<id>` subscription |
+
+### Unchanged
+
+- Database schema — no new tables or columns
+- File storage layer — P2P data never touches server storage
+- Auth module — existing JWT/cookie auth reused
+- Model definitions — no new API models
+
+## Edge Cases
+
+| Scenario | Handling |
+|----------|----------|
+| **Recipient offline** | `transfer-offer` goes to `user:<id>` topic with zero subscribers → silently dropped. Sender's `initiateTransfer` times out after 5s → shows "对方已离线" |
+| **Multiple tabs** | Same user's WS connections all subscribe to `user:<id>`. All receive the offer. DataChannel connects to whichever tab answers first. Other tabs ignore |
+| **Sender cancels** | Close RTCPeerConnection, discard pending chunk buffer. Recipient receives `dc.onclose` → shows "传输已取消" |
+| **Tab closes mid-transfer** | RTCPeerConnection state lost. Other side detects via `onconnectionstatechange: 'failed'` → shows error |
+| **Concurrent transfers** | Each transfer has unique `transferId` and its own RTCPeerConnection. No interference |
+| **File > 2 GB** | `File.slice()` handles large files. Browser memory limits on recipient side — Blob may exceed available RAM. Acceptable for typical media files (videos up to a few GB) |
+| **LAN switch during transfer** | ICE restart or `onconnectionstatechange: 'disconnected'` → mark as failed, user retries |
+| **Drop zone conflicts** | FileDropZone only intercepts `dragenter`/`drop`; existing click-to-upload in GeneratorPanel unaffected |
+| **Security: unauthorized send** | Server only relays messages for authenticated users. `to` target must be an online user with an active WS connection |
+
+## Out of Scope
+
+- TURN server / WAN relay
+- Chat messaging
+- File persistence on server
+- Transfer history
+- Group/broadcast file sharing
+- Chunk-level retry or resume
+- File preview before download
+- Progress for the original sender's shared asset (generated result sharing uses same mechanism)
+
+## File Summary
+
+### New Files
+
+| File | Purpose |
+|------|---------|
+| `apps/generate/src/components/transfer/PeerConnectionManager.ts` | WebRTC state machine, DataChannel protocol, chunking/reassembly |
+| `apps/generate/src/components/transfer/FileDropZone.tsx` | App-level drag-and-drop overlay |
+| `apps/generate/src/components/transfer/UserPickerPopup.tsx` | Online user picker modal |
+| `apps/generate/src/components/transfer/TransferProgressChip.tsx` | Sender progress in topbar |
+| `apps/generate/src/components/transfer/IncomingTransferToast.tsx` | Recipient progress notification |
+
+### Modified Files
+
+| File | Change |
+|------|--------|
+| `apps/generate/src/components/PresenceBridge.tsx` | Expose `useFileTransfer()` hook, handle incoming signaling messages |
+| `apps/generate/src/components/AppLayout.tsx` | Mount `FileDropZone` around `main.gen-app` |
+| `services/api/src/modules/presence/index.ts` | Add `message` handler for signaling relay, `user:<id>` subscription |
