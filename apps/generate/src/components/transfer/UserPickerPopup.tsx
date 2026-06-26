@@ -82,7 +82,7 @@ export function UserPickerPopup({ fileName, fileSize, onSelect, onCancel }: User
                     fontWeight: 700,
                     fontSize: 14,
                     color: '#fff',
-                    background: 'var(--accent)',
+                    background: '#cba0ff',
                     flexShrink: 0,
                   }}
                 >

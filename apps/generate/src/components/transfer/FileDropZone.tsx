@@ -104,7 +104,7 @@ export function FileDropZone({ children }: { children: ReactNode }) {
               padding: '48px 64px',
               borderRadius: 16,
               background: 'var(--paper)',
-              border: '3px dashed var(--accent)',
+              border: '3px dashed #cba0ff',
               textAlign: 'center',
               fontSize: 24,
               fontWeight: 700,

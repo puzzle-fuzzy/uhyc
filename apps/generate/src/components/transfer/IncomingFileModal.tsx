@@ -117,18 +117,18 @@ export function IncomingFileModal() {
                   <div style={{ fontSize: 12, color: 'var(--ink-muted)', margin: '2px 0 8px' }}>
                     {offer.fileName} · {formatSize(offer.fileSize)}
                   </div>
-                  <div style={{ display: 'flex', gap: 8 }}>
+                  <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                     <button
                       type="button"
-                      className="uhyc-btn"
                       style={{
-                        padding: '4px 16px',
-                        fontSize: 12,
-                        background: 'var(--accent)',
-                        color: '#fff',
-                        border: 'none',
+                        padding: '6px 24px',
+                        fontSize: 13,
+                        background: '#cba0ff',
+                        color: '#0a0a0a',
+                        border: '2px solid #0a0a0a',
                         borderRadius: 6,
                         cursor: 'pointer',
+                        fontWeight: 700,
                       }}
                       onClick={() => acceptOffer(offer.transferId)}
                     >
@@ -136,8 +136,16 @@ export function IncomingFileModal() {
                     </button>
                     <button
                       type="button"
-                      className="uhyc-btn uhyc-btn--ghost"
-                      style={{ padding: '4px 16px', fontSize: 12 }}
+                      style={{
+                        padding: '4px 12px',
+                        fontSize: 12,
+                        background: 'transparent',
+                        color: 'var(--muted)',
+                        border: 'none',
+                        cursor: 'pointer',
+                        fontWeight: 400,
+                        textDecoration: 'underline',
+                      }}
                       onClick={() => rejectOffer(offer.transferId)}
                     >
                       拒绝
@@ -163,7 +171,7 @@ export function IncomingFileModal() {
                 style={{
                   height: 6,
                   borderRadius: 3,
-                  background: 'var(--border)',
+                  background: '#e5e4dd',
                   overflow: 'hidden',
                 }}
               >
@@ -172,7 +180,7 @@ export function IncomingFileModal() {
                     height: '100%',
                     width: `${Math.round(t.progress * 100)}%`,
                     borderRadius: 3,
-                    background: 'var(--accent)',
+                    background: '#cba0ff',
                     transition: 'width 0.2s ease',
                   }}
                 />

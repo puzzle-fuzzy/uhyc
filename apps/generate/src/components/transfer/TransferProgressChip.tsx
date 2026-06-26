@@ -39,7 +39,7 @@ export function TransferProgressChip() {
         gap: 4,
         padding: '4px 10px',
         borderRadius: 20,
-        background: 'var(--accent-muted)',
+        background: '#ebdbff',
         fontSize: 12,
         fontWeight: 600,
         whiteSpace: 'nowrap',
