@@ -1,7 +1,7 @@
 import * as ScrollArea from '@radix-ui/react-scroll-area'
-import { usePresence } from '@uhyc/shared'
 import { useEffect } from 'react'
 import { useCreativity } from '../../hooks/useCreativity'
+import { useSetPresenceCallbacks } from '../PresenceBridge'
 import { VideoUpload, clearPendingVideo } from './VideoUpload'
 import { PipelineStatus } from './PipelineStatus'
 import { ResultPanel } from './ResultPanel'
@@ -10,7 +10,10 @@ import { creativityApi } from '../../api'
 /** 视频转剧本页面内容 (route: /creativity) */
 export function CreativityPage() {
   const { tasks, processing, submit, refresh, setTasks, onTaskUpdated, onWsDisconnect } = useCreativity()
-  usePresence({ onTaskUpdated, onDisconnect: onWsDisconnect })
+  const setPresenceCallbacks = useSetPresenceCallbacks()
+  useEffect(() => {
+    setPresenceCallbacks({ onTaskUpdated, onDisconnect: onWsDisconnect })
+  }, [onTaskUpdated, onWsDisconnect, setPresenceCallbacks])
 
   useEffect(() => {
     void refresh()

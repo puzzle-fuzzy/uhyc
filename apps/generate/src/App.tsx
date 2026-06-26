@@ -1,4 +1,3 @@
-import { usePresence } from '@uhyc/shared'
 import { useEffect, useRef, useState } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import type { TaskResponse, Catalog } from './types'
@@ -15,6 +14,7 @@ import { ProtectedRoute } from './components/ProtectedRoute'
 import { AuthProvider, useAuthContext } from './components/AuthContext'
 import { GlobalCommandModal } from './components/GlobalCommandModal'
 import { AppLayout } from './components/AppLayout'
+import { useSetPresenceCallbacks, useDevMode } from './components/PresenceBridge'
 import { CreativityPage } from './components/creativity/CreativityPage'
 import { generateApi } from './api'
 import './App.css'
@@ -126,9 +126,13 @@ function parsePromptIntoTokens(
 function Studio() {
   const auth = useAuthContext()
   const { catalog } = useCatalog()
-  const { tasks, setTasks, refresh } = useTaskHistory()
+  const { showAll, setShowAll } = useDevMode()
+  const { tasks, setTasks, refresh } = useTaskHistory(showAll, setShowAll)
   const { submit, submitting, error: submitError, onTaskUpdated, onWsDisconnect } = useGenerate(tasks, setTasks)
-  usePresence({ onTaskUpdated, onDisconnect: onWsDisconnect })
+  const setPresenceCallbacks = useSetPresenceCallbacks()
+  useEffect(() => {
+    setPresenceCallbacks({ onTaskUpdated, onDisconnect: onWsDisconnect })
+  }, [onTaskUpdated, onWsDisconnect, setPresenceCallbacks])
 
   const [formFill, setFormFill] = useState<FormValues | null>(null)
   const [formFillVersion, setFormFillVersion] = useState(0)

@@ -180,43 +180,7 @@ export abstract class GenerateService {
       const res = await createTask(bailianConfig(), definition, finalParams)
 
       if (!definition.async && 'choices' in (res as SyncTaskResponse).output) {
-
-      if (!definition.async && 'audio' in (res as any).output) {
-        const audioUrl = (res as any).output.audio.url as string | undefined
-        if (audioUrl) {
-          try {
-            const info = await downloadToTaskDir(row.id, audioUrl)
-            await db.insert(table.generationTaskFiles).values({
-              taskId: row.id,
-              kind: 'primary',
-              sourceUrl: audioUrl,
-              storagePath: info.storagePath,
-              mimeType: info.mimeType || 'audio/mpeg',
-              sizeBytes: info.sizeBytes,
-              originalFilename: info.originalFilename,
-            })
-          } catch (e) {
-            await db.insert(table.generationTaskFiles).values({
-              taskId: row.id,
-              kind: 'primary',
-              sourceUrl: audioUrl,
-              storagePath: audioUrl,
-              mimeType: 'audio/mpeg',
-            }).catch(function() {})
-          }
-        }
-        const [updated] = await db
-          .update(table.generationTasks)
-          .set({ status: 'SUCCEEDED', createRequestId: (res as any).request_id, updatedAt: new Date() })
-          .where(eq(table.generationTasks.id, row.id))
-          .returning()
-        const taskFiles = await db
-          .select()
-          .from(table.generationTaskFiles)
-          .where(eq(table.generationTaskFiles.taskId, row.id))
-        return { task: toTaskResponse(updated, taskFiles) }
-      }
-        // 同步模型：结果已返回，直接处理
+        // 同步模型（多模态）：结果已返回，直接处理
         const syncRes = res as SyncTaskResponse
         const content = syncRes.output.choices?.[0]?.message?.content ?? []
         const imageUrls = content
@@ -247,6 +211,43 @@ export abstract class GenerateService {
         const [updated] = await db
           .update(table.generationTasks)
           .set({ status: 'SUCCEEDED', createRequestId: syncRes.request_id, updatedAt: new Date() })
+          .where(eq(table.generationTasks.id, row.id))
+          .returning()
+        const taskFiles = await db
+          .select()
+          .from(table.generationTaskFiles)
+          .where(eq(table.generationTaskFiles.taskId, row.id))
+        return { task: toTaskResponse(updated, taskFiles) }
+      }
+
+      if (!definition.async && 'audio' in (res as any).output) {
+        // 同步模型（音频）：FunMusic 等音频模型，结果在 POST 响应中直接返回 audio.url
+        const audioUrl = (res as any).output.audio.url as string | undefined
+        if (audioUrl) {
+          try {
+            const info = await downloadToTaskDir(row.id, audioUrl)
+            await db.insert(table.generationTaskFiles).values({
+              taskId: row.id,
+              kind: 'primary',
+              sourceUrl: audioUrl,
+              storagePath: info.storagePath,
+              mimeType: info.mimeType || 'audio/mpeg',
+              sizeBytes: info.sizeBytes,
+              originalFilename: info.originalFilename,
+            })
+          } catch (e) {
+            await db.insert(table.generationTaskFiles).values({
+              taskId: row.id,
+              kind: 'primary',
+              sourceUrl: audioUrl,
+              storagePath: audioUrl,
+              mimeType: 'audio/mpeg',
+            }).catch(function() {})
+          }
+        }
+        const [updated] = await db
+          .update(table.generationTasks)
+          .set({ status: 'SUCCEEDED', createRequestId: (res as any).request_id, updatedAt: new Date() })
           .where(eq(table.generationTasks.id, row.id))
           .returning()
         const taskFiles = await db
