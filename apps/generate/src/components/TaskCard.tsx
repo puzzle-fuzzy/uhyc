@@ -1,6 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import type { TaskResponse } from '../types'
 import { artifactUrl } from '../api'
+import { useFileTransfer } from './PresenceBridge'
+import { UserPickerPopup } from './transfer/UserPickerPopup'
 
 const STATUS_LABEL: Record<string, string> = {
   PENDING: '正在为尊贵超级VIP极速生成中',
@@ -61,8 +63,30 @@ export function TaskCard({ task, onRerun, onDelete }: TaskCardProps) {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [sloganIdx, setSloganIdx] = useState(0)
   const [justLanded, setJustLanded] = useState(false)
+  const [showSharePicker, setShowSharePicker] = useState(false)
+  const [sharing, setSharing] = useState(false)
   const files = task.files?.filter((f) => f.kind === 'primary') ?? []
   const file = files[0]
+  const { startTransfer } = useFileTransfer()
+
+  const handleShare = useCallback(async (peerUserId: string) => {
+    setShowSharePicker(false)
+    const f = task.files?.find((x) => x.kind === 'primary')
+    if (!f) return
+    setSharing(true)
+    try {
+      // 先从服务器拉取文件到浏览器
+      const resp = await fetch(artifactUrl(f.storagePath))
+      const blob = await resp.blob()
+      const fileName = f.originalFilename || 'share'
+      const file = new File([blob], fileName, { type: f.mimeType || undefined })
+      await startTransfer(peerUserId, file)
+    } catch {
+      // 错误由 PCM 的 onError 处理
+    } finally {
+      setSharing(false)
+    }
+  }, [task.files, startTransfer])
 
   // 新卡入场动画
   useEffect(() => {
@@ -174,13 +198,25 @@ export function TaskCard({ task, onRerun, onDelete }: TaskCardProps) {
             </button>
           )}
           {files.length > 0 && (
-            <button
-              type="button"
-              className="gen-task__btn"
-              onClick={() => downloadAll(files)}
-            >
-              下载
-            </button>
+            <>
+              <button
+                type="button"
+                className="gen-task__btn"
+                onClick={() => downloadAll(files)}
+              >
+                下载
+              </button>
+              {task.status === 'SUCCEEDED' && (
+                <button
+                  type="button"
+                  className="gen-task__btn"
+                  onClick={() => setShowSharePicker(true)}
+                  disabled={sharing}
+                >
+                  {sharing ? '📤 发送中…' : '📤 分享'}
+                </button>
+              )}
+            </>
           )}
           <button
             type="button"
@@ -191,6 +227,16 @@ export function TaskCard({ task, onRerun, onDelete }: TaskCardProps) {
           </button>
         </div>
       </div>
+
+      {/* 分享选人弹窗 */}
+      {showSharePicker && file && (
+        <UserPickerPopup
+          fileName={file.originalFilename || '分享文件'}
+          fileSize={file.sizeBytes ?? 0}
+          onSelect={handleShare}
+          onCancel={() => setShowSharePicker(false)}
+        />
+      )}
 
       {expanded && (
         <pre className="gen-task__params">

@@ -2,6 +2,9 @@ import { Outlet } from 'react-router-dom'
 import { AvatarStack } from '@uhyc/shared'
 import { useAuthContext } from './AuthContext'
 import { PresenceBridge, usePresenceCtx, useDevMode } from './PresenceBridge'
+import { FileDropZone } from './transfer/FileDropZone'
+import { TransferProgressChip } from './transfer/TransferProgressChip'
+import { IncomingTransferToast } from './transfer/IncomingTransferToast'
 
 const LOGO_SVG = (
   <svg viewBox="0 0 32 32" fill="none" aria-hidden="true">
@@ -12,7 +15,7 @@ const LOGO_SVG = (
   </svg>
 )
 
-/** 顶栏内部（在 PresenceBridge 上下文中，能读取 onlineUsers / showAll） */
+/** 顶栏内部（在 PresenceBridge 上下文中） */
 function Topbar() {
   const auth = useAuthContext()
   const { onlineUsers } = usePresenceCtx()
@@ -39,6 +42,7 @@ function Topbar() {
           devTitle={showAll ? '开发模式：显示全部记录' : '点击切换开发模式'}
         />
         {showAll && <span className="uhyc-badge uhyc-badge--dev">DEV</span>}
+        <TransferProgressChip />
         <button
           type="button"
           className="uhyc-btn uhyc-btn--ghost topbar__logout"
@@ -55,10 +59,13 @@ function Topbar() {
 export function AppLayout() {
   return (
     <PresenceBridge>
-      <main className="gen-app">
-        <Topbar />
-        <Outlet />
-      </main>
+      <FileDropZone>
+        <main className="gen-app">
+          <Topbar />
+          <Outlet />
+        </main>
+        <IncomingTransferToast />
+      </FileDropZone>
     </PresenceBridge>
   )
 }

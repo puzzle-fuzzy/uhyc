@@ -54,6 +54,8 @@ export const presenceModule = new Elysia({ name: 'presence' })
 
       // 订阅个人任务频道
       ws.subscribe(`task:${user.userId}`)
+      // 订阅个人信令频道（P2P 传输中继）
+      ws.subscribe(`user:${user.userId}`)
 
       // 查询用户名（只在首次加入时需要）
       let username = user.userId
@@ -88,10 +90,31 @@ export const presenceModule = new Elysia({ name: 'presence' })
 
       ws.unsubscribe('presence')
       ws.unsubscribe(`task:${user.userId}`)
+      ws.unsubscribe(`user:${user.userId}`)
 
       const leaveMsg = presenceManager.leave(user.userId, ws.raw)
       if (leaveMsg) {
         presenceManager.broadcast(leaveMsg)
+      }
+    },
+
+    // P2P 信令中继：服务器只转发，不解析载荷
+    message(ws, data) {
+      const user = ws.data.presenceUser
+      if (!user) return
+
+      let msg: Record<string, unknown>
+      try {
+        msg = typeof data === 'string' ? JSON.parse(data) : (data as Record<string, unknown>)
+      } catch {
+        return
+      }
+
+      const type = msg.type as string | undefined
+      if (type === 'transfer-offer' || type === 'transfer-answer' || type === 'signal') {
+        const to = msg.to as string | undefined
+        if (!to || to === user.userId) return
+        ws.publish(`user:${to}`, { ...msg, from: user.userId })
       }
     },
   })

@@ -19,6 +19,10 @@ const BACKOFF_MULTIPLIER = 2
 export interface UsePresenceOptions {
   onTaskUpdated?: (task: Record<string, unknown>) => void
   onDisconnect?: () => void
+  /** 未知消息类型的兜底回调（P2P 信令等） */
+  onMessage?: (msg: Record<string, unknown>) => void
+  /** WS 连接建立后，向外暴露 send 方法（用于 P2P 信令发送） */
+  onWsOpen?: (send: (data: unknown) => void) => void
 }
 
 export function usePresence(options: UsePresenceOptions = {}): {
@@ -30,8 +34,8 @@ export function usePresence(options: UsePresenceOptions = {}): {
   const wsRef = useRef<WebSocket | null>(null)
   const backoffRef = useRef(INITIAL_BACKOFF)
   const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const callbacksRef = useRef({ onTaskUpdated, onDisconnect })
-  callbacksRef.current = { onTaskUpdated, onDisconnect }
+  const callbacksRef = useRef({ onTaskUpdated, onDisconnect, onMessage: options.onMessage, onWsOpen: options.onWsOpen })
+  callbacksRef.current = { onTaskUpdated, onDisconnect, onMessage: options.onMessage, onWsOpen: options.onWsOpen }
 
   const connect = useCallback(() => {
     if (auth.status !== 'authenticated') return
@@ -75,6 +79,9 @@ export function usePresence(options: UsePresenceOptions = {}): {
           case 'task_updated':
             callbacksRef.current.onTaskUpdated?.(msg.task)
             break
+          default:
+            callbacksRef.current.onMessage?.(msg as unknown as Record<string, unknown>)
+            break
         }
       } catch {
         // 忽略无法解析的消息
@@ -83,6 +90,7 @@ export function usePresence(options: UsePresenceOptions = {}): {
 
     ws.onopen = () => {
       backoffRef.current = INITIAL_BACKOFF
+      callbacksRef.current.onWsOpen?.((data) => ws.send(JSON.stringify(data)))
     }
 
     ws.onclose = () => {
