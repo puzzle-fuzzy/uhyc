@@ -7,7 +7,7 @@ import { usePresenceCtx } from '../PresenceBridge'
 interface UserPickerPopupProps {
   fileName: string
   fileSize: number
-  onSelect: (peerUserId: string) => void
+  onSelect: (peerUserId: string, peerName: string) => void
   onCancel: () => void
 }
 
@@ -69,7 +69,7 @@ export function UserPickerPopup({ fileName, fileSize, onSelect, onCancel }: User
                   width: '100%',
                   textAlign: 'left',
                 }}
-                onClick={() => onSelect(u.userId)}
+                onClick={() => onSelect(u.userId, u.username)}
               >
                 <span
                   style={{

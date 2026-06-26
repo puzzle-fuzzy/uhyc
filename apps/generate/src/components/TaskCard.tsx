@@ -69,18 +69,17 @@ export function TaskCard({ task, onRerun, onDelete }: TaskCardProps) {
   const file = files[0]
   const { startTransfer } = useFileTransfer()
 
-  const handleShare = useCallback(async (peerUserId: string) => {
+  const handleShare = useCallback(async (peerUserId: string, peerName: string) => {
     setShowSharePicker(false)
     const f = task.files?.find((x) => x.kind === 'primary')
     if (!f) return
     setSharing(true)
     try {
-      // 先从服务器拉取文件到浏览器
       const resp = await fetch(artifactUrl(f.storagePath))
       const blob = await resp.blob()
       const fileName = f.originalFilename || 'share'
       const file = new File([blob], fileName, { type: f.mimeType || undefined })
-      await startTransfer(peerUserId, file)
+      await startTransfer(peerUserId, peerName, file)
     } catch {
       // 错误由 PCM 的 onError 处理
     } finally {

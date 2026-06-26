@@ -57,11 +57,11 @@ export function FileDropZone({ children }: { children: ReactNode }) {
   }, [])
 
   const handleSelectUser = useCallback(
-    async (peerUserId: string) => {
+    async (peerUserId: string, peerName: string) => {
       setShowPicker(false)
       if (!dragFile) return
       try {
-        await startTransfer(peerUserId, dragFile)
+        await startTransfer(peerUserId, peerName, dragFile)
       } catch {
         // 错误由 PeerConnectionManager 的 onError 处理
       }

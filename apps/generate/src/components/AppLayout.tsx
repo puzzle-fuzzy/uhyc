@@ -4,7 +4,7 @@ import { useAuthContext } from './AuthContext'
 import { PresenceBridge, usePresenceCtx, useDevMode } from './PresenceBridge'
 import { FileDropZone } from './transfer/FileDropZone'
 import { TransferProgressChip } from './transfer/TransferProgressChip'
-import { IncomingTransferToast } from './transfer/IncomingTransferToast'
+import { IncomingFileModal } from './transfer/IncomingFileModal'
 
 const LOGO_SVG = (
   <svg viewBox="0 0 32 32" fill="none" aria-hidden="true">
@@ -64,7 +64,7 @@ export function AppLayout() {
           <Topbar />
           <Outlet />
         </main>
-        <IncomingTransferToast />
+        <IncomingFileModal />
       </FileDropZone>
     </PresenceBridge>
   )

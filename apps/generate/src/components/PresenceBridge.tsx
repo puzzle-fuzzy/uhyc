@@ -1,17 +1,9 @@
 import { createContext, useContext, useRef, useState, useCallback, type ReactNode } from 'react'
 import { usePresence, type PresenceUser } from '@uhyc/shared'
-import { PeerConnectionManager, type TransferHandle } from './transfer/PeerConnectionManager'
+import { PeerConnectionManager, type TransferHandle, type TransferOffer } from './transfer/PeerConnectionManager'
 
 // ---------------------------------------------------------------------------
-// PresenceBridge — 将 usePresence + 开发模式 + P2P 传输放在路由布局层
-//
-// 架构问题：
-//   AppLayout（顶栏）需要渲染 AvatarStack + DEV 徽章，但 usePresence / showAll
-//   原先在子路由（Studio）中调用，顶栏拿不到数据。
-//
-// 解法：
-//   把共享状态提升到 PresenceBridge 中（包裹 AppLayout），
-//   子路由通过 usePresenceCtx / useDevMode / useFileTransfer 读写。
+// PresenceBridge
 // ---------------------------------------------------------------------------
 
 interface PresenceCallbacks {
@@ -25,11 +17,16 @@ interface PresenceCtxValue {
   showAll: boolean
   setShowAll: (v: boolean) => void
   /** 发起 P2P 文件传输 */
-  startTransfer: (peerUserId: string, file: File) => Promise<TransferHandle>
+  startTransfer: (peerUserId: string, peerName: string, file: File) => Promise<TransferHandle>
   /** 所有活跃传输的快照 */
   transfers: TransferHandle[]
-  /** 注册传输事件回调 */
-  onTransferComplete: ((transferId: string, blob: Blob, fileName: string) => void) | null
+  /** 待接收的文件邀约列表 */
+  pendingOffers: readonly TransferOffer[]
+  /** 接受文件 */
+  acceptOffer: (transferId: string) => void
+  /** 拒绝文件 */
+  rejectOffer: (transferId: string) => void
+  /** 传输完成回调（接收方拿到 Blob 时触发） */
   setOnTransferComplete: (fn: ((transferId: string, blob: Blob, fileName: string) => void) | null) => void
 }
 
@@ -40,72 +37,88 @@ const PresenceCtx = createContext<PresenceCtxValue>({
   setShowAll: () => {},
   startTransfer: async () => { throw new Error('PresenceBridge not ready') },
   transfers: [],
-  onTransferComplete: null,
+  pendingOffers: [],
+  acceptOffer: () => {},
+  rejectOffer: () => {},
   setOnTransferComplete: () => {},
 })
 
-/** 供子路由（Studio / CreativityPage）获取 onlineUsers */
 export function usePresenceCtx() {
   return useContext(PresenceCtx)
 }
 
-/** 供子路由注册 WS 推送回调（task_updated / disconnect） */
 export function useSetPresenceCallbacks() {
   return useContext(PresenceCtx).setCallbacks
 }
 
-/** 供子路由或顶栏读写开发模式（showAll） */
 export function useDevMode() {
   const { showAll, setShowAll } = useContext(PresenceCtx)
   return { showAll, setShowAll }
 }
 
-/** 供子路由发起 P2P 文件传输和读取传输状态 */
 export function useFileTransfer() {
-  const { startTransfer, transfers, onTransferComplete, setOnTransferComplete } = useContext(PresenceCtx)
-  return { startTransfer, transfers, onTransferComplete, setOnTransferComplete }
+  const { startTransfer, transfers, pendingOffers, acceptOffer, rejectOffer, setOnTransferComplete } =
+    useContext(PresenceCtx)
+  return { startTransfer, transfers, pendingOffers, acceptOffer, rejectOffer, setOnTransferComplete }
 }
 
 export function PresenceBridge({ children }: { children: ReactNode }) {
   const callbacksRef = useRef<PresenceCallbacks>({})
   const [showAll, setShowAll] = useState(false)
   const [transfers, setTransfers] = useState<TransferHandle[]>([])
+  const [pendingOffers, setPendingOffers] = useState<readonly TransferOffer[]>([])
   const onTransferCompleteRef = useRef<
     ((transferId: string, blob: Blob, fileName: string) => void) | null
   >(null)
+  const [onlineUsers, setOnlineUsersState] = useState<PresenceUser[]>([])
 
-  // 稳定引用：PeerConnectionManager 只创建一次
   const pcmRef = useRef<PeerConnectionManager | null>(null)
   if (!pcmRef.current) {
     pcmRef.current = new PeerConnectionManager(() => {
-      // SignalRelay 会在 usePresence 就绪后被赋值
+      // signalRelay will be set when WS is ready
     })
   }
   const pcm = pcmRef.current
 
-  // WS 消息处理：转发信令给 PCM
-  const handleWsMessage = useCallback((msg: Record<string, unknown>) => {
-    const type = msg.type as string | undefined
-    if (type === 'signal' || type === 'transfer-offer' || type === 'transfer-answer') {
-      pcm.handleSignal(msg as unknown as Parameters<typeof pcm.handleSignal>[0])
-      // 更新传输状态快照
-      setTransfers(pcm.getTransfers())
-    }
-  }, [pcm])
+  // WS 消息 → PCM
+  const handleWsMessage = useCallback(
+    (msg: Record<string, unknown>) => {
+      const type = msg.type as string | undefined
+      if (type === 'signal' || type === 'transfer-offer' || type === 'transfer-answer' || type === 'transfer-reject') {
+        pcm.handleSignal(msg as unknown as Parameters<typeof pcm.handleSignal>[0])
+        setTransfers(pcm.getTransfers())
+        setPendingOffers(pcm.pendingOffers)
+      }
+    },
+    [pcm],
+  )
 
-  // WS 连接就绪后，把 send 函数注入 PCM 的 signalRelay
-  const handleWsOpen = useCallback((send: (data: unknown) => void) => {
-    pcm.signalRelay = (msg) => send(msg)
-  }, [pcm])
+  // WS 就绪 → PCM relay
+  const handleWsOpen = useCallback(
+    (send: (data: unknown) => void) => {
+      pcm.signalRelay = (msg) => send(msg)
+    },
+    [pcm],
+  )
 
-  const { onlineUsers } = usePresence({
+  const presenceResult = usePresence({
     onTaskUpdated: (task) => callbacksRef.current.onTaskUpdated?.(task),
     onDisconnect: () => callbacksRef.current.onDisconnect?.(),
     onMessage: handleWsMessage,
     onWsOpen: handleWsOpen,
   })
 
-  // 注册 PCM 回调
+  // 同步 onlineUsers 到本组件 state（用于查用户名）
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const onlineUsersFromPresence = presenceResult.onlineUsers
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const prevOnlineUsersRef = useRef(onlineUsersFromPresence)
+  if (prevOnlineUsersRef.current !== onlineUsersFromPresence) {
+    prevOnlineUsersRef.current = onlineUsersFromPresence
+    setOnlineUsersState(onlineUsersFromPresence)
+  }
+
+  // PCM 回调注册
   pcm.onProgress = () => {
     setTransfers(pcm.getTransfers())
   }
@@ -116,16 +129,36 @@ export function PresenceBridge({ children }: { children: ReactNode }) {
   pcm.onError = () => {
     setTransfers(pcm.getTransfers())
   }
+  pcm.onIncomingRequest = () => {
+    setPendingOffers(pcm.pendingOffers)
+  }
 
   const setCallbacks = (cbs: PresenceCallbacks) => {
     callbacksRef.current = cbs
   }
 
   const startTransfer = useCallback(
-    async (peerUserId: string, file: File) => {
-      const handle = await pcm.initiateTransfer(peerUserId, file)
+    async (peerUserId: string, peerName: string, file: File) => {
+      const handle = await pcm.initiateTransfer(peerUserId, peerName, file)
       setTransfers(pcm.getTransfers())
       return handle
+    },
+    [pcm],
+  )
+
+  const acceptOffer = useCallback(
+    (transferId: string) => {
+      pcm.acceptOffer(transferId)
+      setPendingOffers(pcm.pendingOffers)
+      setTransfers(pcm.getTransfers())
+    },
+    [pcm],
+  )
+
+  const rejectOffer = useCallback(
+    (transferId: string) => {
+      pcm.rejectOffer(transferId)
+      setPendingOffers(pcm.pendingOffers)
     },
     [pcm],
   )
@@ -146,7 +179,9 @@ export function PresenceBridge({ children }: { children: ReactNode }) {
         setShowAll,
         startTransfer,
         transfers,
-        onTransferComplete: onTransferCompleteRef.current,
+        pendingOffers,
+        acceptOffer,
+        rejectOffer,
         setOnTransferComplete,
       }}
     >

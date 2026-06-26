@@ -55,13 +55,25 @@ export interface TransferAnswer {
   accepted: true
 }
 
-export type SignalingMessage = SignalPayload | TransferOffer | TransferAnswer
+export interface TransferReject {
+  type: 'transfer-reject'
+  transferId: string
+  to: string
+  from?: string
+}
+
+export type SignalingMessage =
+  | SignalPayload
+  | TransferOffer
+  | TransferAnswer
+  | TransferReject
 
 export interface TransferHandle {
   transferId: string
   fileName: string
   fileSize: number
   peerUserId: string
+  peerName: string
   direction: 'send' | 'receive'
   status: 'connecting' | 'transferring' | 'done' | 'failed'
   progress: number // 0-1
@@ -86,23 +98,30 @@ interface TransferState {
 
 export class PeerConnectionManager {
   private transfers = new Map<string, TransferState>()
+  private pendingOffers_: TransferOffer[] = []
   signalRelay: SignalRelay
 
-  /** 收到传输邀约（接收方展示通知用） */
-  onIncomingRequest: ((offer: TransferOffer) => void) | null = null
+  /* ---- 事件回调 ---- */
+
+  /** 收到新传输邀约（接收方展示用） */
+  onIncomingRequest: ((offers: TransferOffer[]) => void) | null = null
 
   /** 接收方完成时拿到 Blob */
   onComplete:
     | ((transferId: string, blob: Blob, fileName: string) => void)
     | null = null
 
-  /** 任一方进度更新 */
+  /** 进度更新 */
   onProgress:
     | ((transferId: string, bytesDone: number, total: number) => void)
     | null = null
 
-  /** 传输失败 */
+  /** 传输失败 / 对方拒绝 */
   onError: ((transferId: string, error: string) => void) | null = null
+
+  get pendingOffers(): readonly TransferOffer[] {
+    return this.pendingOffers_
+  }
 
   constructor(signalRelay: SignalRelay) {
     this.signalRelay = signalRelay
@@ -114,21 +133,27 @@ export class PeerConnectionManager {
 
   async initiateTransfer(
     peerUserId: string,
+    peerName: string,
     file: File,
   ): Promise<TransferHandle> {
     const transferId = crypto.randomUUID()
-    const state = this.createState(transferId, file.name, file.size, peerUserId, 'send')
+    const state = this.createState(
+      transferId,
+      file.name,
+      file.size,
+      peerUserId,
+      peerName,
+      'send',
+    )
 
     try {
       const pc = new RTCPeerConnection(RTC_CONFIG)
       state.pc = pc
 
-      // DataChannel — 接收方通过 ondatachannel 事件拿到同一 channel
       const dc = pc.createDataChannel('file-transfer')
       state.dc = dc
       this.bindDataChannel(dc, state, file)
 
-      // ICE 候选 → 经 WS 转发
       pc.onicecandidate = (e) => {
         if (e.candidate) {
           this.signalRelay({
@@ -150,21 +175,20 @@ export class PeerConnectionManager {
         }
       }
 
-      // 创建 offer
       const offer = await pc.createOffer()
       await pc.setLocalDescription(offer)
 
-      // 等 ICE gathering 完成再发 offer（减少 ICE 候选交换次数）
+      // 等 ICE gathering 完成（减少 ICE 交换次数）
       await new Promise<void>((resolve) => {
         if (pc.iceGatheringState === 'complete') resolve()
-        else pc.onicegatheringstatechange = () => {
-          if (pc.iceGatheringState === 'complete') resolve()
+        else {
+          pc.onicegatheringstatechange = () => {
+            if (pc.iceGatheringState === 'complete') resolve()
+          }
+          setTimeout(resolve, 2000)
         }
-        // 兜底：最多等 2s
-        setTimeout(resolve, 2000)
       })
 
-      // 发 offer（含完整 SDP + ICE candidates）
       this.signalRelay({
         type: 'signal',
         transferId,
@@ -173,7 +197,6 @@ export class PeerConnectionManager {
         label: 'offer',
       })
 
-      // 等 answer（超时处理）
       await this.waitForAnswer(transferId)
 
       return state.handle
@@ -185,6 +208,54 @@ export class PeerConnectionManager {
   }
 
   /* ---------------------------------------------------------------- */
+  /*  接收方：显式接受 / 拒绝                                          */
+  /* ---------------------------------------------------------------- */
+
+  acceptOffer(transferId: string): void {
+    const offer = this.pendingOffers_.find((o) => o.transferId === transferId)
+    if (!offer) return
+    this.pendingOffers_ = this.pendingOffers_.filter(
+      (o) => o.transferId !== transferId,
+    )
+
+    // 发送 answer 通知发送方
+    this.signalRelay({
+      type: 'transfer-answer',
+      transferId,
+      to: offer.from!,
+      accepted: true,
+    })
+
+    // 创建接收方的 transfer state（待 handleOffer 填充 pc/dc）
+    this.createState(
+      transferId,
+      offer.fileName,
+      offer.fileSize,
+      offer.from!,
+      '未知',
+      'receive',
+    )
+
+    this.onIncomingRequest?.(this.pendingOffers_)
+  }
+
+  rejectOffer(transferId: string): void {
+    const offer = this.pendingOffers_.find((o) => o.transferId === transferId)
+    if (!offer) return
+    this.pendingOffers_ = this.pendingOffers_.filter(
+      (o) => o.transferId !== transferId,
+    )
+
+    this.signalRelay({
+      type: 'transfer-reject',
+      transferId,
+      to: offer.from!,
+    })
+
+    this.onIncomingRequest?.(this.pendingOffers_)
+  }
+
+  /* ---------------------------------------------------------------- */
   /*  信令入口                                                        */
   /* ---------------------------------------------------------------- */
 
@@ -192,17 +263,14 @@ export class PeerConnectionManager {
     switch (msg.type) {
       case 'signal': {
         const { transferId, label, sdp, candidate, from } = msg as SignalPayload
-        // 接收方收到 offer → 建连
         if (label === 'offer' && sdp) {
           this.handleOffer(transferId, sdp, from!)
           return
         }
-        // 发送方收到 answer
         if (label === 'answer' && sdp) {
           this.handleAnswer(transferId, sdp)
           return
         }
-        // ICE 候选
         if (label === 'ice' && candidate) {
           this.handleIceCandidate(transferId, candidate)
           return
@@ -212,20 +280,18 @@ export class PeerConnectionManager {
 
       case 'transfer-offer': {
         const offer = msg as TransferOffer
-        this.onIncomingRequest?.(offer)
-        // 自动应答
-        this.signalRelay({
-          type: 'transfer-answer',
-          transferId: offer.transferId,
-          to: offer.from!,
-          accepted: true,
-        })
+        this.pendingOffers_ = [...this.pendingOffers_, offer]
+        this.onIncomingRequest?.(this.pendingOffers_)
         break
       }
 
       case 'transfer-answer': {
-        const answer = msg as TransferAnswer
-        this.resolveAnswer(answer.transferId)
+        this.resolveAnswer(msg.transferId)
+        break
+      }
+
+      case 'transfer-reject': {
+        this.failTransfer(msg.transferId, '对方拒绝了文件')
         break
       }
     }
@@ -245,6 +311,7 @@ export class PeerConnectionManager {
       state.pc?.close()
     }
     this.transfers.clear()
+    this.pendingOffers_ = []
   }
 
   /* ---------------------------------------------------------------- */
@@ -256,9 +323,6 @@ export class PeerConnectionManager {
     sdp: string,
     fromUserId: string,
   ) {
-    // 从 incoming request 中找到对应 offer 的信息
-    // 这里用 temp 名称，等拿到 offer 对象后更新
-    const tempName = `接收中...`
     const pc = new RTCPeerConnection(RTC_CONFIG)
 
     pc.onicecandidate = (e) => {
@@ -282,16 +346,18 @@ export class PeerConnectionManager {
       }
     }
 
-    // DataChannel 由发送方创建，接收方通过 ondatachannel 事件接收
     pc.ondatachannel = (e) => {
       const dc = e.channel
-      // 此时还不知道文件名/大小，等第一个 META 消息
-      const pendingState = this.transfers.get(transferId)
-      if (pendingState) {
-        pendingState.dc = dc
-        pendingState.pc = pc
+      const state = this.transfers.get(transferId)
+      if (state) {
+        state.dc = dc
+        state.pc = pc
       }
-      this.bindDataChannel(dc, pendingState || this.createState(transferId, tempName, 0, fromUserId, 'receive'))
+      this.bindDataChannel(
+        dc,
+        state ||
+          this.createState(transferId, '接收中…', 0, fromUserId, '未知', 'receive'),
+      )
     }
 
     await pc.setRemoteDescription({ type: 'offer', sdp })
@@ -314,7 +380,10 @@ export class PeerConnectionManager {
     await state.pc.setRemoteDescription({ type: 'answer', sdp })
   }
 
-  private async handleIceCandidate(transferId: string, candidateInit: RTCIceCandidateInit) {
+  private async handleIceCandidate(
+    transferId: string,
+    candidateInit: RTCIceCandidateInit,
+  ) {
     const state = this.transfers.get(transferId)
     if (!state?.pc) return
     try {
@@ -343,7 +412,10 @@ export class PeerConnectionManager {
     }
 
     dc.onclose = () => {
-      if (state.handle.status !== 'done' && state.handle.status !== 'failed') {
+      if (
+        state.handle.status !== 'done' &&
+        state.handle.status !== 'failed'
+      ) {
         this.failTransfer(state.handle.transferId, '连接已关闭')
       }
     }
@@ -364,7 +436,6 @@ export class PeerConnectionManager {
   ) {
     const chunkCount = Math.ceil(file.size / CHUNK_SIZE)
 
-    // 0x01: 元数据
     const meta = this.encodeMessage(
       MT.META,
       JSON.stringify({
@@ -378,7 +449,6 @@ export class PeerConnectionManager {
     dc.send(meta)
     state.totalChunks = chunkCount
 
-    // 0x02: 分片
     for (let i = 0; i < chunkCount; i++) {
       if (state.abortFlag) return
 
@@ -397,13 +467,13 @@ export class PeerConnectionManager {
       state.handle.progress = (i + 1) / chunkCount
       this.onProgress?.(state.handle.transferId, end, file.size)
 
-      // 背压控制
       if (dc.bufferedAmount > 1024 * 1024) {
-        await new Promise<void>((r) => { dc.onbufferedamountlow = () => r() })
+        await new Promise<void>((r) => {
+          dc.onbufferedamountlow = () => r()
+        })
       }
     }
 
-    // 0x03: 完成
     dc.send(
       this.encodeMessage(
         MT.COMPLETE,
@@ -455,7 +525,11 @@ export class PeerConnectionManager {
         })
         state.handle.status = 'done'
         state.handle.progress = 1
-        this.onComplete?.(state.handle.transferId, blob, state.handle.fileName)
+        this.onComplete?.(
+          state.handle.transferId,
+          blob,
+          state.handle.fileName,
+        )
         break
       }
     }
@@ -470,6 +544,7 @@ export class PeerConnectionManager {
     fileName: string,
     fileSize: number,
     peerUserId: string,
+    peerName: string,
     direction: 'send' | 'receive',
   ): TransferState {
     const state: TransferState = {
@@ -478,6 +553,7 @@ export class PeerConnectionManager {
         fileName,
         fileSize,
         peerUserId,
+        peerName,
         direction,
         status: 'connecting',
         progress: 0,
@@ -506,9 +582,13 @@ export class PeerConnectionManager {
     state.dc?.close()
     state.pc?.close()
     this.onError?.(transferId, error)
+
+    // 从 pending 中移除（防止卡住）
+    this.pendingOffers_ = this.pendingOffers_.filter(
+      (o) => o.transferId !== transferId,
+    )
   }
 
-  /** 等 answer 的 Promise，带超时 */
   private waitForAnswer(transferId: string): Promise<void> {
     return new Promise((resolve, reject) => {
       const timer = setTimeout(() => {
