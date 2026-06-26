@@ -1,6 +1,6 @@
 import type { Catalog, TaskResponse, CreativityTask } from './types'
 
-const BASE = '/api'
+const BASE = import.meta.env.PROD ? '' : '/api'
 const CREDS: RequestInit = { credentials: 'include' }
 
 export class ApiError extends Error {

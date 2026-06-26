@@ -17,6 +17,8 @@
   "scripts": {
     "dev": "turbo run dev",
     "build": "turbo run build",
+    "build:prod": "cd apps/generate && bun run build",
+    "start:prod": "cd services/api && NODE_ENV=production bun run src/index.ts",
     "lint": "turbo run lint",
     "typecheck": "turbo run typecheck"
   },

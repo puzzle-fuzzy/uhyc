@@ -145,6 +145,32 @@ const app = new Elysia()
 // 服务启动后恢复所有非终态任务的轮询
 taskPoller.recoverOnStartup()
 
+// ---------------------------------------------------------------------------
+// 生产模式：serve 前端静态文件（API 路由优先，此兜底在最后）
+// ---------------------------------------------------------------------------
+// 由于 Elysia 按注册顺序路由匹配，所有 API/WS 路由注册在前，
+// 此 .get('/*') 兜底，只有未匹配到时才会执行。
+if (process.env.NODE_ENV === 'production') {
+  const FRONTEND_DIR = resolve(process.env.FRONTEND_DIR || '../../apps/generate/dist')
+
+  app.get('/*', async ({ set, request }) => {
+    const url = new URL(request.url)
+    let path = url.pathname
+    if (path === '/') path = '/index.html'
+
+    const filePath = join(FRONTEND_DIR, path)
+    const file = Bun.file(filePath)
+    if (await file.exists()) return new Response(file)
+
+    // SPA fallback
+    const index = Bun.file(join(FRONTEND_DIR, 'index.html'))
+    if (await index.exists()) return new Response(index)
+
+    set.status = 404
+    return { error: 'Not found' }
+  })
+}
+
 console.log(
   `🦊 Elysia is running at ${app.server?.hostname}:${app.server?.port}`,
 )
