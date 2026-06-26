@@ -147,6 +147,18 @@ export class PeerConnectionManager {
     )
 
     try {
+      // Phase 1: 发送 transfer-offer，等接收方点击接受
+      this.signalRelay({
+        type: 'transfer-offer',
+        transferId,
+        to: peerUserId,
+        fileName: file.name,
+        fileSize: file.size,
+        mimeType: file.type,
+      })
+      await this.waitForAnswer(transferId) // resolves on transfer-answer
+
+      // Phase 2: 接收方已接受，开始 WebRTC 建连
       const pc = new RTCPeerConnection(RTC_CONFIG)
       state.pc = pc
 
@@ -178,7 +190,7 @@ export class PeerConnectionManager {
       const offer = await pc.createOffer()
       await pc.setLocalDescription(offer)
 
-      // 等 ICE gathering 完成（减少 ICE 交换次数）
+      // 等 ICE gathering 完成
       await new Promise<void>((resolve) => {
         if (pc.iceGatheringState === 'complete') resolve()
         else {
@@ -197,7 +209,8 @@ export class PeerConnectionManager {
         label: 'offer',
       })
 
-      await this.waitForAnswer(transferId)
+      // 等 signal(answer) 回到 sender
+      await this.waitForSignalAnswer(transferId)
 
       return state.handle
     } catch (e) {
@@ -269,6 +282,7 @@ export class PeerConnectionManager {
         }
         if (label === 'answer' && sdp) {
           this.handleAnswer(transferId, sdp)
+          this.resolveSignalAnswer(transferId)
           return
         }
         if (label === 'ice' && candidate) {
@@ -286,6 +300,7 @@ export class PeerConnectionManager {
       }
 
       case 'transfer-answer': {
+        // 发送方收到 → 接收方已点击接受
         this.resolveAnswer(msg.transferId)
         break
       }
@@ -604,10 +619,30 @@ export class PeerConnectionManager {
   }
 
   private answerResolvers = new Map<string, () => void>()
+  private signalAnswerResolvers = new Map<string, () => void>()
 
   private resolveAnswer(transferId: string) {
     this.answerResolvers.get(transferId)?.()
     this.answerResolvers.delete(transferId)
+  }
+
+  private waitForSignalAnswer(transferId: string): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const timer = setTimeout(() => {
+        this.signalAnswerResolvers.delete(transferId)
+        reject(new Error('WebRTC 连接超时'))
+      }, 10000)
+
+      this.signalAnswerResolvers.set(transferId, () => {
+        clearTimeout(timer)
+        resolve()
+      })
+    })
+  }
+
+  private resolveSignalAnswer(transferId: string) {
+    this.signalAnswerResolvers.get(transferId)?.()
+    this.signalAnswerResolvers.delete(transferId)
   }
 
   private encodeMessage(type: number, json: string): ArrayBuffer {
